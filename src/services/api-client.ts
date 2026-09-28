@@ -28,6 +28,7 @@ async function request<T>(
   const response = await fetch(`${API_URL}${path}`, {
     method,
     signal,
+    credentials: 'include',
     headers: {
       Accept: 'application/json',
       ...(body !== undefined && { 'Content-Type': 'application/json' }),
