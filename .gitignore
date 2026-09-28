@@ -1,0 +1,92 @@
+# ── Sistema operativo ────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Desktop.ini
+
+# ── Editores / IDEs ──────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+*.sw?
+*~
+
+# ── Xcode ────────────────────────────────────────────────────────────
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+**/.xcode.env.local
+
+# ── Android / Gradle ─────────────────────────────────────────────────
+.gradle
+local.properties
+*.hprof
+.cxx/
+.kotlin/
+*.apk
+*.aab
+
+# ── Firma y credenciales (nunca se versionan) ────────────────────────
+*.keystore
+!debug.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+
+# ── Dependencias ─────────────────────────────────────────────────────
+node_modules/
+**/Pods/
+/vendor/bundle/
+
+# ── Metro / caché / coverage ─────────────────────────────────────────
+*.jsbundle
+.metro-health-check*
+.eslintcache
+*.tsbuildinfo
+/coverage
+
+# ── Variables de entorno ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ─────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-error.log
+
+# ── fastlane ─────────────────────────────────────────────────────────
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# ── Yarn ─────────────────────────────────────────────────────────────
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# ── Herramientas de testing / agentes ────────────────────────────────
+.playwright-mcp
