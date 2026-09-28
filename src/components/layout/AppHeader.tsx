@@ -1,11 +1,15 @@
-import { View } from 'react-native';
+import { View, type ImageSourcePropType } from 'react-native';
 import { Avatar, BrandLogo, Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
 export interface AppHeaderProps {
   /** Texto bajo la marca (p. ej. "Entrenamiento de hoy"). */
   subtitle?: string;
-  user?: { name: string; avatarUrl?: string };
+  user?: {
+    name: string;
+    avatarUrl?: string;
+    avatarSource?: ImageSourcePropType;
+  };
   className?: string;
 }
 
@@ -29,7 +33,9 @@ export function AppHeader({ subtitle, user, className }: AppHeaderProps) {
           )}
         </View>
       </View>
-      {user && <Avatar name={user.name} src={user.avatarUrl} />}
+      {user && (
+        <Avatar name={user.name} src={user.avatarSource ?? user.avatarUrl} />
+      )}
     </View>
   );
 }

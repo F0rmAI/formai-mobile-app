@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, View } from 'react-native';
+import { Image, View, type ImageSourcePropType } from 'react-native';
 import type { AvatarSize } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { Text } from './Text';
@@ -21,7 +21,7 @@ function initialsOf(name: string) {
 export interface AvatarProps {
   /** Nombre de la persona: se usa como texto accesible y para las iniciales. */
   name: string;
-  src?: string;
+  src?: string | ImageSourcePropType;
   size?: AvatarSize;
   className?: string;
 }
@@ -29,7 +29,9 @@ export interface AvatarProps {
 /** Foto de perfil circular. `sm` 32 px (header) o `md` 48 px (saludo). */
 export function Avatar({ name, src, size = 'sm', className }: AvatarProps) {
   const [failedSrc, setFailedSrc] = useState<string>();
-  const showImage = Boolean(src) && src !== failedSrc;
+  const remoteSrc = typeof src === 'string' ? src : undefined;
+  const showImage =
+    Boolean(src) && (typeof src !== 'string' || remoteSrc !== failedSrc);
 
   return (
     <View
@@ -43,10 +45,10 @@ export function Avatar({ name, src, size = 'sm', className }: AvatarProps) {
     >
       {showImage ? (
         <Image
-          source={{ uri: src }}
+          source={typeof src === 'string' ? { uri: src } : src}
           className="size-full"
           resizeMode="cover"
-          onError={() => setFailedSrc(src)}
+          onError={() => remoteSrc && setFailedSrc(remoteSrc)}
         />
       ) : (
         <Text

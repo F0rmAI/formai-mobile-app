@@ -1,5 +1,5 @@
 import { Pressable, View, type PressableProps } from 'react-native';
-import type { IconName } from '@/types/ui';
+import type { BadgeTone, IconName } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { Badge } from './Badge';
 import { Icon } from './Icon';
@@ -12,6 +12,7 @@ export interface ListItemProps
   icon?: IconName;
   /** Texto de un Badge primary a la derecha. */
   badge?: string;
+  badgeTone?: BadgeTone;
   showChevron?: boolean;
   className?: string;
 }
@@ -22,6 +23,7 @@ export function ListItem({
   subtitle,
   icon,
   badge,
+  badgeTone = 'primary',
   showChevron = true,
   className,
   ...props
@@ -50,7 +52,9 @@ export function ListItem({
           </Text>
         )}
       </View>
-      {badge && <Badge label={badge} className="self-center" />}
+      {badge && (
+        <Badge label={badge} tone={badgeTone} className="self-center" />
+      )}
       {showChevron && (
         <Icon name="chevron_right" size={20} className="text-content-subtle" />
       )}
