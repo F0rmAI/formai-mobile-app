@@ -150,6 +150,7 @@ export function TodayScreen({
         icon="flag"
         confirmLabel="Finalizar"
         cancelLabel="Seguir entrenando"
+        confirmLoading={saving}
         onConfirm={() => {
           finish(true);
         }}

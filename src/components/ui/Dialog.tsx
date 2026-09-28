@@ -12,6 +12,7 @@ export interface DialogProps {
   tone?: DialogTone;
   icon?: IconName;
   confirmLabel: string;
+  confirmLoading?: boolean;
   cancelLabel?: string;
   onConfirm: () => void;
   /** Se llama al cancelar, al tocar fuera o con el botón atrás de Android. */
@@ -26,6 +27,7 @@ export function Dialog({
   tone = 'default',
   icon = tone === 'danger' ? 'warning' : 'flag',
   confirmLabel,
+  confirmLoading = false,
   cancelLabel = 'Cancelar',
   onConfirm,
   onCancel,
@@ -75,15 +77,17 @@ export function Dialog({
               label={cancelLabel}
               variant="secondary"
               size="md"
-              className="flex-1"
+              className="flex-1 px-md"
               onPress={onCancel}
+              disabled={confirmLoading}
             />
             <Button
               label={confirmLabel}
               variant={isDanger ? 'danger' : 'primary'}
               size="md"
-              className="flex-1"
+              className="flex-1 px-md"
               onPress={onConfirm}
+              loading={confirmLoading}
             />
           </View>
         </Pressable>
