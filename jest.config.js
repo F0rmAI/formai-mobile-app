@@ -2,7 +2,7 @@ module.exports = {
   preset: '@react-native/jest-preset',
   setupFiles: ['<rootDir>/jest/setup.js'],
   moduleNameMapper: {
-    // Metro compila global.css con Uniwind; en Jest basta con un módulo vacío.
+    // Metro compiles global.css through the styling binding; in Jest an empty module is enough.
     '\\.css$': '<rootDir>/jest/style-mock.js',
   },
 };

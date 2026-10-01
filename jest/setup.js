@@ -1,5 +1,5 @@
 /* eslint-env jest */
-// Sin módulos nativos, SafeAreaProvider no renderiza a sus hijos: se usa el mock oficial.
+// Without native modules SafeAreaProvider does not render its children: use the official mock.
 jest.mock(
   'react-native-safe-area-context',
   () => require('react-native-safe-area-context/jest/mock').default,
