@@ -144,7 +144,7 @@ test('no llama al backend si el código está vacío', async () => {
   await press('Continuar');
 
   expect(hasText('Ingresa el código que te dio tu entrenador.')).toBe(true);
-  expect(fetchMock).not.toHaveBeenCalled();
+  expect(requestsTo(VERIFY)).toHaveLength(0);
 });
 
 test('avisa cuando no hay conexión al verificar el código', async () => {

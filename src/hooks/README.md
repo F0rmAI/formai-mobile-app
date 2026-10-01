@@ -25,4 +25,4 @@ export function useClients() {
 ```
 
 `useActivationCode.ts` (verifica el código del entrenador) y `useAccountActivation.ts` (correo, contraseña
-y consentimiento) son los primeros ejemplos: la pantalla solo pinta lo que devuelven.
+y consentimiento) y `useSignIn.ts` (formulario de inicio de sesión) son los primeros ejemplos: la pantalla solo pinta lo que devuelven.

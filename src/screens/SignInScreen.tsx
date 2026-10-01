@@ -4,24 +4,25 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '@/components/layout';
 import { Button, Text, TextField, Toast } from '@/components/ui';
+import { useSignIn } from '@/hooks/useSignIn';
 import type { RootStackParamList } from '@/types/navigation';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
-/**
- * Inicio de sesión del cliente. Por ahora es solo la pantalla: la validación de
- * credenciales contra el backend se conecta después de la activación de cuenta.
- */
+/** Inicio de sesión del cliente con correo y contraseña. */
 export function SignInScreen({ navigation, route }: SignInScreenProps) {
   const insets = useSafeAreaInsets();
   const activatedEmail = route.params?.activatedEmail;
-  const [email, setEmail] = useState(activatedEmail ?? '');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  // Provisional: entra a las pestañas sin autenticar hasta conectar FE-MOB-002.
-  const enterApp = () =>
-    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+  const {
+    email,
+    password,
+    errors,
+    isSubmitting,
+    changeEmail,
+    changePassword,
+    submit,
+  } = useSignIn(activatedEmail);
 
   return (
     <View
@@ -46,13 +47,15 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           label="Correo electrónico"
           leadingIcon="mail"
           value={email}
+          error={errors.email}
+          editable={!isSubmitting}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="email"
           textContentType="username"
           returnKeyType="next"
-          onChangeText={setEmail}
+          onChangeText={changeEmail}
         />
         <TextField
           label="Contraseña"
@@ -63,18 +66,26 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           }
           onTrailingIconPress={() => setShowPassword(visible => !visible)}
           value={password}
+          error={errors.password}
+          editable={!isSubmitting}
           secureTextEntry={!showPassword}
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="current-password"
           textContentType="password"
           returnKeyType="go"
-          onChangeText={setPassword}
+          onChangeText={changePassword}
+          onSubmitEditing={submit}
         />
 
         {/* La recuperación de contraseña se conecta con FE-MOB-005. */}
         <Button label="¿Olvidaste tu contraseña?" variant="ghost" size="sm" />
-        <Button label="Iniciar sesión" fullWidth onPress={enterApp} />
+        <Button
+          label="Iniciar sesión"
+          fullWidth
+          loading={isSubmitting}
+          onPress={submit}
+        />
       </ScrollView>
       {activatedEmail && (
         <View

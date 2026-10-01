@@ -22,4 +22,5 @@ export function useAuth() {
 }
 ```
 
-La base aún no tiene contextos: se crean con la primera feature que los necesite (p. ej. autenticación).
+`AuthContext.tsx` guarda la sesión del cliente (`restoring`, `signedOut` o `signedIn`): al abrir la app
+intenta renovarla con el backend y expone `signIn`.

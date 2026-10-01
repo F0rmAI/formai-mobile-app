@@ -8,6 +8,7 @@ del design system.
 | Archivo | Uso |
 |---|---|
 | `ui.ts` | Variantes del design system (`ButtonVariant`, `BadgeTone`, `TextVariant`…). Mismo contenido en web y mobile, para que ambos expongan la misma API de componentes. |
+| `auth.ts` | Cuenta autenticada y datos del inicio de sesión. |
 | `account-activation.ts` | Datos de la verificación del código y de la activación de cuenta. |
 | `navigation.ts` | Parámetros de las rutas de React Navigation (`RootStackParamList`, `MainTabParamList`). |
 | `assets.d.ts` | Tipos para importar `*.css` y `*.png`. |

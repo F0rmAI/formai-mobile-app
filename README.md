@@ -113,7 +113,7 @@ npm run android
 npm start
 ```
 
-Al iniciar verás la **bienvenida**; desde la pantalla de inicio de sesión se entra a la pestaña **Hoy** y la barra inferior
+Al iniciar verás la **bienvenida**; después de iniciar sesión, la pestaña **Hoy** y la barra inferior
 para moverte entre **Hoy**, **Progreso** y **Perfil**. El contenido de cada pestaña es provisional hasta que llegue su feature.
 
 | Script | Qué hace |
