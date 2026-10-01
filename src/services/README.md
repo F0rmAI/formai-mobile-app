@@ -8,6 +8,7 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 | Archivo | Uso |
 |---|---|
 | `config.ts` | URL base del backend. La URL base vive en `services/config.ts` (RN no lee `.env` sin una librería adicional). |
+| `account-activation.service.ts` | Verificación del código (`/v1/activation-code-verifications`) y activación de la cuenta (`/v1/account-activations`). |
 | `api-client.ts` | Cliente `fetch` único (`apiClient.get/post/put/patch/delete`) con JSON y `ApiError` tipado. |
 
 ## Reglas

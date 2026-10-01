@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '@/components/layout';
-import { Button, Text, TextField } from '@/components/ui';
+import { Button, Text, TextField, Toast } from '@/components/ui';
 import type { RootStackParamList } from '@/types/navigation';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
@@ -12,9 +12,10 @@ type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
  * Inicio de sesión del cliente. Por ahora es solo la pantalla: la validación de
  * credenciales contra el backend se conecta después de la activación de cuenta.
  */
-export function SignInScreen({ navigation }: SignInScreenProps) {
+export function SignInScreen({ navigation, route }: SignInScreenProps) {
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('');
+  const activatedEmail = route.params?.activatedEmail;
+  const [email, setEmail] = useState(activatedEmail ?? '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,6 +76,14 @@ export function SignInScreen({ navigation }: SignInScreenProps) {
         <Button label="¿Olvidaste tu contraseña?" variant="ghost" size="sm" />
         <Button label="Iniciar sesión" fullWidth onPress={enterApp} />
       </ScrollView>
+      {activatedEmail && (
+        <View
+          className="absolute inset-x-xl"
+          style={{ bottom: insets.bottom + 16 }}
+        >
+          <Toast message="Cuenta activada" tone="success" />
+        </View>
+      )}
     </View>
   );
 }

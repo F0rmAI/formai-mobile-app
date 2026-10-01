@@ -31,6 +31,7 @@ Backend/API
 - Mantiene el markup de alto nivel; si un bloque se repite o crece, se extrae a `components/`.
 - Cada ruta de `navigation/` apunta a una pantalla de esta carpeta.
 - `WelcomeScreen` y `SignInScreen` son el acceso a la app (el inicio de sesión aún no valida credenciales).
+- `ActivationCodeScreen` y `ActivationPasswordScreen` son los dos pasos de la activación de cuenta.
 - `TodayScreen`, `ProgressScreen` y `ProfileScreen` son las pestañas principales; su contenido es provisional hasta que llegue su feature.
 
 ## Ejemplo

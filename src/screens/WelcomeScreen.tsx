@@ -46,12 +46,12 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
             fullWidth
             onPress={() => navigation.navigate('SignIn')}
           />
-          {/* La activación de cuenta se conecta con FE-MOB-003. */}
           <Button
             label="Activar mi cuenta"
             icon="key"
             variant="secondary"
             fullWidth
+            onPress={() => navigation.navigate('ActivationCode')}
           />
           <Text variant="body-m" tone="muted" className="text-center">
             ¿Eres entrenador? Ingresa desde la web de FormAI.

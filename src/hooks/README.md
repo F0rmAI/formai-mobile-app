@@ -24,4 +24,5 @@ export function useClients() {
 }
 ```
 
-La base aún no tiene hooks: se crean con la primera feature que los necesite.
+`useActivationCode.ts` (verifica el código del entrenador) y `useAccountActivation.ts` (correo, contraseña
+y consentimiento) son los primeros ejemplos: la pantalla solo pinta lo que devuelven.

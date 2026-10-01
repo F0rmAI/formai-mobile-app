@@ -7,7 +7,7 @@ rutas con pantallas de `screens/`; no tiene UI propia ni lógica de negocio.
 
 | Archivo | Uso |
 |---|---|
-| `RootNavigator.tsx` | Navegación de primer nivel: bienvenida, inicio de sesión y pestañas principales. Se monta en `App.tsx`. |
+| `RootNavigator.tsx` | Navegación de primer nivel: bienvenida, inicio de sesión, activación de cuenta y pestañas principales. Se monta en `App.tsx`. |
 | `MainTabs.tsx` | Pestañas del cliente: Hoy, Progreso y Perfil (TB2 agrega Escanear). Usa el `BottomNav` del design system como barra. |
 
 ## Reglas
