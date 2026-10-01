@@ -2,11 +2,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandLogo, Button, Text } from '@/components/ui';
-import type { AuthStackParamList } from '@/types/navigation';
+import type { RootStackParamList } from '@/types/navigation';
 
 const welcomeHero = require('@/assets/welcome-hero.jpeg');
 
-type WelcomeScreenProps = NativeStackScreenProps<AuthStackParamList, 'Welcome'>;
+type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
 /** Bienvenida con las opciones de ingreso a la app. */
 export function WelcomeScreen({ navigation }: WelcomeScreenProps) {

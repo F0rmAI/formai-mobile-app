@@ -7,13 +7,12 @@ rutas con pantallas de `screens/`; no tiene UI propia ni lógica de negocio.
 
 | Archivo | Uso |
 |---|---|
-| `RootNavigator.tsx` | Elige entre `AuthStack` y `MainTabs` según el estado de la sesión (`useAuth`). |
-| `AuthStack.tsx` | Pantallas previas al inicio de sesión: bienvenida e ingreso. |
+| `RootNavigator.tsx` | Navegación de primer nivel: bienvenida, inicio de sesión y pestañas principales. Se monta en `App.tsx`. |
 | `MainTabs.tsx` | Pestañas del cliente: Hoy, Progreso y Perfil (TB2 agrega Escanear). Usa el `BottomNav` del design system como barra. |
 
 ## Reglas
 
-- Un archivo por navegador (`MainTabs.tsx`, `AuthStack.tsx`…), exportado por nombre y montado en `App.tsx`.
+- Un archivo por navegador (`RootNavigator.tsx`, `MainTabs.tsx`…), exportado por nombre.
 - Los parámetros de las rutas se tipan en `types/navigation.ts`.
 - La barra y los headers se dibujan con `components/layout`; aquí solo se conectan con el estado del navegador.
 - Las pantallas navegan con los hooks de React Navigation (`useNavigation`); no se pasan callbacks de ruta por props.

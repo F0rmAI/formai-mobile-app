@@ -1,15 +1,21 @@
-import { View } from 'react-native';
-import { useAuth } from '@/context/AuthContext';
-import { AuthStack } from './AuthStack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SignInScreen } from '@/screens/SignInScreen';
+import { WelcomeScreen } from '@/screens/WelcomeScreen';
+import type { RootStackParamList } from '@/types/navigation';
 import { MainTabs } from './MainTabs';
 
-/** Elige entre el acceso y las pestañas según el estado de la sesión. */
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+/** Navegación de primer nivel: bienvenida, inicio de sesión y pestañas principales. */
 export function RootNavigator() {
-  const { status } = useAuth();
-
-  if (status === 'restoring') {
-    return <View className="flex-1 bg-surface-background" />;
-  }
-
-  return status === 'signedIn' ? <MainTabs /> : <AuthStack />;
+  return (
+    <Stack.Navigator
+      initialRouteName="Welcome"
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen name="SignIn" component={SignInScreen} />
+      <Stack.Screen name="Main" component={MainTabs} />
+    </Stack.Navigator>
+  );
 }
