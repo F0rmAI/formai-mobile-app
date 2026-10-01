@@ -9,6 +9,7 @@ type Reply = { status: number; body?: unknown } | 'network-error';
 
 const REFRESH = '/v1/authentication/refresh';
 const SIGN_IN = '/v1/authentication/sign-in';
+const SIGN_OUT = '/v1/authentication/sign-out';
 
 const client = {
   id: 'ab5e59a7-851c-4b15-a2ea-6e3374e867a1',
@@ -222,4 +223,61 @@ test('con una sesión guardada entra directo y navega entre pestañas', async ()
   });
   expect(isSelected('Progreso')).toBe(false);
   expect(isSelected('Perfil')).toBe(true);
+});
+
+async function openProfile() {
+  await ReactTestRenderer.act(async () => {
+    tab('Perfil').props.onPress();
+  });
+}
+
+test('pide confirmación y cierra la sesión desde Perfil', async () => {
+  mockBackend({
+    [REFRESH]: { status: 200, body: client },
+    [SIGN_OUT]: { status: 204 },
+  });
+  await renderApp();
+  await openProfile();
+
+  await press('Cerrar sesión');
+  expect(hasText('¿Cerrar sesión?')).toBe(true);
+  expect(requestsTo(SIGN_OUT)).toHaveLength(0);
+
+  await press('Cerrar sesión');
+
+  const [, request] = requestsTo(SIGN_OUT)[0];
+  expect(request.method).toBe('POST');
+  expect(request.credentials).toBe('include');
+  expect(hasTabs()).toBe(false);
+  expect(hasText('Activar mi cuenta')).toBe(true);
+});
+
+test('no cierra la sesión si se cancela la confirmación', async () => {
+  mockBackend({ [REFRESH]: { status: 200, body: client } });
+  await renderApp();
+  await openProfile();
+
+  await press('Cerrar sesión');
+  await press('Cancelar');
+
+  expect(hasText('¿Cerrar sesión?')).toBe(false);
+  expect(requestsTo(SIGN_OUT)).toHaveLength(0);
+  expect(hasTabs()).toBe(true);
+});
+
+test('mantiene la sesión y avisa si no se pudo cerrar', async () => {
+  mockBackend({
+    [REFRESH]: { status: 200, body: client },
+    [SIGN_OUT]: 'network-error',
+  });
+  await renderApp();
+  await openProfile();
+
+  await press('Cerrar sesión');
+  await press('Cerrar sesión');
+
+  expect(hasText('No pudimos cerrar tu sesión. Inténtalo de nuevo.')).toBe(
+    true,
+  );
+  expect(hasTabs()).toBe(true);
 });

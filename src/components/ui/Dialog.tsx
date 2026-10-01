@@ -12,6 +12,8 @@ export interface DialogProps {
   tone?: DialogTone;
   icon?: IconName;
   confirmLabel: string;
+  /** Ícono a la izquierda del texto del botón de confirmar. */
+  confirmIcon?: IconName;
   cancelLabel?: string;
   onConfirm: () => void;
   /** Se llama al cancelar, al tocar fuera o con el botón atrás de Android. */
@@ -26,6 +28,7 @@ export function Dialog({
   tone = 'default',
   icon = tone === 'danger' ? 'warning' : 'flag',
   confirmLabel,
+  confirmIcon,
   cancelLabel = 'Cancelar',
   onConfirm,
   onCancel,
@@ -80,6 +83,7 @@ export function Dialog({
             />
             <Button
               label={confirmLabel}
+              icon={confirmIcon}
               variant={isDanger ? 'danger' : 'primary'}
               size="md"
               className="flex-1"

@@ -23,4 +23,4 @@ export function useAuth() {
 ```
 
 `AuthContext.tsx` guarda la sesión del cliente (`restoring`, `signedOut` o `signedIn`): al abrir la app
-intenta renovarla con el backend y expone `signIn`.
+intenta renovarla con el backend y expone `signIn` y `signOut`.

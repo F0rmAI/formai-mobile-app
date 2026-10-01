@@ -17,6 +17,7 @@ interface AuthState {
   status: AuthStatus;
   user?: AuthenticatedUser;
   signIn: (input: SignInInput) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -50,9 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('signedIn');
   }, []);
 
+  // Solo el backend puede borrar las cookies: si la llamada falla, la sesión sigue abierta.
+  const signOut = useCallback(async () => {
+    await authService.signOut();
+    setUser(undefined);
+    setStatus('signedOut');
+  }, []);
+
   const value = useMemo(
-    () => ({ status, user, signIn }),
-    [status, user, signIn],
+    () => ({ status, user, signIn, signOut }),
+    [status, user, signIn, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

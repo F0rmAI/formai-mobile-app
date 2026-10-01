@@ -16,6 +16,8 @@ export const authService = {
   /** Renueva la sesión con la cookie de refresh; responde 401 si no hay sesión. */
   refresh: () =>
     apiClient.post<AuthenticatedUser>('/v1/authentication/refresh'),
+  /** Revoca el refresh token y borra las cookies de sesión en el backend. */
+  signOut: () => apiClient.post<void>('/v1/authentication/sign-out'),
 };
 
 /** Por qué el backend rechazó el inicio de sesión. */
