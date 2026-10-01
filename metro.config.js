@@ -9,7 +9,7 @@ const { withUniwindConfig } = require('uniwind/metro');
  */
 const config = {};
 
-// Uniwind (Tailwind CSS v4 para React Native) debe ser el envoltorio más externo.
+// Uniwind (Tailwind CSS v4 for React Native) must be the outermost wrapper.
 module.exports = withUniwindConfig(
   mergeConfig(getDefaultConfig(__dirname), config),
   {

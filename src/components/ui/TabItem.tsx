@@ -1,7 +1,17 @@
+/**
+ * Tab item primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Pressable, type PressableProps } from 'react-native';
 import { cn } from '@/utils/cn';
 import { Text } from './Text';
 
+/**
+ * Props accepted by {@link TabItem}.
+ */
 export interface TabItemProps
   extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
@@ -9,7 +19,14 @@ export interface TabItemProps
   className?: string;
 }
 
-/** Pestaña de navegación interna (ficha, entrenamientos, progreso…). */
+/**
+ * Renders one tab of an in-page tab bar.
+ *
+ * @example
+ * ```tsx
+ * <TabItem label="Profile" active={tab === 'profile'} onPress={() => setTab('profile')} />
+ * ```
+ */
 export function TabItem({
   label,
   active = false,

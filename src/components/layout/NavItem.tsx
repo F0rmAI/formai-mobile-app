@@ -1,8 +1,18 @@
+/**
+ * Navigation item layout component.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Pressable, type PressableProps } from 'react-native';
 import { Icon, Text } from '@/components/ui';
 import type { IconName } from '@/types/ui';
 import { cn } from '@/utils/cn';
 
+/**
+ * Props accepted by {@link NavItem}.
+ */
 export interface NavItemProps
   extends Omit<PressableProps, 'children' | 'style'> {
   icon: IconName;
@@ -11,7 +21,14 @@ export interface NavItemProps
   className?: string;
 }
 
-/** Pestaña de la navegación inferior. */
+/**
+ * Renders one tab of the bottom navigation.
+ *
+ * @example
+ * ```tsx
+ * <NavItem icon="person" label="Profile" active onPress={openProfile} />
+ * ```
+ */
 export function NavItem({
   icon,
   label,

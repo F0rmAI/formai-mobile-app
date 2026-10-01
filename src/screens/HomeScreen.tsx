@@ -1,18 +1,27 @@
+/**
+ * Starter screen of the project base.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Text } from '@/components/ui';
 import { useCounter } from '@/hooks/useCounter';
 
 /**
- * Pantalla inicial de la base del proyecto: verifica que Uniwind (Tailwind), los tokens,
- * la tipografía, los íconos y los componentes del design system funcionan.
+ * Shows the product name and a counter, using {@link useCounter} for the state.
  *
- * Nota: SafeAreaView no es un componente del core de React Native, así que Uniwind no le
- * agrega `className`; los estilos van en los `View` que lo envuelven.
+ * @remarks
+ * Exists to verify that styles, tokens, fonts, icons and components work. Replace it when the
+ * first feature lands.
  */
 export function HomeScreen() {
   const { count, increment } = useCounter();
 
+  // SafeAreaView is not a React Native core component, so it does not receive `className`:
+  // the utilities go on the core views around it.
   return (
     <View className="flex-1 bg-surface-background">
       <SafeAreaView style={styles.safeArea}>

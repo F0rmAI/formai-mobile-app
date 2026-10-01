@@ -1,6 +1,6 @@
 /**
- * Assets nativos (fuentes). Tras agregar o cambiar una fuente en assets/fonts,
- * ejecuta `npx react-native-asset` para enlazarla en iOS y Android.
+ * Native assets (fonts). After adding or changing a font in assets/fonts,
+ * run `npx react-native-asset` to link it on iOS and Android.
  */
 module.exports = {
   assets: ['./assets/fonts'],

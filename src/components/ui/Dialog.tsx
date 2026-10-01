@@ -1,3 +1,10 @@
+/**
+ * Dialog primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Modal, Pressable, View } from 'react-native';
 import type { DialogTone, IconName } from '@/types/ui';
 import { cn } from '@/utils/cn';
@@ -5,20 +12,55 @@ import { Button } from './Button';
 import { Icon } from './Icon';
 import { Text } from './Text';
 
+/**
+ * Props accepted by {@link Dialog}.
+ */
 export interface DialogProps {
+  /** Whether the dialog is visible. */
   open: boolean;
+  /** Question or statement the user must confirm. */
   title: string;
+  /** Supporting text shown below the title. */
   description?: string;
+  /**
+   * Kind of confirmation.
+   *
+   * @defaultValue `'default'`
+   */
   tone?: DialogTone;
+  /** Icon shown in the tile; defaults to `flag`, or to `warning` for the `danger` tone. */
   icon?: IconName;
+  /** Label of the confirm button. */
   confirmLabel: string;
+  /**
+   * Label of the cancel button.
+   *
+   * @defaultValue `'Cancelar'`
+   */
   cancelLabel?: string;
+  /** Called when the user confirms. */
   onConfirm: () => void;
-  /** Se llama al cancelar, al tocar fuera o con el botón atrás de Android. */
+  /** Called when the user cancels or dismisses the dialog. */
   onCancel: () => void;
 }
 
-/** Diálogo de confirmación (345 px en mobile). */
+/**
+ * Renders a modal confirmation dialog.
+ *
+ * @remarks
+ * Use the `danger` tone for destructive actions.
+ *
+ * @example
+ * ```tsx
+ * <Dialog
+ *   open={isOpen}
+ *   title="Finish the session?"
+ *   confirmLabel="Finish"
+ *   onConfirm={finish}
+ *   onCancel={close}
+ * />
+ * ```
+ */
 export function Dialog({
   open,
   title,

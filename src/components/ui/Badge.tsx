@@ -1,3 +1,10 @@
+/**
+ * Badge primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { View, type ViewProps } from 'react-native';
 import type { BadgeTone, IconName, TextTone } from '@/types/ui';
 import { cn } from '@/utils/cn';
@@ -35,14 +42,32 @@ const toneClass: Record<
   },
 };
 
+/**
+ * Props accepted by {@link Badge}.
+ */
 export interface BadgeProps extends Omit<ViewProps, 'children'> {
+  /** Short text of the badge. */
   label: string;
+  /**
+   * Color tone.
+   *
+   * @defaultValue `'primary'`
+   */
   tone?: BadgeTone;
+  /** Icon rendered before the label. */
   icon?: IconName;
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
-/** Estado o dato corto. */
+/**
+ * Renders a short status or data label.
+ *
+ * @example
+ * ```tsx
+ * <Badge label="Completed" tone="tertiary" icon="check" />
+ * ```
+ */
 export function Badge({
   label,
   tone = 'primary',

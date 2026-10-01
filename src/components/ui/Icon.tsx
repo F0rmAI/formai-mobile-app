@@ -1,17 +1,40 @@
+/**
+ * Icon primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Text, type TextProps } from 'react-native';
 import type { IconName, IconSize } from '@/types/ui';
 import { cn } from '@/utils/cn';
 
+/**
+ * Props accepted by {@link Icon}.
+ */
 export interface IconProps extends Omit<TextProps, 'children'> {
-  /** Ligadura de Material Symbols Rounded (p. ej. "bolt"). */
+  /** Ligature name of the icon, such as `bolt`. */
   name: IconName;
+  /**
+   * Size in pixels.
+   *
+   * @defaultValue `20`
+   */
   size?: IconSize;
-  /** Texto accesible; si se omite, el ícono es decorativo. */
+  /** Accessible label; when omitted the icon is decorative. */
   label?: string;
+  /** Extra classes; use a text color utility to change the color. */
   className?: string;
 }
 
-/** Ícono Material Symbols Rounded (fuente por ligaduras). Color por defecto: primary. */
+/**
+ * Renders a Material Symbols Rounded icon, using the primary color by default.
+ *
+ * @example
+ * ```tsx
+ * <Icon name="bolt" size={24} />
+ * ```
+ */
 export function Icon({
   name,
   size = 20,

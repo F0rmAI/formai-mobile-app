@@ -1,3 +1,10 @@
+/**
+ * Section label primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { View, type ViewProps } from 'react-native';
 import type { IconName, SectionLabelTone, TextTone } from '@/types/ui';
 import { cn } from '@/utils/cn';
@@ -21,15 +28,32 @@ const toneClass: Record<
   },
 };
 
+/**
+ * Props accepted by {@link SectionLabel}.
+ */
 export interface SectionLabelProps extends Omit<ViewProps, 'children'> {
+  /** Text shown in uppercase. */
   label: string;
+  /**
+   * Color tone.
+   *
+   * @defaultValue `'primary'`
+   */
   tone?: SectionLabelTone;
-  /** Si se indica, reemplaza el punto inicial por este ícono. */
+  /** Icon that replaces the leading dot. */
   icon?: IconName;
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
-/** Overline de sección con punto o ícono inicial. */
+/**
+ * Renders an overline label with a leading dot or icon.
+ *
+ * @example
+ * ```tsx
+ * <SectionLabel label="Current exercise" />
+ * ```
+ */
 export function SectionLabel({
   label,
   tone = 'primary',

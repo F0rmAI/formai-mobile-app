@@ -1,15 +1,34 @@
+/**
+ * App header layout component.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { View } from 'react-native';
 import { Avatar, BrandLogo, Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
+/**
+ * Props accepted by {@link AppHeader}.
+ */
 export interface AppHeaderProps {
-  /** Texto bajo la marca (p. ej. "Entrenamiento de hoy"). */
+  /** Text shown below the brand name. */
   subtitle?: string;
+  /** Signed-in user whose avatar is shown. */
   user?: { name: string; avatarUrl?: string };
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
-/** Header principal con marca y avatar (64 px). */
+/**
+ * Renders the main header with the brand and the user avatar.
+ *
+ * @example
+ * ```tsx
+ * <AppHeader subtitle="Today" user={user} />
+ * ```
+ */
 export function AppHeader({ subtitle, user, className }: AppHeaderProps) {
   return (
     <View

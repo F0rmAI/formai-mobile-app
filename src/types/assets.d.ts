@@ -1,4 +1,11 @@
-/** Metro/Uniwind procesa los CSS; solo se importan por efecto (global.css). */
+/**
+ * Module declarations for the assets imported from source files.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
+// Metro processes CSS through the styling binding; it is imported only for its side effect.
 declare module '*.css';
 
 declare module '*.png' {

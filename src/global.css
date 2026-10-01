@@ -1,16 +1,16 @@
 /*
- * Estilos globales de la app mobile.
- * - tailwindcss + uniwind: Tailwind CSS v4 compilado para React Native.
- * - tokens.css: design tokens de FormAI (idéntico en web y mobile).
+ * Global styles of the mobile app.
+ * - tailwindcss + uniwind: Tailwind CSS v4 compiled for React Native.
+ * - tokens.css: FormAI design tokens (identical in web and mobile).
  */
 @import 'tailwindcss';
 @import 'uniwind';
 @import './tokens.css';
 
 /*
- * Familias tipográficas (específicas de mobile).
- * React Native no admite fallbacks ni pesos sintéticos fiables en Android:
- * cada peso de Plus Jakarta Sans es una familia propia (nombre PostScript del TTF).
+ * Font families (mobile only).
+ * React Native has no fallbacks or reliable synthetic weights on Android:
+ * every weight of Plus Jakarta Sans is its own family (PostScript name of the TTF).
  */
 @theme {
   --font-sans: 'PlusJakartaSans-Regular';

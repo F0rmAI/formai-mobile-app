@@ -28,7 +28,7 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 | Estilos | Tailwind CSS + Uniwind (bindings de Tailwind v4 para React Native) | **4.3.3** / 1.12 |
 | Lenguaje | TypeScript | 6.0 |
 | Bundler | Metro | 0.87 |
-| Tests / lint | Jest + react-test-renderer · ESLint (`@react-native/eslint-config`) + Prettier | — |
+| Tests / lint | Jest + react-test-renderer · ESLint (`@react-native/eslint-config`, `eslint-plugin-tsdoc`) + Prettier | — |
 | Safe area | `react-native-safe-area-context` | 5.x |
 | Tipografía | Plus Jakarta Sans (TTF 400/600/700/800) | — |
 | Íconos | Material Symbols Rounded (TTF por ligaduras, peso 400) | — |
@@ -92,6 +92,12 @@ Cada carpeta tiene un `README.md` que explica para qué sirve la capa, qué va y
 - En React Native cada peso tipográfico es una familia (`font-sans`, `font-sans-semibold`, `font-sans-bold`, `font-sans-extrabold`): usa siempre `<Text variant="…">`.
 - Íconos por ligadura: `<Icon name="fitness_center" />`.
 
+## Convenciones de código
+
+- **Mobile-first:** la base es el teléfono en vertical; lo que cambie en pantallas más anchas se agrega con prefijos de ancho mínimo.
+- **Documentación TSDoc en inglés:** cada archivo lleva una cabecera con `@packageDocumentation` y `@author`, y todo lo exportado tiene su comentario. `@author` está declarado como tag propio en `tsdoc.json` y ESLint valida la sintaxis (`tsdoc/syntax`).
+- **Tests en `__tests__/`:** utilidades, hooks, services y la pantalla inicial.
+
 ## Primeros pasos
 
 Requisitos: Node.js ≥ 22.13, Xcode + CocoaPods (iOS) y Android Studio con JDK 17 (Android).
@@ -119,7 +125,7 @@ comprobar que Uniwind, los tokens, las fuentes, los íconos y los componentes fu
 | `npm start` | Inicia Metro. |
 | `npm run ios` / `npm run android` | Compila e instala la app en simulador o emulador. |
 | `npm test` | Tests con Jest. |
-| `npm run lint` | ESLint + Prettier. |
+| `npm run lint` | ESLint + Prettier + sintaxis TSDoc. |
 | `npm run typecheck` | `tsc --noEmit`. |
 
 ### Agregar una fuente
