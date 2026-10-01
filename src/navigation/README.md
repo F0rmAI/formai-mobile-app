@@ -7,6 +7,8 @@ rutas con pantallas de `screens/`; no tiene UI propia ni lógica de negocio.
 
 | Archivo | Uso |
 |---|---|
+| `RootNavigator.tsx` | Elige entre `AuthStack` y `MainTabs` según el estado de la sesión (`useAuth`). |
+| `AuthStack.tsx` | Pantallas previas al inicio de sesión: bienvenida e ingreso. |
 | `MainTabs.tsx` | Pestañas del cliente: Hoy, Progreso y Perfil (TB2 agrega Escanear). Usa el `BottomNav` del design system como barra. |
 
 ## Reglas

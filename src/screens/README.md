@@ -30,6 +30,7 @@ Backend/API
 - **No llama a `services/` directamente**: usa un hook (`useClients`, `useTodayWorkout`…).
 - Mantiene el markup de alto nivel; si un bloque se repite o crece, se extrae a `components/`.
 - Cada ruta de `navigation/` apunta a una pantalla de esta carpeta.
+- `WelcomeScreen` y `SignInScreen` son el acceso a la app.
 - `TodayScreen`, `ProgressScreen` y `ProfileScreen` son las pestañas principales; su contenido es provisional hasta que llegue su feature.
 
 ## Ejemplo

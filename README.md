@@ -29,7 +29,7 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 | Lenguaje | TypeScript | 6.0 |
 | Bundler | Metro | 0.87 |
 | Tests / lint | Jest + react-test-renderer · ESLint (`@react-native/eslint-config`) + Prettier | — |
-| Navegación | React Navigation (`bottom-tabs`) + `react-native-screens` | 7.x / 4.x |
+| Navegación | React Navigation (`native-stack`, `bottom-tabs`) + `react-native-screens` | 7.x / 4.x |
 | Safe area | `react-native-safe-area-context` | 5.x |
 | Tipografía | Plus Jakarta Sans (TTF 400/600/700/800) | — |
 | Íconos | Material Symbols Rounded (TTF por ligaduras, peso 400) | — |
@@ -113,8 +113,8 @@ npm run android
 npm start
 ```
 
-Al iniciar verás la pestaña **Hoy** y la barra inferior para moverte entre **Hoy**, **Progreso** y
-**Perfil**. El contenido de cada pestaña es provisional hasta que llegue su feature.
+Al iniciar verás la **bienvenida**; después de iniciar sesión, la pestaña **Hoy** y la barra inferior
+para moverte entre **Hoy**, **Progreso** y **Perfil**. El contenido de cada pestaña es provisional hasta que llegue su feature.
 
 | Script | Qué hace |
 |---|---|
