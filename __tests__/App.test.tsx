@@ -5,20 +5,40 @@
 import ReactTestRenderer from 'react-test-renderer';
 import App from '@/App';
 
-test('renderiza la pantalla inicial y el contador incrementa', async () => {
+test('navega entre Hoy, Progreso y Perfil desde la barra inferior', async () => {
   let renderer!: ReactTestRenderer.ReactTestRenderer;
   await ReactTestRenderer.act(() => {
     renderer = ReactTestRenderer.create(<App />);
   });
 
-  const counter = () => renderer.root.findByProps({ testID: 'counter-value' });
-  const button = renderer.root.findByProps({ accessibilityRole: 'button' });
+  const tab = (label: string) =>
+    renderer.root.findByProps({
+      accessibilityRole: 'tab',
+      accessibilityLabel: label,
+    });
+  const isSelected = (label: string) =>
+    tab(label).props.accessibilityState.selected;
 
-  expect(counter().props.children).toBe(0);
+  expect(isSelected('Hoy')).toBe(true);
+  expect(isSelected('Progreso')).toBe(false);
+  expect(isSelected('Perfil')).toBe(false);
 
   await ReactTestRenderer.act(() => {
-    button.props.onPress();
+    tab('Progreso').props.onPress();
   });
 
-  expect(counter().props.children).toBe(1);
+  expect(isSelected('Hoy')).toBe(false);
+  expect(isSelected('Progreso')).toBe(true);
+
+  await ReactTestRenderer.act(() => {
+    tab('Perfil').props.onPress();
+  });
+
+  expect(isSelected('Progreso')).toBe(false);
+  expect(isSelected('Perfil')).toBe(true);
+
+  // El navegador deja actualizaciones pendientes: se desmonta antes de terminar.
+  await ReactTestRenderer.act(() => {
+    renderer.unmount();
+  });
 });

@@ -7,7 +7,7 @@ errores y estado local, y exponen a las pantallas una API simple.
 
 - Nombre `use<Algo>.ts` (camelCase con prefijo `use`), exportado por nombre.
 - Pueden usar `services/`, `context/`, `utils/` y `types/`. **Nunca** importan componentes.
-- Devuelven datos listos para pintar (`{ data, isLoading, error, refetch }`) y acciones (`increment`, `logSet`…).
+- Devuelven datos listos para pintar (`{ data, isLoading, error, refetch }`) y acciones (`logSet`, `finishSession`…).
 - Un hook por caso de uso; si crece, se divide.
 
 ## Ejemplo
@@ -24,4 +24,4 @@ export function useClients() {
 }
 ```
 
-`useCounter.ts` es el ejemplo mínimo de la base (lo usa la pantalla inicial).
+La base aún no tiene hooks: se crean con la primera feature que los necesite.

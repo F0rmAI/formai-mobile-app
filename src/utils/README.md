@@ -7,6 +7,7 @@ validaciones, cálculos.
 
 | Archivo | Uso |
 |---|---|
+| `dates.ts` | Formato de fechas en español (`formatLongDate`). |
 | `cn.ts` | Une clases condicionales (`clsx`) y resuelve conflictos de Tailwind (`tailwind-merge`) conociendo los tokens propios de FormAI. Mismo contenido en web y mobile. |
 
 ## Reglas

@@ -7,6 +7,9 @@ Cada archivo es una **pantalla completa** de la app: compone componentes de
 App
  │
  ▼
+Navigation
+ │
+ ▼
 Screens
  │
  ├──────────► Components
@@ -26,8 +29,8 @@ Backend/API
 - Nombre `<Nombre>Screen.tsx` (p. ej. `TodayScreen.tsx`), exportado por nombre.
 - **No llama a `services/` directamente**: usa un hook (`useClients`, `useTodayWorkout`…).
 - Mantiene el markup de alto nivel; si un bloque se repite o crece, se extrae a `components/`.
-- Cuando se agregue la navegación (stack/tabs), cada ruta apunta a una pantalla de esta carpeta.
-- `HomeScreen`/`HomePage` es la pantalla de verificación de la base (título + contador) y se reemplaza al empezar las features.
+- Cada ruta de `navigation/` apunta a una pantalla de esta carpeta.
+- `TodayScreen`, `ProgressScreen` y `ProfileScreen` son las pestañas principales; su contenido es provisional hasta que llegue su feature.
 
 ## Ejemplo
 

@@ -29,6 +29,7 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 | Lenguaje | TypeScript | 6.0 |
 | Bundler | Metro | 0.87 |
 | Tests / lint | Jest + react-test-renderer · ESLint (`@react-native/eslint-config`) + Prettier | — |
+| Navegación | React Navigation (`bottom-tabs`) + `react-native-screens` | 7.x / 4.x |
 | Safe area | `react-native-safe-area-context` | 5.x |
 | Tipografía | Plus Jakarta Sans (TTF 400/600/700/800) | — |
 | Íconos | Material Symbols Rounded (TTF por ligaduras, peso 400) | — |
@@ -57,8 +58,9 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 
 ```
 src/
-├── components/   ui/ (design system) + layout/ (AppHeader, TopBar, BottomNav)
+├── components/   ui/ (design system) + layout/ (AppHeader, TopBar, BottomNav, TabScreenLayout)
 ├── screens/      pantallas completas
+├── navigation/   navegadores de React Navigation (pestañas…)
 ├── hooks/        estado y casos de uso de la UI
 ├── services/     acceso al backend (apiClient + config)
 ├── context/      estado global (sesión…)
@@ -67,19 +69,19 @@ src/
 ├── assets/       imágenes estáticas (isotipo)
 ├── tokens.css    design tokens de FormAI (idéntico en web y mobile)
 ├── global.css    Tailwind + Uniwind + tokens + fuentes
-└── App.tsx       providers + pantalla inicial (registrado en index.js)
+└── App.tsx       providers + navegación (registrado en index.js)
 assets/fonts/     TTF enlazados en iOS y Android (react-native.config.js)
 ```
 
 ```
-App ──► Screens ──► Components
-          │
-          ▼
-        Hooks ──► Services ──► Backend/API
+App ──► Navigation ──► Screens ──► Components
+                          │
+                          ▼
+                        Hooks ──► Services ──► Backend/API
 ```
 
 Cada carpeta tiene un `README.md` que explica para qué sirve la capa, qué va y qué no, y un ejemplo:
-[components](src/components/README.md) · [screens](src/screens/README.md) · [hooks](src/hooks/README.md) ·
+[components](src/components/README.md) · [screens](src/screens/README.md) · [navigation](src/navigation/README.md) · [hooks](src/hooks/README.md) ·
 [services](src/services/README.md) · [context](src/context/README.md) · [utils](src/utils/README.md) ·
 [types](src/types/README.md).
 
@@ -111,8 +113,8 @@ npm run android
 npm start
 ```
 
-Al iniciar verás **"FormAI"** centrado y un contador con un `Button` del design system: sirve para
-comprobar que Uniwind, los tokens, las fuentes, los íconos y los componentes funcionan.
+Al iniciar verás la pestaña **Hoy** y la barra inferior para moverte entre **Hoy**, **Progreso** y
+**Perfil**. El contenido de cada pestaña es provisional hasta que llegue su feature.
 
 | Script | Qué hace |
 |---|---|
