@@ -16,3 +16,9 @@ export interface SignInInput {
   email: string;
   password: string;
 }
+
+export interface PasswordResetInput {
+  /** Token de un solo uso que llega en el enlace del correo. */
+  token: string;
+  password: string;
+}

@@ -1,5 +1,9 @@
 import { ApiError, apiClient } from './api-client';
-import type { AuthenticatedUser, SignInInput } from '@/types/auth';
+import type {
+  AuthenticatedUser,
+  PasswordResetInput,
+  SignInInput,
+} from '@/types/auth';
 
 /**
  * Acceso a la cuenta. El backend entrega el JWT y el refresh token en cookies
@@ -18,6 +22,15 @@ export const authService = {
     apiClient.post<AuthenticatedUser>('/v1/authentication/refresh'),
   /** Revoca el refresh token y borra las cookies de sesión en el backend. */
   signOut: () => apiClient.post<void>('/v1/authentication/sign-out'),
+  /**
+   * Pide el correo con el enlace para crear una nueva contraseña. El backend
+   * responde igual exista o no la cuenta, para no revelar qué correos están registrados.
+   */
+  requestPasswordReset: (email: string) =>
+    apiClient.post<void>('/v1/password-reset-requests', { email }),
+  /** Canjea el token del enlace y reemplaza la contraseña de la cuenta. */
+  resetPassword: (input: PasswordResetInput) =>
+    apiClient.post<void>('/v1/password-resets', input),
 };
 
 /** Por qué el backend rechazó el inicio de sesión. */
@@ -44,3 +57,10 @@ export function signInFailureOf(error: unknown): SignInFailure {
   }
   return { reason: 'unavailable' };
 }
+
+/**
+ * El backend responde 422 cuando el enlace no existe, venció o ya se usó (400 si el
+ * token llega vacío). La contraseña se valida en la app: un 422 solo puede ser el enlace.
+ */
+export const isRejectedResetLink = (error: unknown) =>
+  error instanceof ApiError && (error.status === 422 || error.status === 400);

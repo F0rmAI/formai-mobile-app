@@ -72,6 +72,8 @@ export type DialogTone = 'default' | 'danger';
 
 export type CalloutTone = 'info' | 'warning';
 
+export type EmptyStateTone = 'primary' | 'error';
+
 export type AvatarSize = 'sm' | 'md';
 
 export interface SegmentOption<T extends string = string> {

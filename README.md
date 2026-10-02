@@ -43,6 +43,7 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 ## Features
 
 - **Activación de cuenta** con el código de invitación de 72 h del entrenador, definición de contraseña y consentimiento obligatorio para datos personales y de salud (Ley N.° 29733).
+- **Recuperación de contraseña**: el cliente pide un enlace a su correo (válido 30 minutos y de un solo uso) y crea su nueva contraseña al abrirlo en la app.
 - **Rutina del día**: sesión programada con ejercicios, series, cargas objetivo y descansos; detalle de cualquier otra sesión.
 - **Registro de entrenamiento**: carga (kg) y repeticiones reales por serie, con corrección antes de cerrar.
 - **Cierre de sesión** como **Completada** o **Parcial**; marcado automático como **Omitida** si el día termina sin registros.
@@ -123,6 +124,25 @@ para moverte entre **Hoy**, **Progreso** y **Perfil**. El contenido de cada pest
 | `npm test` | Tests con Jest. |
 | `npm run lint` | ESLint + Prettier. |
 | `npm run typecheck` | `tsc --noEmit`. |
+
+### Enlaces que abren la app
+
+El correo de recuperación trae un enlace `…/password-reset?token=…` que abre la pantalla **Nueva contraseña**
+(`src/navigation/linking.ts`). La app responde a `formai://password-reset` y a `https://formai.app/password-reset`.
+
+En desarrollo el backend apunta ese enlace a la web local (`PASSWORD_RESET_URL`), así que se copia el token y se abre a mano:
+
+```bash
+# iOS
+xcrun simctl openurl booted "formai://password-reset?token=<token>"
+
+# Android
+adb shell am start -a android.intent.action.VIEW -d "formai://password-reset?token=<token>"
+```
+
+Para que el enlace `https://formai.app/…` abra la app sin pasar por el navegador faltan, fuera de este repositorio,
+`/.well-known/assetlinks.json` (Android) y `/.well-known/apple-app-site-association` junto con la capability
+*Associated Domains* (iOS).
 
 ### Agregar una fuente
 

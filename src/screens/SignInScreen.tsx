@@ -12,7 +12,12 @@ type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 /** Inicio de sesión del cliente con correo y contraseña. */
 export function SignInScreen({ navigation, route }: SignInScreenProps) {
   const insets = useSafeAreaInsets();
-  const activatedEmail = route.params?.activatedEmail;
+  const { activatedEmail, passwordUpdated } = route.params ?? {};
+  const toast = activatedEmail
+    ? 'Cuenta activada'
+    : passwordUpdated
+    ? 'Contraseña actualizada'
+    : undefined;
   const [showPassword, setShowPassword] = useState(false);
   const {
     email,
@@ -22,7 +27,7 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
     changeEmail,
     changePassword,
     submit,
-  } = useSignIn(activatedEmail);
+  } = useSignIn(activatedEmail ?? route.params?.email);
 
   return (
     <View
@@ -39,7 +44,9 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
             Hola de nuevo
           </Text>
           <Text variant="body-l" tone="secondary">
-            Ingresa con el correo que registró tu entrenador.
+            {passwordUpdated
+              ? 'Ingresa con tu nueva contraseña.'
+              : 'Ingresa con el correo que registró tu entrenador.'}
           </Text>
         </View>
 
@@ -78,8 +85,15 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           onSubmitEditing={submit}
         />
 
-        {/* La recuperación de contraseña se conecta con FE-MOB-005. */}
-        <Button label="¿Olvidaste tu contraseña?" variant="ghost" size="sm" />
+        <Button
+          label="¿Olvidaste tu contraseña?"
+          variant="ghost"
+          size="sm"
+          disabled={isSubmitting}
+          onPress={() =>
+            navigation.navigate('ForgotPassword', { email: email.trim() })
+          }
+        />
         <Button
           label="Iniciar sesión"
           fullWidth
@@ -87,12 +101,12 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           onPress={submit}
         />
       </ScrollView>
-      {activatedEmail && (
+      {toast && (
         <View
           className="absolute inset-x-xl"
           style={{ bottom: insets.bottom + 16 }}
         >
-          <Toast message="Cuenta activada" tone="success" />
+          <Toast message={toast} tone="success" />
         </View>
       )}
     </View>

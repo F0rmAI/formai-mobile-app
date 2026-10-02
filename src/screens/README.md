@@ -32,6 +32,7 @@ Backend/API
 - Cada ruta de `navigation/` apunta a una pantalla de esta carpeta.
 - `WelcomeScreen` y `SignInScreen` son el acceso a la app.
 - `ActivationCodeScreen` y `ActivationPasswordScreen` son los dos pasos de la activación de cuenta.
+- `ForgotPasswordScreen`, `PasswordResetSentScreen` y `ResetPasswordScreen` son la recuperación de contraseña: pedir el enlace, la confirmación del envío y la nueva contraseña (o el aviso de enlace vencido) al abrir el enlace del correo.
 - `TodayScreen`, `ProgressScreen` y `ProfileScreen` son las pestañas principales; su contenido es provisional hasta que llegue su feature.
 
 ## Ejemplo
