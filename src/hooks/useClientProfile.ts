@@ -11,6 +11,13 @@ import { firstNameOf } from '@/utils/names';
 
 /**
  * Provides the signed-in client profile and display name when available.
+ *
+ * @returns The `profile`, greeting `firstName` and header avatar data.
+ *
+ * @example
+ * ```tsx
+ * const { profile, firstName } = useClientProfile();
+ * ```
  */
 export function useClientProfile() {
   const { profile } = useAuth();

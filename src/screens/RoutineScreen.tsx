@@ -6,9 +6,8 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScrollView } from 'react-native';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import {
   Badge,
   Button,
@@ -21,24 +20,20 @@ import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import type { RootStackParamList } from '@/types/navigation';
 import { formatRoutineStartDate } from '@/utils/training-formatters';
 
-/** Shows the assigned routine and its ordered days. */
+/** Shows the assigned routine and ordered days using useActiveRoutine. */
 export function RoutineScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'Routine'>) {
-  const insets = useSafeAreaInsets();
-  const { routine, loading, error, retry } = useActiveRoutine();
+  const { routine, isLoading, error, retry } = useActiveRoutine();
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Mi rutina" onBack={navigation.goBack} />
       <ScrollView contentContainerClassName="gap-lg p-xl">
-        {loading ? (
+        {isLoading ? (
           <EmptyState title="Cargando tu rutina" icon="hourglass_top" />
         ) : error ? (
           <EmptyState
-            title="No pudimos cargar tu rutina"
+            title={error}
             icon="cloud_off"
             action={{ label: 'Reintentar', onPress: retry }}
           />
@@ -81,6 +76,6 @@ export function RoutineScreen({
           </>
         )}
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

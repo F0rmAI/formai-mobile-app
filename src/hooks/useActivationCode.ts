@@ -1,3 +1,10 @@
+/**
+ * Activation code verification state and actions.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useCallback, useState } from 'react';
 import {
   accountActivationService,
@@ -9,8 +16,20 @@ import {
   normalizeActivationCode,
 } from '@/utils/account-activation';
 
-/** Paso 1 de la activación: el cliente escribe el código y el backend lo verifica. */
-export function useActivationCode(onVerified: (activationCode: string) => void) {
+/**
+ * Verifies the trainer code before the client chooses account credentials.
+ *
+ * @param onVerified - Opens credential setup with the accepted code.
+ * @returns The `code`, `error`, `isSubmitting` and verification actions.
+ *
+ * @example
+ * ```tsx
+ * const activation = useActivationCode(openPasswordStep);
+ * ```
+ */
+export function useActivationCode(
+  onVerified: (activationCode: string) => void,
+) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +39,7 @@ export function useActivationCode(onVerified: (activationCode: string) => void) 
     setError(undefined);
   }, []);
 
-  /** El código dejó de servir después de verificarlo (p. ej. venció en el paso 2). */
+  /** Marks a code rejected after initial verification. */
   const markRejected = useCallback(() => setError(INVALID_CODE_MESSAGE), []);
 
   const submit = useCallback(async () => {

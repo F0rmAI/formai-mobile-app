@@ -12,15 +12,27 @@ import type {
   ActivationCodeVerification,
 } from '@/types/account-activation';
 
-/** Account activation and transfer resource. */
+/** Calls the account activation and transfer endpoints. */
 export const accountActivationService = {
-  /** Verifies an activation code without consuming it. */
+  /**
+   * Verifies an activation code without consuming it.
+   *
+   * @param activationCode - Code provided by the trainer.
+   * @returns The code expiration supplied by the backend.
+   * @throws {@link ApiError} when the code is rejected.
+   */
   verifyCode: (activationCode: string) =>
     apiClient.post<ActivationCodeVerification>(
       '/v1/activation-code-verifications',
       { activationCode },
     ),
-  /** Redeems the code with account credentials and consent. */
+  /**
+   * Redeems the code with account credentials and consent.
+   *
+   * @param input - Code, credentials and accepted consent version.
+   * @returns The activated or transferred account.
+   * @throws {@link ApiError} when the code or account data is rejected.
+   */
   activate: (input: ActivateAccountInput) =>
     apiClient.post<AccountActivation>('/v1/account-activations', input),
 };

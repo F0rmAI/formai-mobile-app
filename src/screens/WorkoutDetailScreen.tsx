@@ -6,9 +6,8 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScrollView } from 'react-native';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { Badge, Card, EmptyState, Text } from '@/components/ui';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
 import type { RootStackParamList } from '@/types/navigation';
@@ -21,27 +20,23 @@ const labels: Record<WorkoutStatus, string> = {
   PENDING: 'Pendiente',
 };
 
-/** Shows every exercise and recorded set in a historical session. */
+/** Shows recorded sets in a historical session using useWorkoutSession. */
 export function WorkoutDetailScreen({
   navigation,
   route,
 }: NativeStackScreenProps<RootStackParamList, 'WorkoutDetail'>) {
-  const insets = useSafeAreaInsets();
-  const { session, loading, error, retry } = useWorkoutSession(
+  const { session, isLoading, error, retry } = useWorkoutSession(
     route.params.sessionId,
   );
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Detalle de sesión" onBack={navigation.goBack} />
       <ScrollView contentContainerClassName="gap-lg p-xl">
-        {loading ? (
+        {isLoading ? (
           <EmptyState title="Cargando sesión" icon="hourglass_top" />
         ) : error ? (
           <EmptyState
-            title="No pudimos cargar la sesión"
+            title={error}
             action={{ label: 'Reintentar', onPress: retry }}
           />
         ) : !session ? (
@@ -76,6 +71,6 @@ export function WorkoutDetailScreen({
           </>
         )}
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

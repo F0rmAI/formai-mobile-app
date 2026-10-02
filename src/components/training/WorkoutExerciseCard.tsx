@@ -14,7 +14,12 @@ import { SetEditor } from './SetEditor';
 interface WorkoutExerciseCardProps {
   /** Exercise from the workout resource. */ exercise: WorkoutExercise;
   /** Whether a request is in progress. */ saving: boolean;
-  /** Disables editing for finished sessions. */ readOnly?: boolean;
+  /**
+   * Disables editing for finished sessions.
+   *
+   * @defaultValue `false`
+   */
+  readOnly?: boolean;
   /** Records a missing set. */ onRecordSet: (
     input: RecordSetInput,
   ) => Promise<boolean>;

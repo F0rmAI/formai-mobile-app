@@ -1,3 +1,10 @@
+/**
+ * Client sign-in form state and actions.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useCallback, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { signInFailureOf } from '@/services/auth.service';
@@ -9,7 +16,7 @@ interface SignInErrors {
   password?: string;
 }
 
-/** Traduce el rechazo del backend al mensaje que ve el cliente. */
+/** Maps a backend sign-in failure to safe client-facing copy. */
 function messageOf(error: unknown) {
   const failure = signInFailureOf(error);
   switch (failure.reason) {
@@ -28,7 +35,17 @@ function messageOf(error: unknown) {
   }
 }
 
-/** Formulario de inicio de sesión: valores, validación, envío y errores. */
+/**
+ * Manages sign-in credentials, validation and submission state.
+ *
+ * @param initialEmail - Email carried over from activation or recovery.
+ * @returns The credentials, `errors`, `isSubmitting` and form actions.
+ *
+ * @example
+ * ```tsx
+ * const signIn = useSignIn(email);
+ * ```
+ */
 export function useSignIn(initialEmail = '') {
   const { signIn } = useAuth();
   const [email, setEmail] = useState(initialEmail);
@@ -60,7 +77,7 @@ export function useSignIn(initialEmail = '') {
     setErrors({});
     setIsSubmitting(true);
     try {
-      // Si la sesión se inicia, el navegador reemplaza el acceso por las pestañas.
+      // The navigator replaces the access flow after successful sign-in.
       await signIn({ email: trimmedEmail, password });
     } catch (error) {
       setErrors({ password: messageOf(error) });

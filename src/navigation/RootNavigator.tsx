@@ -1,5 +1,5 @@
 /**
- * RootNavigator module.
+ * Root stack for signed-in and signed-out routes.
  *
  * @author Carlos
  * @packageDocumentation
@@ -67,7 +67,7 @@ export function RootNavigator() {
             name="PasswordResetSent"
             component={PasswordResetSentScreen}
           />
-          {/* Cada enlace abre su propia pantalla: un token nuevo no hereda el estado del anterior. */}
+          {/* Each link opens a fresh screen so a new token cannot inherit the previous state. */}
           <Stack.Screen
             name="ResetPassword"
             component={ResetPasswordScreen}

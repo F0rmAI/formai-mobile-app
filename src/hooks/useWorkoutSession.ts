@@ -6,27 +6,41 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { trainingService } from '@/services/training.service';
+import { workoutSessionService } from '@/services/workout-session.service';
 import type { WorkoutSession } from '@/types/training';
 
-/** Loads a session by its backend identifier. */
-export function useWorkoutSession(id: string) {
+/**
+ * Loads a workout session by its backend identifier.
+ *
+ * @param id - Identifier of the session to load.
+ * @param errorMessage - Screen-specific message shown when loading fails.
+ * @returns The `session`, `isLoading`, display-ready `error` and `retry` action.
+ *
+ * @example
+ * ```tsx
+ * const { session, isLoading, error, retry } = useWorkoutSession(sessionId);
+ * ```
+ */
+export function useWorkoutSession(
+  id: string,
+  errorMessage = 'No pudimos cargar la sesión',
+) {
   const [session, setSession] = useState<WorkoutSession>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>();
   const retry = useCallback(async () => {
-    setLoading(true);
-    setError(false);
+    setIsLoading(true);
+    setError(undefined);
     try {
-      setSession(await trainingService.getWorkoutSession(id));
+      setSession(await workoutSessionService.getWorkoutSession(id));
     } catch {
-      setError(true);
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [id]);
+  }, [id, errorMessage]);
   useEffect(() => {
     retry();
   }, [retry]);
-  return { session, loading, error, retry };
+  return { session, isLoading, error, retry };
 }

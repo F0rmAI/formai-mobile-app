@@ -1,5 +1,5 @@
 /**
- * MainTabs module.
+ * Bottom tab routes for the signed-in client.
  *
  * @author Carlos
  * @packageDocumentation

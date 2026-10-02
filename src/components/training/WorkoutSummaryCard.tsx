@@ -1,5 +1,5 @@
 /**
- * WorkoutSummaryCard module.
+ * Workout summary totals card.
  *
  * @author Melina
  * @packageDocumentation
@@ -9,8 +9,14 @@ import { View } from 'react-native';
 import { Card, Icon, Text } from '@/components/ui';
 import type { TrainingSummary } from '@/types/training';
 
+/** Props accepted by {@link WorkoutSummaryCard}. */
+interface WorkoutSummaryCardProps {
+  /** Backend totals and derived set counts for the session. */
+  summary: TrainingSummary;
+}
+
 /** Displays volume and completed set totals. */
-export function WorkoutSummaryCard({ summary }: { summary: TrainingSummary }) {
+export function WorkoutSummaryCard({ summary }: WorkoutSummaryCardProps) {
   const stats = [
     {
       icon: 'open_in_full',

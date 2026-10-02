@@ -1,8 +1,14 @@
+/**
+ * Password reset redemption screen.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { Button, EmptyState, Text, TextField, Toast } from '@/components/ui';
 import { useResetPassword } from '@/hooks/useResetPassword';
 import type { RootStackParamList } from '@/types/navigation';
@@ -12,18 +18,17 @@ type ResetPasswordScreenProps = NativeStackScreenProps<
   'ResetPassword'
 >;
 
-/** Recuperación de contraseña, paso 2: nueva contraseña desde el enlace del correo. */
+/** Shows new password entry using useResetPassword to redeem the link. */
 export function ResetPasswordScreen({
   navigation,
   route,
 }: ResetPasswordScreenProps) {
-  const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Cambiar la contraseña no deja sesión abierta: el cliente continúa en el inicio de sesión.
+  // Resetting a password does not sign in the client.
   const onReset = useCallback(() => {
-    // Si el enlace se pidió desde esta app, se conoce el correo y se precarga.
+    // Prefill the email when the reset link was requested in this app.
     const sent = navigation
       .getState()
       .routes.find(({ name }) => name === 'PasswordResetSent');
@@ -50,10 +55,7 @@ export function ResetPasswordScreen({
 
   if (isLinkExpired) {
     return (
-      <View
-        className="flex-1 bg-surface-background"
-        style={{ paddingTop: insets.top }}
-      >
+      <ScreenContainer>
         <TopBar title="Recuperar contraseña" onBack={navigation.goBack} />
         <View className="flex-1 justify-center px-xl pb-8">
           <EmptyState
@@ -64,21 +66,18 @@ export function ResetPasswordScreen({
             action={{
               label: 'Solicitar un nuevo enlace',
               icon: 'refresh',
-              // El enlace ya no sirve: no se puede volver a esta pantalla.
+              // Replace the expired link route so the client cannot return to it.
               onPress: () =>
                 navigation.replace('ForgotPassword', { renewal: true }),
             }}
           />
         </View>
-      </View>
+      </ScreenContainer>
     );
   }
 
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Nueva contraseña" onBack={navigation.goBack} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -146,6 +145,6 @@ export function ResetPasswordScreen({
           onPress={submit}
         />
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

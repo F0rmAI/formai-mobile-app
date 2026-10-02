@@ -1,5 +1,5 @@
 /**
- * account-activation module.
+ * Account activation copy and input validation.
  *
  * @author Carlos
  * @packageDocumentation

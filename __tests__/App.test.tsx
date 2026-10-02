@@ -1,5 +1,5 @@
 /**
- * Integration tests.
+ * Integration tests for useSignIn, useSignOut and useClientProfile through the app.
  *
  * @author G0nz4loQu3dena
  * @packageDocumentation
@@ -30,7 +30,7 @@ const profile = {
 
 const fetchMock = jest.fn();
 
-/** Responde cada endpoint con la respuesta indicada; sin sesión guardada por defecto. */
+/** Returns configured endpoint responses with no saved session by default. */
 function mockBackend(replies: Record<string, Reply>) {
   const all: Record<string, Reply> = { [REFRESH]: { status: 401 }, ...replies };
   fetchMock.mockImplementation(async (url: string) => {
@@ -65,7 +65,7 @@ async function renderApp() {
 const hasText = (text: string) =>
   renderer.root.findAll(node => node.props.children === text).length > 0;
 
-/** Pulsa el último botón visible con ese texto (el de la pantalla superior). */
+/** Presses the last visible button bearing the given label. */
 async function press(label: string) {
   const buttons = renderer.root.findAll(
     node =>
@@ -117,7 +117,7 @@ afterEach(async () => {
   });
 });
 
-test('sin sesión abre en la bienvenida con las opciones de ingreso', async () => {
+test('opens the welcome screen without a session', async () => {
   mockBackend({});
   await renderApp();
 
@@ -127,7 +127,7 @@ test('sin sesión abre en la bienvenida con las opciones de ingreso', async () =
   expect(hasTabs()).toBe(false);
 });
 
-test('inicia sesión como cliente y entra a las pestañas', async () => {
+test('signs in a client and opens the main tabs', async () => {
   mockBackend({ [SIGN_IN]: { status: 200, body: client } });
   await renderApp();
 
@@ -144,7 +144,7 @@ test('inicia sesión como cliente y entra a las pestañas', async () => {
   expect(hasText('Activar mi cuenta')).toBe(false);
 });
 
-test('avisa cuando el correo o la contraseña son incorrectos', async () => {
+test('shows an error for invalid credentials', async () => {
   mockBackend({
     [SIGN_IN]: { status: 401, body: { detail: 'Invalid credentials' } },
   });
@@ -158,7 +158,7 @@ test('avisa cuando el correo o la contraseña son incorrectos', async () => {
   expect(hasTabs()).toBe(false);
 });
 
-test('no llama al backend si falta el correo o la contraseña', async () => {
+test('does not call the backend for missing credentials', async () => {
   mockBackend({});
   await renderApp();
   await press('Iniciar sesión');
@@ -174,7 +174,7 @@ test('no llama al backend si falta el correo o la contraseña', async () => {
   expect(requestsTo(SIGN_IN)).toHaveLength(0);
 });
 
-test('avisa hasta qué hora está bloqueada la cuenta', async () => {
+test('shows when a locked account can retry', async () => {
   const lockedUntil = new Date(2026, 9, 1, 18, 30).toISOString();
   mockBackend({ [SIGN_IN]: { status: 429, body: { lockedUntil } } });
   await renderApp();
@@ -188,7 +188,7 @@ test('avisa hasta qué hora está bloqueada la cuenta', async () => {
   ).toBe(true);
 });
 
-test('avisa cuando la cuenta es de entrenador', async () => {
+test('shows a message when a trainer tries to sign in', async () => {
   mockBackend({ [SIGN_IN]: { status: 403, body: { status: 403 } } });
   await renderApp();
 
@@ -201,7 +201,7 @@ test('avisa cuando la cuenta es de entrenador', async () => {
   ).toBe(true);
 });
 
-test('avisa cuando no hay conexión', async () => {
+test('shows a connection error', async () => {
   mockBackend({ [SIGN_IN]: 'network-error' });
   await renderApp();
 
@@ -212,7 +212,7 @@ test('avisa cuando no hay conexión', async () => {
   ).toBe(true);
 });
 
-test('con una sesión guardada entra directo y navega entre pestañas', async () => {
+test('restores a saved session and navigates between tabs', async () => {
   mockBackend({ [REFRESH]: { status: 200, body: client } });
   await renderApp();
 
@@ -241,7 +241,7 @@ async function openProfile() {
   });
 }
 
-test('pide confirmación y cierra la sesión desde Perfil', async () => {
+test('confirms sign-out from Profile', async () => {
   mockBackend({
     [REFRESH]: { status: 200, body: client },
     [SIGN_OUT]: { status: 204 },
@@ -262,7 +262,7 @@ test('pide confirmación y cierra la sesión desde Perfil', async () => {
   expect(hasText('Activar mi cuenta')).toBe(true);
 });
 
-test('no cierra la sesión si se cancela la confirmación', async () => {
+test('keeps the session when sign-out is canceled', async () => {
   mockBackend({ [REFRESH]: { status: 200, body: client } });
   await renderApp();
   await openProfile();
@@ -275,7 +275,7 @@ test('no cierra la sesión si se cancela la confirmación', async () => {
   expect(hasTabs()).toBe(true);
 });
 
-test('mantiene la sesión y avisa si no se pudo cerrar', async () => {
+test('keeps the session and shows an error when sign-out fails', async () => {
   mockBackend({
     [REFRESH]: { status: 200, body: client },
     [SIGN_OUT]: 'network-error',
@@ -292,7 +292,7 @@ test('mantiene la sesión y avisa si no se pudo cerrar', async () => {
   expect(hasTabs()).toBe(true);
 });
 
-test('saluda al cliente por su nombre al iniciar sesión', async () => {
+test('greets the client by name after sign-in', async () => {
   mockBackend({
     [SIGN_IN]: { status: 200, body: client },
     [PROFILE]: { status: 200, body: profile },
@@ -313,7 +313,7 @@ test('saluda al cliente por su nombre al iniciar sesión', async () => {
   ).toBeGreaterThan(0);
 });
 
-test('saluda por su nombre al recuperar una sesión guardada', async () => {
+test('greets the client by name after session restoration', async () => {
   mockBackend({
     [REFRESH]: { status: 200, body: client },
     [PROFILE]: { status: 200, body: profile },
@@ -323,7 +323,7 @@ test('saluda por su nombre al recuperar una sesión guardada', async () => {
   expect(hasText('Hola, Diego')).toBe(true);
 });
 
-test('saluda sin nombre si no se pudo obtener el perfil', async () => {
+test('greets without a name when the profile cannot be loaded', async () => {
   mockBackend({
     [REFRESH]: { status: 200, body: client },
     [PROFILE]: 'network-error',
@@ -334,14 +334,14 @@ test('saluda sin nombre si no se pudo obtener el perfil', async () => {
   expect(tab('Hoy').props.accessibilityState.selected).toBe(true);
 });
 
-test('no pide el perfil mientras no hay sesión', async () => {
+test('does not request the profile without a session', async () => {
   mockBackend({});
   await renderApp();
 
   expect(requestsTo(PROFILE)).toHaveLength(0);
 });
 
-test('muestra nombre, correo y rutina vigente en Perfil', async () => {
+test('shows the client name, email and active routine in Profile', async () => {
   mockBackend({
     [REFRESH]: { status: 200, body: client },
     [PROFILE]: { status: 200, body: profile },

@@ -9,12 +9,14 @@ import { View } from 'react-native';
 import { Badge, Card, Text } from '@/components/ui';
 import type { ExercisePrescription } from '@/types/training';
 
-/** Shows the prescribed sets, repetitions, load and rest. */
-export function RoutineExerciseCard({
-  exercise,
-}: {
+/** Props accepted by {@link RoutineExerciseCard}. */
+interface RoutineExerciseCardProps {
+  /** Exercise prescribed for a routine day. */
   exercise: ExercisePrescription;
-}) {
+}
+
+/** Shows the prescribed sets, repetitions, load and rest. */
+export function RoutineExerciseCard({ exercise }: RoutineExerciseCardProps) {
   return (
     <Card className="gap-md">
       <Text variant="title">{exercise.exerciseName}</Text>

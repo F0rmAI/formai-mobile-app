@@ -6,37 +6,34 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScrollView } from 'react-native';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { RoutineExerciseCard } from '@/components/training';
 import { EmptyState, Text } from '@/components/ui';
 import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import type { RootStackParamList } from '@/types/navigation';
 
-/** Shows the exercises prescribed for a routine day. */
+/** Shows prescribed exercises using useActiveRoutine for the assigned day. */
 export function RoutineDayScreen({
   navigation,
   route,
 }: NativeStackScreenProps<RootStackParamList, 'RoutineDay'>) {
-  const insets = useSafeAreaInsets();
-  const { routine, loading, error, retry } = useActiveRoutine();
+  const { routine, isLoading, error, retry } = useActiveRoutine(
+    'No pudimos cargar la sesión',
+  );
   const day = routine?.sessions.find(item => item.order === route.params.order);
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar
         title={day?.label ?? 'Día de rutina'}
         onBack={navigation.goBack}
       />
       <ScrollView contentContainerClassName="gap-lg p-xl">
-        {loading ? (
+        {isLoading ? (
           <EmptyState title="Cargando sesión" icon="hourglass_top" />
         ) : error ? (
           <EmptyState
-            title="No pudimos cargar la sesión"
+            title={error}
             action={{ label: 'Reintentar', onPress: retry }}
           />
         ) : !day ? (
@@ -57,6 +54,6 @@ export function RoutineDayScreen({
           </>
         )}
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

@@ -6,27 +6,37 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { trainingService } from '@/services/training.service';
+import { activeRoutineService } from '@/services/active-routine.service';
 import type { ActiveRoutine } from '@/types/training';
 
-/** Loads the current routine without requesting today's workout. */
-export function useActiveRoutine() {
+/**
+ * Loads the current routine without requesting today's workout.
+ *
+ * @param errorMessage - Screen-specific message shown when loading fails.
+ * @returns The `routine`, `isLoading`, display-ready `error` and `retry` action.
+ *
+ * @example
+ * ```tsx
+ * const { routine, isLoading, error, retry } = useActiveRoutine();
+ * ```
+ */
+export function useActiveRoutine(errorMessage = 'No pudimos cargar tu rutina') {
   const [routine, setRoutine] = useState<ActiveRoutine | null>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>();
   const retry = useCallback(async () => {
-    setLoading(true);
-    setError(false);
+    setIsLoading(true);
+    setError(undefined);
     try {
-      setRoutine(await trainingService.getActiveRoutine());
+      setRoutine(await activeRoutineService.getActiveRoutine());
     } catch {
-      setError(true);
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, []);
+  }, [errorMessage]);
   useEffect(() => {
     retry();
   }, [retry]);
-  return { routine, loading, error, retry };
+  return { routine, isLoading, error, retry };
 }

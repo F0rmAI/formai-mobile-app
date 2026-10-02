@@ -14,7 +14,7 @@ import { useClientProfile } from '@/hooks/useClientProfile';
 import { useSignOut } from '@/hooks/useSignOut';
 import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
 
-/** Shows the backend profile, routine and sign-out action. */
+/** Shows profile and routine data using useClientProfile, useActiveRoutine and useSignOut. */
 export function ProfileScreen({
   navigation,
 }: {
@@ -23,7 +23,12 @@ export function ProfileScreen({
   const { isConfirming, isSigningOut, error, requestSignOut, cancel, confirm } =
     useSignOut();
   const { profile, headerUser } = useClientProfile();
-  const { routine, loading, error: routineError, retry } = useActiveRoutine();
+  const {
+    routine,
+    isLoading,
+    error: routineError,
+    retry,
+  } = useActiveRoutine('No pudimos cargar tu rutina.');
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
   return (
@@ -38,13 +43,11 @@ export function ProfileScreen({
           {profile?.email ?? ''}
         </Text>
       </Card>
-      {routineError && (
-        <Toast message="No pudimos cargar tu rutina." tone="error" />
-      )}
+      {routineError && <Toast message={routineError} tone="error" />}
       <ListItem
         title="Mi rutina vigente"
         subtitle={
-          loading
+          isLoading
             ? 'Cargando...'
             : routine?.routineName ?? 'Sin rutina asignada'
         }

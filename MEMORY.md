@@ -1,19 +1,20 @@
-# MEMORY.md - FormAI Mobile App
+# MEMORY.md — FormAI Mobile App
 
-## Current status (2026-10-02)
-- Branch `feature/api-integration` unifies authentication, React Navigation, training, history and profile. The Today tab uses the real `/api` resources; the state-based TrainingFlow, its second navigation bar and the mock training service are removed.
-- Authenticated requests retry once after one shared in-flight refresh on an initial 401 or 403. A failed refresh returns the app to Welcome; a retried 403 remains a forbidden response. Startup restoration uses the same refresh path.
-- Today covers no routine, rest day, pending workout, set registration and correction, partial confirmation, and finished summary. Routine and day views use typed stack routes.
-- Progress lists paginated sessions with a validated date range and per-session details. Profile shows the backend full name, email and current routine. Activation supports an existing account moving to another trainer with its current password.
-- Verification: `npm run typecheck` passes; `npm test -- --runInBand --watchman=false` passes 68 tests. Plain Jest cannot access the Watchman socket in this environment. `npm run lint` reports only the existing `@format` TSDoc errors in `__tests__/dates.test.ts` and `__tests__/names.test.ts`.
+## Estado actual (2026-10-02)
+- `feature/mobile-auth` y `feature/mobile-training-flow` ya están integradas en `develop`; `feature/api-integration` conecta autenticación, entrenamiento, historial y perfil con recursos reales de `/api`.
+- La app muestra Bienvenida, activación, inicio/cierre de sesión, recuperación por deep link, Hoy, rutina/día, resumen, historial/detalle y Perfil. No hay servicios simulados en los flujos actuales.
+- Progreso lista sesiones y permite filtrar fechas; las métricas y los gráficos todavía pertenecen al siguiente incremento, junto con recordatorios y reconocimiento de máquinas.
+- La renovación de sesión usa una sola petición compartida tras un 401 o 403 inicial y reintenta una vez. Si falla, vuelve a Bienvenida; un 403 posterior se conserva como rechazo.
+- La auditoría frontend pasa con 0 errores y 0 advertencias. Lint y typecheck pasan; 13 suites y 77 tests pasan con `--watchman=false`.
 
-## Decisions
-- Backend DTOs are authoritative: session states are PENDING, COMPLETED, PARTIAL and SKIPPED; rest-day fields are nullable. Screens show no fabricated trainer, exercise image, duration or progress metrics.
-- Training uses one real `training.service.ts`; session and history hooks call it through `apiClient`. Error details from the backend are never displayed to users.
-- Account activation validates the backend password range of 8–128 characters so a valid existing password can be used for trainer transfer. HTTP 409 has one neutral message for both conflict cases.
+## Decisiones
+- Los DTO del backend mandan: estados `PENDING`, `COMPLETED`, `PARTIAL`, `SKIPPED`, días de descanso con campos nulos y sin métricas inventadas.
+- Cada recurso usa su service mediante `apiClient`; recuperación, rutina vigente y sesiones tienen archivos separados. Los hooks de datos exponen `isLoading`, errores seguros en español y acciones de recarga.
+- Los insets de pantalla y toast viven en primitivas de layout; las medidas de la bienvenida viven en UI. `tokens.css` no cambió.
+- Los tests están en `__tests__/`; los flujos de activación, autenticación y recuperación prueban sus hooks mediante la app, y los hooks de carga tienen pruebas directas.
 
-## Pitfalls
-- Do not call refresh independently: rotated-token reuse can revoke every session. Use `refreshSession` in `api-client.ts`.
-- Keep `tokens.css` byte-identical with the web repo; no token change was needed here.
-- `className` is ignored by non-core components such as `SafeAreaView`; use a core View for Uniwind classes.
-- Android rejects `accessibilityRole="tabbar"`; use `tablist`. Native runtime verification on both platforms remains necessary when available.
+## Riesgos y cuidados
+- Para formai-api local usar `JWT_COOKIE_SECURE=false`: iOS Simulator y Android Emulator no envían cookies `Secure` por HTTP. Android usa `10.0.2.2:8080`; iOS usa `localhost:8080`.
+- No lanzar renovaciones independientes: la reutilización de un token rotado puede revocar las sesiones. Usar `refreshSession` en `api-client.ts`.
+- `className` solo funciona en componentes core de React Native; Android rechaza `accessibilityRole="tabbar"` y usa `tablist`.
+- Falta validar el resultado visual y la ejecución nativa en iOS y Android cuando haya simuladores disponibles.

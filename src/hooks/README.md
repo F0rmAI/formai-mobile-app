@@ -7,7 +7,7 @@ errores y estado local, y exponen a las pantallas una API simple.
 
 - Nombre `use<Algo>.ts` (camelCase con prefijo `use`), exportado por nombre.
 - Pueden usar `services/`, `context/`, `utils/` y `types/`. **Nunca** importan componentes.
-- Devuelven datos listos para pintar (`{ data, isLoading, error, refetch }`) y acciones (`logSet`, `finishSession`…).
+- Los hooks de datos devuelven `isLoading`, un `error` seguro en español, datos y una acción de recarga (`retry` o `load`). Los hooks de formulario devuelven `isSubmitting`, errores listos para mostrar y acciones de edición o envío. Nunca muestran texto crudo del backend.
 - Un hook por caso de uso; si crece, se divide.
 
 ## Ejemplo

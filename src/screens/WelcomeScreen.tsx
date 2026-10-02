@@ -1,28 +1,28 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BrandLogo, Button, Text } from '@/components/ui';
-import type { RootStackParamList } from '@/types/navigation';
+/**
+ * Client welcome and entry screen.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
 
-const welcomeHero = require('@/assets/welcome-hero.png');
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ScrollView, View } from 'react-native';
+import { ScreenContainer } from '@/components/layout';
+import { BrandLogo, Button, Text, WelcomeHero } from '@/components/ui';
+import type { RootStackParamList } from '@/types/navigation';
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
-/** Bienvenida con las opciones de ingreso a la app. */
+/** Shows sign-in and activation entry points for signed-out clients. */
 export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-    >
+    <ScreenContainer bottomInset>
       <ScrollView
         contentContainerClassName="grow justify-center gap-2xl px-xl pb-8 pt-12"
         alwaysBounceVertical={false}
       >
         <View className="items-center gap-xl">
-          <BrandLogo className="size-[72px]" />
+          <BrandLogo large />
           <Text variant="display-xl" accessibilityRole="header">
             FormAI
           </Text>
@@ -32,12 +32,7 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
         </View>
 
         <View className="rounded-md shadow-card">
-          <Image
-            source={welcomeHero}
-            accessibilityIgnoresInvertColors
-            resizeMode="cover"
-            className="h-[260px] w-full rounded-md"
-          />
+          <WelcomeHero />
         </View>
 
         <View className="gap-md">
@@ -58,6 +53,6 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

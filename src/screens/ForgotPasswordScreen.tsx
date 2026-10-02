@@ -1,8 +1,14 @@
+/**
+ * Password reset request screen.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { Button, Text, TextField } from '@/components/ui';
 import { useForgotPassword } from '@/hooks/useForgotPassword';
 import type { RootStackParamList } from '@/types/navigation';
@@ -12,12 +18,11 @@ type ForgotPasswordScreenProps = NativeStackScreenProps<
   'ForgotPassword'
 >;
 
-/** Recuperación de contraseña, paso 1: el correo al que se envía el enlace. */
+/** Shows email entry using useForgotPassword to request a reset link. */
 export function ForgotPasswordScreen({
   navigation,
   route,
 }: ForgotPasswordScreenProps) {
-  const insets = useSafeAreaInsets();
   const renewal = route.params?.renewal;
   const goToSent = useCallback(
     (sentEmail: string) =>
@@ -30,10 +35,7 @@ export function ForgotPasswordScreen({
   );
 
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Recuperar contraseña" onBack={navigation.goBack} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -72,6 +74,6 @@ export function ForgotPasswordScreen({
           onPress={submit}
         />
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

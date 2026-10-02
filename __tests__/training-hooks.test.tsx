@@ -8,12 +8,15 @@
 import ReactTestRenderer from 'react-test-renderer';
 import { useTraining } from '@/hooks/useTraining';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
-import { trainingService } from '@/services/training.service';
+import { activeRoutineService } from '@/services/active-routine.service';
+import { workoutSessionService } from '@/services/workout-session.service';
 import type { ActiveRoutine, WorkoutSession } from '@/types/training';
 
-jest.mock('@/services/training.service', () => ({
-  trainingService: {
-    getActiveRoutine: jest.fn(),
+jest.mock('@/services/active-routine.service', () => ({
+  activeRoutineService: { getActiveRoutine: jest.fn() },
+}));
+jest.mock('@/services/workout-session.service', () => ({
+  workoutSessionService: {
     getWorkoutSession: jest.fn(),
     recordSet: jest.fn(),
     correctSet: jest.fn(),
@@ -52,7 +55,10 @@ const session: WorkoutSession = {
   ],
 };
 const input = { exerciseId: 'e1', setNumber: 1, loadKg: 20, reps: 10 };
-const service = trainingService as jest.Mocked<typeof trainingService>;
+const service = {
+  ...activeRoutineService,
+  ...workoutSessionService,
+} as jest.Mocked<typeof activeRoutineService & typeof workoutSessionService>;
 
 let training!: ReturnType<typeof useTraining>;
 let history!: ReturnType<typeof useWorkoutHistory>;

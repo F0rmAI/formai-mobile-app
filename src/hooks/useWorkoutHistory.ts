@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { trainingService } from '@/services/training.service';
+import { workoutSessionService } from '@/services/workout-session.service';
 import type { WorkoutSession } from '@/types/training';
 
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -18,7 +18,16 @@ function validDate(value: string) {
   );
 }
 
-/** Manages history filtering and incremental page loading. */
+/**
+ * Loads workout history with a validated date range and incremental pages.
+ *
+ * @returns The filter values, sessions, `isLoading`, display-ready `error` and actions.
+ *
+ * @example
+ * ```tsx
+ * const { sessions, isLoading, applyFilter, loadMore } = useWorkoutHistory();
+ * ```
+ */
 export function useWorkoutHistory() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -26,14 +35,14 @@ export function useWorkoutHistory() {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [page, setPage] = useState(-1);
   const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const load = useCallback(
     async (nextPage: number) => {
-      setLoading(true);
+      setIsLoading(true);
       setError(undefined);
       try {
-        const result = await trainingService.listWorkoutSessions(
+        const result = await workoutSessionService.listWorkoutSessions(
           nextPage,
           range.from,
           range.to,
@@ -46,7 +55,7 @@ export function useWorkoutHistory() {
       } catch {
         setError('No pudimos cargar tu historial. Inténtalo de nuevo.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     [range],
@@ -74,7 +83,7 @@ export function useWorkoutHistory() {
     setFrom,
     setTo,
     sessions,
-    loading,
+    isLoading,
     error,
     applyFilter,
     retry: () => load(0),

@@ -8,8 +8,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { Button, Checkbox, Text, TextField, Toast } from '@/components/ui';
 import { useAccountActivation } from '@/hooks/useAccountActivation';
 import type { RootStackParamList } from '@/types/navigation';
@@ -20,12 +19,11 @@ type ActivationPasswordScreenProps = NativeStackScreenProps<
   'ActivationPassword'
 >;
 
-/** Activation step two: email, password and consent. */
+/** Shows credentials and consent using useAccountActivation for submission. */
 export function ActivationPasswordScreen({
   navigation,
   route,
 }: ActivationPasswordScreenProps) {
-  const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -64,10 +62,7 @@ export function ActivationPasswordScreen({
   });
 
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Activar cuenta" onBack={navigation.goBack} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -164,6 +159,6 @@ export function ActivationPasswordScreen({
           onPress={submit}
         />
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

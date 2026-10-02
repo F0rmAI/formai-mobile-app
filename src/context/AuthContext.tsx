@@ -1,5 +1,5 @@
 /**
- * AuthContext module.
+ * Shared authentication and client profile state.
  *
  * @author Carlos
  * @packageDocumentation

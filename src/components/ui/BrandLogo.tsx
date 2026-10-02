@@ -16,6 +16,18 @@ const brandLogo = require('@/assets/brand-logo.png');
 export interface BrandLogoProps extends Omit<ImageProps, 'source'> {
   /** Extra classes for layout adjustments from the parent. */
   className?: string;
+  /**
+   * Uses the large mark on the welcome screen.
+   *
+   * @defaultValue `false`
+   */
+  large?: boolean;
+  /**
+   * Accessible name of the logo.
+   *
+   * @defaultValue `'FormAI'`
+   */
+  accessibilityLabel?: string;
 }
 
 /**
@@ -28,6 +40,7 @@ export interface BrandLogoProps extends Omit<ImageProps, 'source'> {
  */
 export function BrandLogo({
   className,
+  large = false,
   accessibilityLabel = 'FormAI',
   ...props
 }: BrandLogoProps) {
@@ -36,7 +49,10 @@ export function BrandLogo({
       source={brandLogo}
       accessibilityLabel={accessibilityLabel}
       resizeMode="cover"
-      className={cn('size-8 rounded-sm', className)}
+      className={cn(
+        large ? 'size-[72px] rounded-sm' : 'size-8 rounded-sm',
+        className,
+      )}
       {...props}
     />
   );

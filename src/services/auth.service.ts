@@ -6,36 +6,40 @@
  */
 
 import { ApiError, apiClient, refreshSession } from './api-client';
-import type {
-  AuthenticatedUser,
-  PasswordResetInput,
-  SignInInput,
-} from '@/types/auth';
+import type { AuthenticatedUser, SignInInput } from '@/types/auth';
 
 /**
  * Authentication resource. The backend stores access and refresh tokens in
  * httpOnly cookies; the app only forwards them.
  */
 export const authService = {
-  /** Clients sign in through the mobile application only. */
+  /**
+   * Signs in a client through the mobile application.
+   *
+   * @param input - Email and password entered by the client.
+   * @returns The authenticated account returned by the backend.
+   * @throws {@link ApiError} when credentials are rejected.
+   */
   signIn: ({ email, password }: SignInInput) =>
     apiClient.post<AuthenticatedUser>('/v1/authentication/sign-in', {
       email,
       password,
       application: 'MOBILE_APP',
     }),
-  /** Renews the session through the shared refresh request. */
-  refresh: () => refreshSession<AuthenticatedUser>(),
-  /** Revokes the refresh token and clears server cookies. */
-  signOut: () => apiClient.post<void>('/v1/authentication/sign-out'),
   /**
-   * Requests a password-reset link without revealing account existence.
+   * Renews the session through the shared refresh request.
+   *
+   * @returns The authenticated account associated with the renewed session.
+   * @throws {@link ApiError} when the refresh cookie is rejected.
    */
-  requestPasswordReset: (email: string) =>
-    apiClient.post<void>('/v1/password-reset-requests', { email }),
-  /** Redeems a reset token and replaces the account password. */
-  resetPassword: (input: PasswordResetInput) =>
-    apiClient.post<void>('/v1/password-resets', input),
+  refresh: () => refreshSession<AuthenticatedUser>(),
+  /**
+   * Revokes the refresh token and clears server cookies.
+   *
+   * @returns Resolves after the backend ends the session.
+   * @throws {@link ApiError} when the sign-out request fails.
+   */
+  signOut: () => apiClient.post<void>('/v1/authentication/sign-out'),
 };
 
 /** Reason for a rejected sign-in. */
@@ -63,9 +67,3 @@ export function signInFailureOf(error: unknown): SignInFailure {
   }
   return { reason: 'unavailable' };
 }
-
-/**
- * Identifies an invalid or expired reset link after local password validation.
- */
-export const isRejectedResetLink = (error: unknown) =>
-  error instanceof ApiError && (error.status === 422 || error.status === 400);

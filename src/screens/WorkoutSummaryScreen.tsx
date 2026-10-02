@@ -7,21 +7,20 @@
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { WorkoutSummaryCard } from '@/components/training';
 import { Badge, Button, EmptyState, Text } from '@/components/ui';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
 import type { RootStackParamList } from '@/types/navigation';
 
-/** Shows a completed or partial session using backend totals. */
+/** Shows a completed or partial session using useWorkoutSession for backend totals. */
 export function WorkoutSummaryScreen({
   navigation,
   route,
 }: NativeStackScreenProps<RootStackParamList, 'WorkoutSummary'>) {
-  const insets = useSafeAreaInsets();
-  const { session, loading, error, retry } = useWorkoutSession(
+  const { session, isLoading, error, retry } = useWorkoutSession(
     route.params.sessionId,
+    'No pudimos cargar el resumen',
   );
   const completedSets =
     session?.exercises.reduce(
@@ -34,17 +33,14 @@ export function WorkoutSummaryScreen({
       0,
     ) ?? 0;
   return (
-    <View
-      className="flex-1 gap-xl bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer className="gap-xl">
       <TopBar title="Resumen" onBack={navigation.goBack} />
       <View className="gap-xl p-xl">
-        {loading ? (
+        {isLoading ? (
           <EmptyState title="Cargando resumen" icon="hourglass_top" />
         ) : error ? (
           <EmptyState
-            title="No pudimos cargar el resumen"
+            title={error}
             action={{ label: 'Reintentar', onPress: retry }}
           />
         ) : session ? (
@@ -84,6 +80,6 @@ export function WorkoutSummaryScreen({
           <EmptyState title="Sesión no disponible" />
         )}
       </View>
-    </View>
+    </ScreenContainer>
   );
 }

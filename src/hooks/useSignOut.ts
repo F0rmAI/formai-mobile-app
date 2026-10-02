@@ -1,7 +1,23 @@
+/**
+ * Confirmed sign-out state and actions.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useCallback, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
-/** Cierre de sesión con confirmación previa. */
+/**
+ * Manages sign-out confirmation and request state.
+ *
+ * @returns Confirmation and submission state, display-ready `error` and actions.
+ *
+ * @example
+ * ```tsx
+ * const { requestSignOut, confirm, cancel } = useSignOut();
+ * ```
+ */
 export function useSignOut() {
   const { signOut } = useAuth();
   const [isConfirming, setIsConfirming] = useState(false);
@@ -19,7 +35,7 @@ export function useSignOut() {
     setIsConfirming(false);
     setIsSigningOut(true);
     try {
-      // Al cerrar la sesión, el navegador reemplaza las pestañas por la bienvenida.
+      // The navigator replaces the tabs with Welcome after sign-out.
       await signOut();
     } catch {
       setError('No pudimos cerrar tu sesión. Inténtalo de nuevo.');

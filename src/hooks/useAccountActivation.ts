@@ -1,5 +1,5 @@
 /**
- * useAccountActivation module.
+ * Account activation form state and actions.
  *
  * @author Carlos
  * @packageDocumentation
@@ -35,7 +35,16 @@ interface ActivationCallbacks {
 }
 
 /**
- * Activation step two: submit the login email, password and consent.
+ * Validates credentials and consent before activating a client account.
+ *
+ * @param activationCode - Code previously verified with the backend.
+ * @param callbacks - Navigation actions after activation or code rejection.
+ * @returns The field values, `errors`, `isSubmitting` and form actions.
+ *
+ * @example
+ * ```tsx
+ * const activation = useAccountActivation(code, { onActivated, onCodeRejected });
+ * ```
  */
 export function useAccountActivation(
   activationCode: string,

@@ -1,21 +1,36 @@
-/** Respuesta al verificar un código: sigue vigente hasta `expiresAt`. */
+/**
+ * Account activation resource types.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
+/** Describes the verified activation code before it expires. */
 export interface ActivationCodeVerification {
+  /** Expiration timestamp returned by the backend. */
   expiresAt: string;
 }
 
+/** Data submitted to activate or transfer a client account. */
 export interface ActivateAccountInput {
+  /** Code provided by the trainer. */
   activationCode: string;
-  /** Correo que elige el cliente: con él iniciará sesión siempre. */
+  /** Email the client will use for subsequent sign-ins. */
   email: string;
+  /** New or existing account password. */
   password: string;
+  /** Whether the client accepted the data consent. */
   consentAccepted: boolean;
-  /** Versión del texto de consentimiento que se mostró al cliente. */
+  /** Version of the consent text shown to the client. */
   consentVersion: string;
 }
 
-/** Cuenta ya activada, tal como la devuelve el backend. */
+/** Describes an account after activation. */
 export interface AccountActivation {
+  /** Identifier of the activated account. */
   userId: string;
+  /** Account lifecycle status after activation. */
   status: string;
+  /** Activation timestamp returned by the backend. */
   activatedAt: string;
 }

@@ -1,5 +1,5 @@
 /**
- * navigation module.
+ * Typed route parameters for the mobile navigators.
  *
  * @author Carlos
  * @packageDocumentation

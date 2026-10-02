@@ -1,5 +1,5 @@
 /**
- * Integration tests.
+ * Integration tests for useForgotPassword, useResetPassword and useMailApp through the app.
  *
  * @author Carlos
  * @packageDocumentation
@@ -22,7 +22,7 @@ const fetchMock = jest.fn();
 const getInitialURL = Linking.getInitialURL as jest.Mock;
 const openURL = Linking.openURL as jest.Mock;
 
-/** Responde cada endpoint de recuperación con la respuesta indicada. */
+/** Returns the configured response for each recovery endpoint. */
 function mockBackend(replies: Record<string, Reply>) {
   fetchMock.mockImplementation(async (url: string) => {
     const path = Object.keys(replies).find(key => url.endsWith(key));
@@ -49,7 +49,7 @@ const bodyOf = (path: string, index = 0) =>
 
 let renderer: ReactTestRenderer.ReactTestRenderer;
 
-/** Abre la app; con `link`, como si el cliente hubiera tocado el enlace del correo. */
+/** Opens the app with an optional email deep link. */
 async function renderApp(link?: string) {
   getInitialURL.mockResolvedValueOnce(link);
   await ReactTestRenderer.act(async () => {
@@ -60,7 +60,7 @@ async function renderApp(link?: string) {
 const hasText = (text: string) =>
   renderer.root.findAll(node => node.props.children === text).length > 0;
 
-/** Pulsa el último botón visible con ese texto (el de la pantalla superior). */
+/** Presses the last visible button bearing the given label. */
 async function press(label: string) {
   const buttons = renderer.root.findAll(
     node =>
@@ -73,7 +73,7 @@ async function press(label: string) {
   });
 }
 
-/** El último campo con esa etiqueta (el de la pantalla superior). */
+/** Finds the last field bearing the given label. */
 const input = (label: string) => {
   const inputs = renderer.root.findAll(
     node =>
@@ -105,14 +105,14 @@ beforeEach(() => {
   globalThis.fetch = fetchMock as unknown as typeof fetch;
 });
 
-// El navegador deja actualizaciones pendientes: se desmonta antes de terminar.
+// Unmount the navigator before pending updates settle.
 afterEach(async () => {
   await ReactTestRenderer.act(async () => {
     renderer.unmount();
   });
 });
 
-test('pide el enlace con el correo escrito en el inicio de sesión', async () => {
+test('requests a reset link using the sign-in email', async () => {
   mockBackend({ [REQUEST]: { status: 201, body: { message: 'ok' } } });
   await renderApp();
 
@@ -132,7 +132,7 @@ test('pide el enlace con el correo escrito en el inicio de sesión', async () =>
   expect(hasText('Te enviamos un nuevo enlace')).toBe(false);
 });
 
-test('no llama al backend si el correo no es válido', async () => {
+test('does not call the backend for an invalid email', async () => {
   mockBackend({});
   await renderApp();
   await openForgotPassword();
@@ -144,7 +144,7 @@ test('no llama al backend si el correo no es válido', async () => {
   expect(requestsTo(REQUEST)).toHaveLength(0);
 });
 
-test('avisa cuando no hay conexión al pedir el enlace', async () => {
+test('shows a connection error while requesting a link', async () => {
   mockBackend({ [REQUEST]: 'network-error' });
   await renderApp();
   await openForgotPassword();
@@ -156,7 +156,7 @@ test('avisa cuando no hay conexión al pedir el enlace', async () => {
   expect(hasText('Revisa tu correo')).toBe(false);
 });
 
-test('abre la app de correo y vuelve al inicio de sesión', async () => {
+test('opens the mail app and returns to sign-in', async () => {
   mockBackend({ [REQUEST]: { status: 201, body: { message: 'ok' } } });
   await renderApp();
   await openForgotPassword();
@@ -171,9 +171,9 @@ test('abre la app de correo y vuelve al inicio de sesión', async () => {
   expect(hasText('Revisa tu correo')).toBe(false);
 });
 
-test('sin app de correo abre la bandeja web del proveedor', async () => {
+test('opens the provider website when mail apps are unavailable', async () => {
   mockBackend({ [REQUEST]: { status: 201, body: { message: 'ok' } } });
-  // Ni Outlook ni Mail están instalados: solo se puede abrir la web.
+  // Fall back to the website when neither Outlook nor Mail is installed.
   openURL.mockImplementation(async (url: string) => {
     if (!url.startsWith('https://')) {
       throw new Error('No app');
@@ -194,7 +194,7 @@ test('sin app de correo abre la bandeja web del proveedor', async () => {
   expect(hasText('Revisa tu correo')).toBe(true);
 });
 
-test('avisa si no se pudo abrir la app de correo', async () => {
+test('shows an error when no inbox can be opened', async () => {
   mockBackend({ [REQUEST]: { status: 201, body: { message: 'ok' } } });
   openURL.mockRejectedValue(new Error('No app'));
   await renderApp();
@@ -211,7 +211,7 @@ test('avisa si no se pudo abrir la app de correo', async () => {
   ).toBe(true);
 });
 
-test('el enlace del correo abre la nueva contraseña y la guarda', async () => {
+test('opens a reset link and saves the new password', async () => {
   mockBackend({ [RESET]: { status: 201, body: { message: 'ok' } } });
   await renderApp(RESET_LINK);
 
@@ -227,14 +227,14 @@ test('el enlace del correo abre la nueva contraseña y la guarda', async () => {
   expect(hasText('Crea una nueva contraseña')).toBe(false);
 });
 
-test('el enlace con el esquema de la app también abre la nueva contraseña', async () => {
+test('opens a reset link using the custom app scheme', async () => {
   mockBackend({});
   await renderApp('formai://password-reset?token=tok-123');
 
   expect(hasText('Crea una nueva contraseña')).toBe(true);
 });
 
-test('valida la contraseña y su confirmación antes de guardar', async () => {
+test('validates password and confirmation before saving', async () => {
   mockBackend({});
   await renderApp(RESET_LINK);
 
@@ -253,7 +253,7 @@ test('valida la contraseña y su confirmación antes de guardar', async () => {
   expect(requestsTo(RESET)).toHaveLength(0);
 });
 
-test('avisa cuando el enlace venció y envía uno nuevo', async () => {
+test('requests a new link after an expired link is rejected', async () => {
   mockBackend({
     [RESET]: { status: 422, body: { status: 422 } },
     [REQUEST]: { status: 201, body: { message: 'ok' } },
@@ -276,7 +276,7 @@ test('avisa cuando el enlace venció y envía uno nuevo', async () => {
   expect(hasText('Te enviamos un nuevo enlace')).toBe(true);
 });
 
-test('un enlace sin token se trata como no válido', async () => {
+test('rejects a link without a token', async () => {
   mockBackend({});
   await renderApp('https://formai.app/password-reset');
 
@@ -284,7 +284,7 @@ test('un enlace sin token se trata como no válido', async () => {
   expect(requestsTo(RESET)).toHaveLength(0);
 });
 
-test('un enlace sin token invalida la nueva contraseña ya abierta', async () => {
+test('invalidates an open reset screen when the new link lacks a token', async () => {
   mockBackend({});
   await renderApp(RESET_LINK);
 
@@ -298,7 +298,7 @@ test('un enlace sin token invalida la nueva contraseña ya abierta', async () =>
   expect(hasText('Este enlace ya no es válido')).toBe(true);
 });
 
-test('avisa cuando no hay conexión al guardar la contraseña', async () => {
+test('shows a connection error while saving the new password', async () => {
   mockBackend({ [RESET]: 'network-error' });
   await renderApp(RESET_LINK);
 
@@ -309,7 +309,7 @@ test('avisa cuando no hay conexión al guardar la contraseña', async () => {
   expect(hasText(CONNECTION_ERROR)).toBe(true);
 });
 
-test('precarga el correo si el enlace se pidió desde la app', async () => {
+test('prefills the email when the link was requested in the app', async () => {
   mockBackend({
     [REQUEST]: { status: 201, body: { message: 'ok' } },
     [RESET]: { status: 201, body: { message: 'ok' } },
@@ -319,7 +319,7 @@ test('precarga el correo si el enlace se pidió desde la app', async () => {
   await type('Correo electrónico', 'diego.paredes@correo.com');
   await press('Enviar enlace');
 
-  // El cliente toca el enlace del correo con la app abierta.
+  // The client follows the email link while the app is open.
   const listeners = (Linking.addEventListener as jest.Mock).mock.calls
     .filter(([event]) => event === 'url')
     .map(([, listener]) => listener);
@@ -337,7 +337,7 @@ test('precarga el correo si el enlace se pidió desde la app', async () => {
   );
 });
 
-test('elige dónde abrir el correo según el proveedor y la plataforma', () => {
+test('selects inbox destinations by provider and platform', () => {
   expect(mailInboxUrls(' Diego@Gmail.com ', 'ios')).toEqual([
     'googlegmail://',
     'message://',

@@ -28,7 +28,7 @@ const labels: Record<WorkoutStatus, string> = {
   PENDING: 'Pendiente',
 };
 
-/** Lists workouts newest first, with date filtering and pagination. */
+/** Lists workouts using useWorkoutHistory for filtering and pagination. */
 export function ProgressScreen({
   navigation,
 }: {
@@ -41,7 +41,7 @@ export function ProgressScreen({
     setFrom,
     setTo,
     sessions,
-    loading,
+    isLoading,
     error,
     applyFilter,
     retry,
@@ -72,7 +72,7 @@ export function ProgressScreen({
         <Button label="Filtrar" onPress={applyFilter} />
       </View>
       {error && <Toast message={error} tone="error" />}
-      {loading && sessions.length === 0 ? (
+      {isLoading && sessions.length === 0 ? (
         <EmptyState title="Cargando historial" icon="hourglass_top" />
       ) : sessions.length === 0 ? (
         <EmptyState
@@ -97,7 +97,7 @@ export function ProgressScreen({
         </View>
       )}
       {hasMore && (
-        <Button label="Cargar más" loading={loading} onPress={loadMore} />
+        <Button label="Cargar más" loading={isLoading} onPress={loadMore} />
       )}
     </TabScreenLayout>
   );

@@ -30,7 +30,7 @@ const dayNames: Record<string, string> = {
   SUNDAY: 'domingo',
 };
 
-/** Renders today's assigned workout, including rest and empty states. */
+/** Shows today's workout and rest states using useTraining for data and actions. */
 export function TodayScreen({
   navigation,
 }: {
@@ -41,7 +41,7 @@ export function TodayScreen({
     routine,
     session,
     summary,
-    loading,
+    isLoading,
     saving,
     error,
     retry,
@@ -64,7 +64,7 @@ export function TodayScreen({
       user={headerUser}
       title={firstName ? `Hola, ${firstName}` : 'Hola'}
     >
-      {loading ? (
+      {isLoading ? (
         <EmptyState icon="hourglass_top" title="Cargando tu entrenamiento" />
       ) : error && (!routine || (routine.todayWorkoutSessionId && !session)) ? (
         <EmptyState
