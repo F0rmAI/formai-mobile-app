@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandLogo, Button, Text } from '@/components/ui';
 import type { RootStackParamList } from '@/types/navigation';
 
-const welcomeHero = require('@/assets/welcome-hero.jpeg');
+const welcomeHero = require('@/assets/welcome-hero.png');
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
