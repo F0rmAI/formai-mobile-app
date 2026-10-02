@@ -7,10 +7,16 @@ export const DATA_CONSENT = {
 export const INVALID_CODE_MESSAGE =
   'Este código no es válido o ya venció. Pídele uno nuevo a tu entrenador.';
 
+export const EMAIL_TAKEN_MESSAGE =
+  'Este correo ya está registrado. Usa otro o inicia sesión.';
+
+export const INVALID_EMAIL_MESSAGE = 'Ingresa un correo válido.';
+
 export const CONNECTION_ERROR_MESSAGE =
   'No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.';
 
-const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
+// Mismo formato que valida el backend.
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
 

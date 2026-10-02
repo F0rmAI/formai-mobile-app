@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react';
 import {
   accountActivationService,
-  isRejectedActivationCode,
+  activationFailureOf,
 } from '@/services/account-activation.service';
 import {
   CONNECTION_ERROR_MESSAGE,
   DATA_CONSENT,
+  EMAIL_TAKEN_MESSAGE,
+  INVALID_EMAIL_MESSAGE,
   isValidEmail,
   isValidPassword,
 } from '@/utils/account-activation';
@@ -25,7 +27,10 @@ interface ActivationCallbacks {
   onCodeRejected: () => void;
 }
 
-/** Paso 2 de la activación: correo, contraseña y consentimiento. */
+/**
+ * Paso 2 de la activación: el cliente registra el correo con el que iniciará sesión,
+ * su contraseña y el consentimiento.
+ */
 export function useAccountActivation(
   activationCode: string,
   { onActivated, onCodeRejected }: ActivationCallbacks,
@@ -64,7 +69,7 @@ export function useAccountActivation(
     const trimmedEmail = email.trim();
     const found: ActivationErrors = {};
     if (!isValidEmail(trimmedEmail)) {
-      found.email = 'Ingresa un correo válido.';
+      found.email = INVALID_EMAIL_MESSAGE;
     }
     if (!isValidPassword(password)) {
       found.password =
@@ -85,17 +90,25 @@ export function useAccountActivation(
     try {
       await accountActivationService.activate({
         activationCode,
+        email: trimmedEmail,
         password,
         consentAccepted,
         consentVersion: DATA_CONSENT.version,
       });
       onActivated(trimmedEmail);
     } catch (activationError) {
-      // Contraseña y consentimiento ya se validaron aquí: un 422 solo puede ser el código.
-      if (isRejectedActivationCode(activationError)) {
-        onCodeRejected();
-      } else {
-        setErrors({ form: CONNECTION_ERROR_MESSAGE });
+      switch (activationFailureOf(activationError)) {
+        case 'code-rejected':
+          onCodeRejected();
+          break;
+        case 'email-taken':
+          setErrors({ email: EMAIL_TAKEN_MESSAGE });
+          break;
+        case 'invalid-email':
+          setErrors({ email: INVALID_EMAIL_MESSAGE });
+          break;
+        default:
+          setErrors({ form: CONNECTION_ERROR_MESSAGE });
       }
       setIsSubmitting(false);
     }

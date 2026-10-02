@@ -5,6 +5,8 @@ export interface ActivationCodeVerification {
 
 export interface ActivateAccountInput {
   activationCode: string;
+  /** Correo que elige el cliente: con él iniciará sesión siempre. */
+  email: string;
   password: string;
   consentAccepted: boolean;
   /** Versión del texto de consentimiento que se mostró al cliente. */

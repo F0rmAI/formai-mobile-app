@@ -210,6 +210,7 @@ test('activa la cuenta y lleva al inicio de sesión con el correo', async () => 
 
   expect(bodyOf(ACTIVATE)).toEqual({
     activationCode: 'ABCD2345',
+    email: 'diego.paredes@correo.com',
     password: 'secreta123',
     consentAccepted: true,
     consentVersion: '1.0',
@@ -233,6 +234,36 @@ test('vuelve al código si deja de ser válido al activar', async () => {
 
   expect(hasText('Ingresa tu código')).toBe(true);
   expect(hasText(INVALID_CODE)).toBe(true);
+});
+
+test('avisa cuando el correo ya pertenece a otra cuenta', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 409, body: { status: 409 } },
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(
+    hasText('Este correo ya está registrado. Usa otro o inicia sesión.'),
+  ).toBe(true);
+});
+
+test('avisa cuando el backend no acepta el formato del correo', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 400, body: { status: 400 } },
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Ingresa un correo válido.')).toBe(true);
 });
 
 test('avisa cuando no hay conexión al activar', async () => {
