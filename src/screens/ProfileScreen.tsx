@@ -1,5 +1,6 @@
 import { TabScreenLayout } from '@/components/layout';
 import { Button, Dialog, EmptyState, Toast } from '@/components/ui';
+import { useClientProfile } from '@/hooks/useClientProfile';
 import { useSignOut } from '@/hooks/useSignOut';
 
 /**
@@ -9,9 +10,14 @@ import { useSignOut } from '@/hooks/useSignOut';
 export function ProfileScreen() {
   const { isConfirming, isSigningOut, error, requestSignOut, cancel, confirm } =
     useSignOut();
+  const { headerUser } = useClientProfile();
 
   return (
-    <TabScreenLayout headerSubtitle="Tu cuenta" title="Perfil">
+    <TabScreenLayout
+      headerSubtitle="Tu cuenta"
+      user={headerUser}
+      title="Perfil"
+    >
       <EmptyState
         icon="person"
         title="Tu cuenta"

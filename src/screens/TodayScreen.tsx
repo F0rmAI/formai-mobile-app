@@ -1,16 +1,17 @@
 import { TabScreenLayout } from '@/components/layout';
 import { EmptyState } from '@/components/ui';
+import { useClientProfile } from '@/hooks/useClientProfile';
 import { formatLongDate } from '@/utils/dates';
 
-/**
- * Pestaña Hoy. El contenido es provisional: la sesión del día llega con
- * FE-MOB-009 y el saludo con el nombre del cliente, con la autenticación.
- */
+/** Pestaña Hoy. El contenido es provisional: la sesión del día llega con FE-MOB-009. */
 export function TodayScreen() {
+  const { firstName, headerUser } = useClientProfile();
+
   return (
     <TabScreenLayout
       headerSubtitle="Entrenamiento de hoy"
-      title="Hola"
+      user={headerUser}
+      title={firstName ? `Hola, ${firstName}` : 'Hola'}
       subtitle={formatLongDate(new Date())}
     >
       <EmptyState

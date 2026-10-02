@@ -10,12 +10,19 @@ type Reply = { status: number; body?: unknown } | 'network-error';
 const REFRESH = '/v1/authentication/refresh';
 const SIGN_IN = '/v1/authentication/sign-in';
 const SIGN_OUT = '/v1/authentication/sign-out';
+const PROFILE = '/v1/client-profiles/me';
 
 const client = {
   id: 'ab5e59a7-851c-4b15-a2ea-6e3374e867a1',
   email: 'diego.paredes@correo.com',
   roles: ['REGISTERED_USER', 'CLIENT'],
   status: 'ACTIVE',
+};
+
+const profile = {
+  id: client.id,
+  fullName: 'Diego Paredes',
+  email: client.email,
 };
 
 const fetchMock = jest.fn();
@@ -280,4 +287,53 @@ test('mantiene la sesión y avisa si no se pudo cerrar', async () => {
     true,
   );
   expect(hasTabs()).toBe(true);
+});
+
+test('saluda al cliente por su nombre al iniciar sesión', async () => {
+  mockBackend({
+    [SIGN_IN]: { status: 200, body: client },
+    [PROFILE]: { status: 200, body: profile },
+  });
+  await renderApp();
+
+  await signInWith('diego.paredes@correo.com', 'secreta123');
+
+  const [, request] = requestsTo(PROFILE)[0];
+  expect(request.method).toBe('GET');
+  expect(request.credentials).toBe('include');
+  expect(hasText('Hola, Diego')).toBe(true);
+  expect(
+    renderer.root.findAllByProps({
+      accessibilityRole: 'image',
+      accessibilityLabel: 'Diego Paredes',
+    }).length,
+  ).toBeGreaterThan(0);
+});
+
+test('saluda por su nombre al recuperar una sesión guardada', async () => {
+  mockBackend({
+    [REFRESH]: { status: 200, body: client },
+    [PROFILE]: { status: 200, body: profile },
+  });
+  await renderApp();
+
+  expect(hasText('Hola, Diego')).toBe(true);
+});
+
+test('saluda sin nombre si no se pudo obtener el perfil', async () => {
+  mockBackend({
+    [REFRESH]: { status: 200, body: client },
+    [PROFILE]: 'network-error',
+  });
+  await renderApp();
+
+  expect(hasText('Hola')).toBe(true);
+  expect(tab('Hoy').props.accessibilityState.selected).toBe(true);
+});
+
+test('no pide el perfil mientras no hay sesión', async () => {
+  mockBackend({});
+  await renderApp();
+
+  expect(requestsTo(PROFILE)).toHaveLength(0);
 });
