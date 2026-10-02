@@ -62,3 +62,27 @@ export function formatLongDate(date: Date) {
     MONTHS[date.getMonth()]
   }`;
 }
+
+/**
+ * Formats a workout calendar date for the history list or detail view.
+ *
+ * @param isoDate - Local calendar date in `yyyy-MM-dd` form.
+ * @param display - History list or full detail format.
+ * @returns The date with a Spanish weekday and month.
+ *
+ * @example
+ * ```ts
+ * formatWorkoutHistoryDate('2026-10-02', 'list'); // 'Viernes 2 oct'
+ * ```
+ */
+export function formatWorkoutHistoryDate(
+  isoDate: string,
+  display: 'list' | 'detail',
+) {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  const prefix = `${WEEKDAYS[date.getDay()]} ${date.getDate()}`;
+  return display === 'list'
+    ? `${prefix} ${MONTHS[date.getMonth()].slice(0, 3)}`
+    : `${prefix} de ${MONTHS[date.getMonth()]} de ${date.getFullYear()}`;
+}

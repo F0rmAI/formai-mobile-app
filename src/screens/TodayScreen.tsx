@@ -144,7 +144,7 @@ export function TodayScreen({
               summary.targetSets - summary.completedSets
             } series. La sesión quedará como parcial.`}
             confirmLabel="Finalizar parcial"
-            cancelLabel="Seguir entrenando"
+            cancelLabel="Seguir"
             confirmLoading={saving}
             onConfirm={() => {
               finish(true);

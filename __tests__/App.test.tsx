@@ -127,6 +127,16 @@ test('opens the welcome screen without a session', async () => {
   expect(hasTabs()).toBe(false);
 });
 
+test('describes sign-in using the email chosen for the account', async () => {
+  mockBackend({});
+  await renderApp();
+  await press('Iniciar sesión');
+
+  expect(
+    hasText('Ingresa con el correo y la contraseña de tu cuenta.'),
+  ).toBe(true);
+});
+
 test('signs in a client and opens the main tabs', async () => {
   mockBackend({ [SIGN_IN]: { status: 200, body: client } });
   await renderApp();

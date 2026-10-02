@@ -92,14 +92,18 @@ export function Dialog({
       statusBarTranslucent
       onRequestClose={onCancel}
     >
-      <Pressable
-        accessibilityLabel={cancelLabel}
-        onPress={onCancel}
-        className="flex-1 items-center justify-center bg-surface-inverse/40 p-xl"
+      <View
+        accessible={false}
+        accessibilityViewIsModal
+        className="flex-1 items-center justify-center p-xl"
       >
         <Pressable
-          accessibilityViewIsModal
-          onPress={() => {}}
+          accessibilityRole="button"
+          accessibilityLabel={cancelLabel}
+          onPress={onCancel}
+          className="absolute inset-0 bg-surface-inverse/40"
+        />
+        <View
           className="w-full max-w-[345px] items-start gap-xl rounded-lg bg-surface-card p-2xl shadow-floating"
         >
           <View
@@ -141,8 +145,8 @@ export function Dialog({
               loading={confirmLoading}
             />
           </View>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }

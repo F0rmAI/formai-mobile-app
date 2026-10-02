@@ -192,11 +192,20 @@ test('validates the date range and loads the next history page', async () => {
       size: 20,
       totalElements: 0,
       totalPages: 0,
+    })
+    .mockResolvedValueOnce({
+      content: [session],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
     });
   await ReactTestRenderer.act(async () => {
     renderer = ReactTestRenderer.create(<HistoryHarness />);
   });
   expect(history.hasMore).toBe(true);
+  expect(history.totalElements).toBe(2);
+  expect(history.isFiltered).toBe(false);
   await ReactTestRenderer.act(async () => {
     await history.loadMore();
   });
@@ -213,10 +222,25 @@ test('validates the date range and loads the next history page', async () => {
     '2026-09-01',
     '2026-09-30',
   );
+  expect(history.isFiltered).toBe(true);
+  expect(history.sessions).toHaveLength(0);
+  expect(history.totalElements).toBe(0);
   await ReactTestRenderer.act(async () => {
     history.setTo('bad');
   });
   await ReactTestRenderer.act(async () => {
     expect(history.applyFilter()).toBe(false);
   });
+  expect(history.isFiltered).toBe(true);
+  await ReactTestRenderer.act(async () => {
+    history.clearFilter();
+  });
+  expect(history.from).toBe('');
+  expect(history.to).toBe('');
+  expect(history.isFiltered).toBe(false);
+  expect(service.listWorkoutSessions).toHaveBeenLastCalledWith(
+    0,
+    undefined,
+    undefined,
+  );
 });

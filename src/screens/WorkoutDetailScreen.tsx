@@ -12,6 +12,7 @@ import { Badge, Card, EmptyState, Text } from '@/components/ui';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
 import type { RootStackParamList } from '@/types/navigation';
 import type { WorkoutStatus } from '@/types/training';
+import { formatWorkoutHistoryDate } from '@/utils/dates';
 
 const labels: Record<WorkoutStatus, string> = {
   COMPLETED: 'Completada',
@@ -45,7 +46,7 @@ export function WorkoutDetailScreen({
           <>
             <Text variant="headline">{session.dayLabel}</Text>
             <Text variant="body-m" tone="secondary">
-              {session.scheduledFor} · Volumen total: {session.totalVolumeKg} kg
+              {formatWorkoutHistoryDate(session.scheduledFor, 'detail')} · Volumen total: {session.totalVolumeKg} kg
             </Text>
             <Badge label={labels[session.status]} />
             {session.exercises.map(exercise => (

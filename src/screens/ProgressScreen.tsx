@@ -14,12 +14,14 @@ import {
   EmptyState,
   ListItem,
   TextField,
+  Text,
   Toast,
 } from '@/components/ui';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
 import type { WorkoutStatus } from '@/types/training';
+import { formatWorkoutHistoryDate } from '@/utils/dates';
 
 const labels: Record<WorkoutStatus, string> = {
   COMPLETED: 'Completada',
@@ -41,9 +43,12 @@ export function ProgressScreen({
     setFrom,
     setTo,
     sessions,
+    totalElements,
+    isFiltered,
     isLoading,
     error,
     applyFilter,
+    clearFilter,
     retry,
     loadMore,
     hasMore,
@@ -58,13 +63,17 @@ export function ProgressScreen({
     >
       <View className="gap-md">
         <TextField
-          label="Desde (yyyy-MM-dd)"
+          label="Desde"
+          helper="aaaa-mm-dd"
+          placeholder="aaaa-mm-dd"
           value={from}
           onChangeText={setFrom}
           autoCapitalize="none"
         />
         <TextField
-          label="Hasta (yyyy-MM-dd)"
+          label="Hasta"
+          helper="aaaa-mm-dd"
+          placeholder="aaaa-mm-dd"
           value={to}
           onChangeText={setTo}
           autoCapitalize="none"
@@ -76,18 +85,42 @@ export function ProgressScreen({
         <EmptyState title="Cargando historial" icon="hourglass_top" />
       ) : sessions.length === 0 ? (
         <EmptyState
-          title="Aún no hay entrenamientos"
-          description="Tus sesiones aparecerán aquí cuando tengas una rutina."
+          title={
+            isFiltered
+              ? 'Sin entrenamientos en este rango'
+              : 'Aún no hay entrenamientos'
+          }
+          description={
+            isFiltered
+              ? undefined
+              : 'Tus sesiones aparecerán aquí cuando tengas una rutina.'
+          }
           icon="event_busy"
-          action={error ? { label: 'Reintentar', onPress: retry } : undefined}
+          action={
+            isFiltered
+              ? { label: 'Quitar filtro', onPress: clearFilter }
+              : error
+              ? { label: 'Reintentar', onPress: retry }
+              : undefined
+          }
         />
       ) : (
         <View className="gap-sm">
+          {isFiltered && (
+            <Text variant="body-m" tone="secondary">
+              {`${totalElements} ${
+                totalElements === 1 ? 'entrenamiento' : 'entrenamientos'
+              } en este rango`}
+            </Text>
+          )}
           {sessions.map(session => (
             <ListItem
               key={session.id}
               title={session.dayLabel}
-              subtitle={`${session.scheduledFor} · ${session.totalVolumeKg} kg`}
+              subtitle={`${formatWorkoutHistoryDate(
+                session.scheduledFor,
+                'list',
+              )} · ${session.totalVolumeKg} kg`}
               badge={labels[session.status]}
               onPress={() =>
                 root?.navigate('WorkoutDetail', { sessionId: session.id })

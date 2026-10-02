@@ -85,7 +85,10 @@ export function SetEditor({
     <View className="gap-md rounded-md bg-surface-container-low p-3">
       <View className="flex-row items-center justify-between">
         <Text variant="label-l">Serie {setNumber}</Text>
-        <Badge label="En curso" tone="secondary" />
+        <Badge
+          label={initialLoad !== undefined ? 'Corrigiendo' : 'En curso'}
+          tone="secondary"
+        />
       </View>
       <View className="flex-row gap-md">
         <StepperField

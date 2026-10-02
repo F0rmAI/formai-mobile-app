@@ -12,9 +12,12 @@ import type { WorkoutSession } from '@/types/training';
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 function validDate(value: string) {
   if (!datePattern.test(value)) return false;
-  const date = new Date(`${value}T12:00:00Z`);
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   return (
-    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
   );
 }
 
@@ -35,6 +38,7 @@ export function useWorkoutHistory() {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [page, setPage] = useState(-1);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
   const load = useCallback(
@@ -52,6 +56,7 @@ export function useWorkoutHistory() {
         );
         setPage(result.page);
         setTotalPages(result.totalPages);
+        setTotalElements(result.totalElements);
       } catch {
         setError('No pudimos cargar tu historial. Inténtalo de nuevo.');
       } finally {
@@ -66,26 +71,37 @@ export function useWorkoutHistory() {
   const applyFilter = useCallback(() => {
     if (!from && !to) {
       setRange({});
+      setSessions([]);
       return true;
     }
     if (!validDate(from) || !validDate(to) || from > to) {
       setError(
-        'Ingresa dos fechas válidas en formato yyyy-MM-dd. La fecha inicial debe ser anterior a la final.',
+        'Ingresa dos fechas válidas en formato aaaa-mm-dd. La fecha inicial debe ser anterior a la final.',
       );
       return false;
     }
     setRange({ from, to });
+    setSessions([]);
     return true;
   }, [from, to]);
+  const clearFilter = useCallback(() => {
+    setFrom('');
+    setTo('');
+    setSessions([]);
+    setRange({});
+  }, []);
   return {
     from,
     to,
     setFrom,
     setTo,
     sessions,
+    totalElements,
+    isFiltered: Boolean(range.from && range.to),
     isLoading,
     error,
     applyFilter,
+    clearFilter,
     retry: () => load(0),
     loadMore: () => load(page + 1),
     hasMore: page + 1 < totalPages,
