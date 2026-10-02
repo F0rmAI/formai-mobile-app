@@ -132,6 +132,11 @@ export type DialogTone = 'default' | 'danger';
 export type CalloutTone = 'info' | 'warning';
 
 /**
+ * Color tones of an empty state: the regular one or the error one.
+ */
+export type EmptyStateTone = 'primary' | 'error';
+
+/**
  * Avatar sizes: `sm` 32 px, `md` 48 px.
  */
 export type AvatarSize = 'sm' | 'md';

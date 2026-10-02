@@ -20,3 +20,10 @@ const PROD_API_URL = 'https://formai.app/api';
  * Base URL of the backend, without a trailing slash.
  */
 export const API_URL = __DEV__ ? DEV_API_URL : PROD_API_URL;
+
+/**
+ * Prefijos de los enlaces que abren la app. El correo de recuperación apunta a
+ * `PASSWORD_RESET_URL` del backend: en producción, `https://formai.app/password-reset?token=`.
+ * `formai://` sirve para abrir la app en desarrollo, donde ese enlace apunta a la web local.
+ */
+export const APP_LINK_PREFIXES = ['formai://', 'https://formai.app'];

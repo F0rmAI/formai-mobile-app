@@ -7,7 +7,10 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 
 | Archivo | Uso |
 |---|---|
-| `config.ts` | URL base del backend. La URL base vive en `services/config.ts` (RN no lee `.env` sin una librería adicional). |
+| `config.ts` | URL base del backend y prefijos de los enlaces que abren la app. La URL base vive en `services/config.ts` (RN no lee `.env` sin una librería adicional). |
+| `auth.service.ts` | Inicio, renovación y cierre de sesión (`/v1/authentication/*`); la sesión viaja en cookies httpOnly. También la recuperación de contraseña: pedir el enlace (`/v1/password-reset-requests`) y canjear su token (`/v1/password-resets`). |
+| `client-profile.service.ts` | Nombre y correo del cliente con sesión (`/v1/client-profiles/me`). |
+| `account-activation.service.ts` | Verificación del código (`/v1/activation-code-verifications`) y activación de la cuenta con el correo que elige el cliente (`/v1/account-activations`). |
 | `api-client.ts` | Cliente `fetch` único (`apiClient.get/post/put/patch/delete`) con JSON y `ApiError` tipado. |
 
 ## Reglas

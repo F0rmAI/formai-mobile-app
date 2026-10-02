@@ -6,11 +6,16 @@
  */
 
 import { View } from 'react-native';
-import type { IconName } from '@/types/ui';
+import type { EmptyStateTone, IconName } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { Button } from './Button';
 import { Icon } from './Icon';
 import { Text } from './Text';
+
+const toneStyles: Record<EmptyStateTone, { tile: string; icon: string }> = {
+  primary: { tile: 'bg-primary-container', icon: 'text-primary' },
+  error: { tile: 'bg-error-container', icon: 'text-error' },
+};
 
 /**
  * Props accepted by {@link EmptyState}.
@@ -26,6 +31,12 @@ export interface EmptyStateProps {
    * @defaultValue `'inbox'`
    */
   icon?: IconName;
+  /**
+   * Color of the icon and its tile.
+   *
+   * @defaultValue `'primary'`
+   */
+  tone?: EmptyStateTone;
   /** Button shown below the text. */
   action?: { label: string; icon?: IconName; onPress: () => void };
   /** Extra classes for layout adjustments from the parent. */
@@ -44,13 +55,21 @@ export function EmptyState({
   title,
   description,
   icon = 'inbox',
+  tone = 'primary',
   action,
   className,
 }: EmptyStateProps) {
+  const styles = toneStyles[tone];
+
   return (
     <View className={cn('w-full items-center gap-lg px-xl py-2xl', className)}>
-      <View className="size-16 items-center justify-center rounded-lg bg-primary-container">
-        <Icon name={icon} size={24} />
+      <View
+        className={cn(
+          'size-16 items-center justify-center rounded-lg',
+          styles.tile,
+        )}
+      >
+        <Icon name={icon} size={24} className={styles.icon} />
       </View>
       <Text variant="title" className="text-center">
         {title}

@@ -11,10 +11,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.20.0",
+    "@react-navigation/native": "^7.5.0",
+    "@react-navigation/native-stack": "^7.20.0",
     "clsx": "2.1.1",
     "react": "19.3.0",
     "react-native": "0.87.1",
     "react-native-safe-area-context": "^5.5.2",
+    "react-native-screens": "^4.28.0",
     "tailwind-merge": "3.7.0",
     "tailwindcss": "4.3.3",
     "uniwind": "1.12.0"

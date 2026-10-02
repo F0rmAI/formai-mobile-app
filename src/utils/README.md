@@ -7,6 +7,9 @@ validaciones, cálculos.
 
 | Archivo | Uso |
 |---|---|
+| `dates.ts` | Formato de fechas en español (`formatLongDate`, `formatTime`). |
+| `names.ts` | Primer nombre para el saludo (`firstNameOf`). |
+| `account-activation.ts` | Texto y versión del consentimiento, mensajes y validaciones de la activación de cuenta. |
 | `cn.ts` | Une clases condicionales (`clsx`) y resuelve conflictos de Tailwind (`tailwind-merge`) conociendo los tokens propios de FormAI. Mismo contenido en web y mobile. |
 
 ## Reglas

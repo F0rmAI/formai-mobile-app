@@ -59,6 +59,8 @@ async function request<T>(
   const response = await fetch(`${API_URL}${path}`, {
     method,
     signal,
+    // La sesión viaja en cookies httpOnly que emite el backend.
+    credentials: 'include',
     headers: {
       Accept: 'application/json',
       ...(body !== undefined && { 'Content-Type': 'application/json' }),
@@ -67,9 +69,8 @@ async function request<T>(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  const isJson = response.headers
-    .get('content-type')
-    ?.includes('application/json');
+  // Los errores del backend llegan como `application/problem+json` (RFC 7807).
+  const isJson = response.headers.get('content-type')?.includes('json');
   const data: unknown = isJson ? await response.json() : undefined;
 
   if (!response.ok) {

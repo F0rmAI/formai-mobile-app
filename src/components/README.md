@@ -18,6 +18,7 @@ de FormAI (Figma › `formai_design_system`).
 | `AppHeader` | Header principal con marca y avatar. |
 | `TopBar` | Barra superior con botón volver y acción opcional. |
 | `BottomNav` / `NavItem` | Navegación inferior (MVP: Hoy, Progreso, Perfil; TB2 agrega Escanear). |
+| `TabScreenLayout` | Estructura de las pantallas con navegación inferior: header, título y contenido desplazable. |
 
 ## Reglas
 

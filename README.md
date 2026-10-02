@@ -29,6 +29,7 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 | Lenguaje | TypeScript | 6.0 |
 | Bundler | Metro | 0.87 |
 | Tests / lint | Jest + react-test-renderer · ESLint (`@react-native/eslint-config`, `eslint-plugin-tsdoc`) + Prettier | — |
+| Navegación | React Navigation (`native-stack`, `bottom-tabs`) + `react-native-screens` | 7.x / 4.x |
 | Safe area | `react-native-safe-area-context` | 5.x |
 | Tipografía | Plus Jakarta Sans (TTF 400/600/700/800) | — |
 | Íconos | Material Symbols Rounded (TTF por ligaduras, peso 400) | — |
@@ -42,6 +43,7 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 ## Features
 
 - **Activación de cuenta** con el código de invitación de 72 h del entrenador, definición de contraseña y consentimiento obligatorio para datos personales y de salud (Ley N.° 29733).
+- **Recuperación de contraseña**: el cliente pide un enlace a su correo (válido 30 minutos y de un solo uso) y crea su nueva contraseña al abrirlo en la app.
 - **Rutina del día**: sesión programada con ejercicios, series, cargas objetivo y descansos; detalle de cualquier otra sesión.
 - **Registro de entrenamiento**: carga (kg) y repeticiones reales por serie, con corrección antes de cerrar.
 - **Cierre de sesión** como **Completada** o **Parcial**; marcado automático como **Omitida** si el día termina sin registros.
@@ -57,8 +59,9 @@ con un plan personalizado y necesita autonomía en el gimnasio.
 
 ```
 src/
-├── components/   ui/ (design system) + layout/ (AppHeader, TopBar, BottomNav)
+├── components/   ui/ (design system) + layout/ (AppHeader, TopBar, BottomNav, TabScreenLayout)
 ├── screens/      pantallas completas
+├── navigation/   navegadores de React Navigation (pestañas…)
 ├── hooks/        estado y casos de uso de la UI
 ├── services/     acceso al backend (apiClient + config)
 ├── context/      estado global (sesión…)
@@ -67,19 +70,19 @@ src/
 ├── assets/       imágenes estáticas (isotipo)
 ├── tokens.css    design tokens de FormAI (idéntico en web y mobile)
 ├── global.css    Tailwind + Uniwind + tokens + fuentes
-└── App.tsx       providers + pantalla inicial (registrado en index.js)
+└── App.tsx       providers + navegación (registrado en index.js)
 assets/fonts/     TTF enlazados en iOS y Android (react-native.config.js)
 ```
 
 ```
-App ──► Screens ──► Components
-          │
-          ▼
-        Hooks ──► Services ──► Backend/API
+App ──► Navigation ──► Screens ──► Components
+                          │
+                          ▼
+                        Hooks ──► Services ──► Backend/API
 ```
 
 Cada carpeta tiene un `README.md` que explica para qué sirve la capa, qué va y qué no, y un ejemplo:
-[components](src/components/README.md) · [screens](src/screens/README.md) · [hooks](src/hooks/README.md) ·
+[components](src/components/README.md) · [screens](src/screens/README.md) · [navigation](src/navigation/README.md) · [hooks](src/hooks/README.md) ·
 [services](src/services/README.md) · [context](src/context/README.md) · [utils](src/utils/README.md) ·
 [types](src/types/README.md).
 
@@ -117,8 +120,8 @@ npm run android
 npm start
 ```
 
-Al iniciar verás **"FormAI"** centrado y un contador con un `Button` del design system: sirve para
-comprobar que Uniwind, los tokens, las fuentes, los íconos y los componentes funcionan.
+Al iniciar verás la **bienvenida**; después de iniciar sesión, la pestaña **Hoy** y la barra inferior
+para moverte entre **Hoy**, **Progreso** y **Perfil**. El contenido de cada pestaña es provisional hasta que llegue su feature.
 
 | Script | Qué hace |
 |---|---|
@@ -127,6 +130,25 @@ comprobar que Uniwind, los tokens, las fuentes, los íconos y los componentes fu
 | `npm test` | Tests con Jest. |
 | `npm run lint` | ESLint + Prettier + sintaxis TSDoc. |
 | `npm run typecheck` | `tsc --noEmit`. |
+
+### Enlaces que abren la app
+
+El correo de recuperación trae un enlace `…/password-reset?token=…` que abre la pantalla **Nueva contraseña**
+(`src/navigation/linking.ts`). La app responde a `formai://password-reset` y a `https://formai.app/password-reset`.
+
+En desarrollo el backend apunta ese enlace a la web local (`PASSWORD_RESET_URL`), así que se copia el token y se abre a mano:
+
+```bash
+# iOS
+xcrun simctl openurl booted "formai://password-reset?token=<token>"
+
+# Android
+adb shell am start -a android.intent.action.VIEW -d "formai://password-reset?token=<token>"
+```
+
+Para que el enlace `https://formai.app/…` abra la app sin pasar por el navegador faltan, fuera de este repositorio,
+`/.well-known/assetlinks.json` (Android) y `/.well-known/apple-app-site-association` junto con la capability
+*Associated Domains* (iOS).
 
 ### Agregar una fuente
 

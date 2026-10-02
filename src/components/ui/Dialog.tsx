@@ -32,6 +32,8 @@ export interface DialogProps {
   icon?: IconName;
   /** Label of the confirm button. */
   confirmLabel: string;
+  /** Icon shown to the left of the confirm button label. */
+  confirmIcon?: IconName;
   /**
    * Label of the cancel button.
    *
@@ -68,6 +70,7 @@ export function Dialog({
   tone = 'default',
   icon = tone === 'danger' ? 'warning' : 'flag',
   confirmLabel,
+  confirmIcon,
   cancelLabel = 'Cancelar',
   onConfirm,
   onCancel,
@@ -122,6 +125,7 @@ export function Dialog({
             />
             <Button
               label={confirmLabel}
+              icon={confirmIcon}
               variant={isDanger ? 'danger' : 'primary'}
               size="md"
               className="flex-1"
