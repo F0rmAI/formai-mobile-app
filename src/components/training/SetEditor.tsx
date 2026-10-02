@@ -1,3 +1,10 @@
+/**
+ * SetEditor module.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
 import { useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { Badge, Button, IconButton, Text } from '@/components/ui';
@@ -75,37 +82,46 @@ interface SetEditorProps {
   exercise: WorkoutExercise;
   setNumber: number;
   saving: boolean;
+  initialLoad?: number;
+  initialReps?: number;
   onSave: (input: RecordSetInput) => Promise<boolean>;
 }
 
+/** Edits a prescribed or recorded set with numeric validation. */
 export function SetEditor({
   exercise,
   setNumber,
   saving,
+  initialLoad,
+  initialReps,
   onSave,
 }: SetEditorProps) {
-  const [load, setLoad] = useState(String(exercise.targetLoadKg));
-  const [reps, setReps] = useState(String(exercise.targetReps));
+  const [load, setLoad] = useState(
+    String(initialLoad ?? exercise.targetLoadKg),
+  );
+  const [reps, setReps] = useState(String(initialReps ?? exercise.targetReps));
   const [validation, setValidation] = useState<{
     field: 'load' | 'reps';
     message: string;
   }>();
 
   useEffect(() => {
-    setLoad(String(exercise.targetLoadKg));
-    setReps(String(exercise.targetReps));
+    setLoad(String(initialLoad ?? exercise.targetLoadKg));
+    setReps(String(initialReps ?? exercise.targetReps));
     setValidation(undefined);
   }, [
     exercise.exerciseId,
     exercise.targetLoadKg,
     exercise.targetReps,
+    initialLoad,
+    initialReps,
     setNumber,
   ]);
 
   const save = async () => {
     const parsedLoad = Number(load.replace(',', '.'));
     const parsedReps = Number(reps.replace(',', '.'));
-    if (!Number.isFinite(parsedLoad) || parsedLoad < 0) {
+    if (!load.trim() || !Number.isFinite(parsedLoad) || parsedLoad < 0) {
       setValidation({ field: 'load', message: 'Ingresa un peso válido.' });
       return;
     }
@@ -150,7 +166,9 @@ export function SetEditor({
         />
       </View>
       <Button
-        label="Registrar serie"
+        label={
+          initialLoad !== undefined ? 'Guardar corrección' : 'Registrar serie'
+        }
         icon="check"
         size="md"
         variant="accent"

@@ -1,86 +1,89 @@
-import { ScrollView, View } from 'react-native';
-import { TrainingShell, WorkoutSummaryCard } from '@/components/training';
-import { Badge, Button, Icon, Text } from '@/components/ui';
-import type { TrainingSummary } from '@/types/training';
-import { trainingScreenStyles } from './styles';
+/**
+ * Finished workout summary.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
 
-interface WorkoutSummaryScreenProps {
-  summary: TrainingSummary;
-  onReturnToday: () => void;
-}
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TopBar } from '@/components/layout';
+import { WorkoutSummaryCard } from '@/components/training';
+import { Badge, Button, EmptyState, Text } from '@/components/ui';
+import { useWorkoutSession } from '@/hooks/useWorkoutSession';
+import type { RootStackParamList } from '@/types/navigation';
 
+/** Shows a completed or partial session using backend totals. */
 export function WorkoutSummaryScreen({
-  summary,
-  onReturnToday,
-}: WorkoutSummaryScreenProps) {
-  const completionPercentage =
-    summary.targetSets === 0
-      ? 0
-      : Math.round((summary.completedSets / summary.targetSets) * 100);
-
+  navigation,
+  route,
+}: NativeStackScreenProps<RootStackParamList, 'WorkoutSummary'>) {
+  const insets = useSafeAreaInsets();
+  const { session, loading, error, retry } = useWorkoutSession(
+    route.params.sessionId,
+  );
+  const completedSets =
+    session?.exercises.reduce(
+      (sum, exercise) => sum + exercise.sets.length,
+      0,
+    ) ?? 0;
+  const targetSets =
+    session?.exercises.reduce(
+      (sum, exercise) => sum + exercise.targetSets,
+      0,
+    ) ?? 0;
   return (
-    <TrainingShell showHeader={false} onTodayPress={onReturnToday}>
-      <ScrollView
-        testID="workout-summary-screen"
-        className="flex-1"
-        contentContainerStyle={trainingScreenStyles.summaryContent}
-      >
-        <View className="flex-1 justify-center gap-xl py-xl">
-          <View className="items-center gap-md">
-            <View
-              className={`size-20 items-center justify-center rounded-lg ${
-                summary.isPartial
-                  ? 'bg-secondary-container'
-                  : 'bg-tertiary-container'
-              }`}
-            >
-              <Icon
-                name={summary.isPartial ? 'flag' : 'trophy'}
-                size={24}
-                className={
-                  summary.isPartial ? 'text-secondary-text' : 'text-tertiary'
-                }
-              />
-            </View>
-            <Text variant="headline" className="text-center">
-              {summary.isPartial
+    <View
+      className="flex-1 gap-xl bg-surface-background"
+      style={{ paddingTop: insets.top }}
+    >
+      <TopBar title="Resumen" onBack={navigation.goBack} />
+      <View className="gap-xl p-xl">
+        {loading ? (
+          <EmptyState title="Cargando resumen" icon="hourglass_top" />
+        ) : error ? (
+          <EmptyState
+            title="No pudimos cargar el resumen"
+            action={{ label: 'Reintentar', onPress: retry }}
+          />
+        ) : session ? (
+          <>
+            <Text variant="headline">
+              {session.status === 'PARTIAL'
                 ? 'Sesión guardada como parcial'
-                : '¡Sesión completada!'}
-            </Text>
-            <Text variant="body-l" tone="secondary" className="text-center">
-              {summary.isPartial
-                ? `Registraste ${summary.completedSets} de ${summary.targetSets} series. Tu entrenador verá lo que completaste.`
-                : `${summary.session.dayLabel} · Entrenamiento finalizado`}
+                : session.status === 'COMPLETED'
+                ? '¡Sesión completada!'
+                : 'Resumen de sesión'}
             </Text>
             <Badge
               label={
-                summary.isPartial
-                  ? `Parcial (${completionPercentage} %)`
-                  : 'Completada'
+                session.status === 'PARTIAL'
+                  ? 'Parcial'
+                  : session.status === 'COMPLETED'
+                  ? 'Completada'
+                  : session.status === 'SKIPPED'
+                  ? 'Omitida'
+                  : 'Pendiente'
               }
-              tone={summary.isPartial ? 'secondary' : 'tertiary'}
-              icon={summary.isPartial ? 'info' : 'check_circle'}
-              className="self-center"
             />
-          </View>
-
-          <WorkoutSummaryCard summary={summary} />
-
-          <Button
-            label="Ver mi progreso"
-            icon="monitoring"
-            fullWidth
-            onPress={onReturnToday}
-          />
-          <Button
-            label="Volver a Hoy"
-            variant="ghost"
-            size="md"
-            fullWidth
-            onPress={onReturnToday}
-          />
-        </View>
-      </ScrollView>
-    </TrainingShell>
+            <WorkoutSummaryCard
+              summary={{
+                session,
+                completedSets,
+                targetSets,
+                isPartial: completedSets < targetSets,
+              }}
+            />
+            <Button
+              label="Volver a Hoy"
+              onPress={() => navigation.navigate('Main')}
+            />
+          </>
+        ) : (
+          <EmptyState title="Sesión no disponible" />
+        )}
+      </View>
+    </View>
   );
 }

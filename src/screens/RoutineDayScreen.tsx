@@ -1,57 +1,62 @@
+/**
+ * Routine day details.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '@/components/layout';
-import { RoutineExerciseCard, TrainingShell } from '@/components/training';
-import { Badge, Text } from '@/components/ui';
-import type { RoutineDay } from '@/types/training';
-import { trainingScreenStyles } from './styles';
+import { RoutineExerciseCard } from '@/components/training';
+import { EmptyState, Text } from '@/components/ui';
+import { useActiveRoutine } from '@/hooks/useActiveRoutine';
+import type { RootStackParamList } from '@/types/navigation';
 
-interface RoutineDayScreenProps {
-  day: RoutineDay;
-  isToday: boolean;
-  onBack: () => void;
-  onTodayPress: () => void;
-}
-
+/** Shows the exercises prescribed for a routine day. */
 export function RoutineDayScreen({
-  day,
-  isToday,
-  onBack,
-  onTodayPress,
-}: RoutineDayScreenProps) {
+  navigation,
+  route,
+}: NativeStackScreenProps<RootStackParamList, 'RoutineDay'>) {
+  const insets = useSafeAreaInsets();
+  const { routine, loading, error, retry } = useActiveRoutine();
+  const day = routine?.sessions.find(item => item.order === route.params.order);
   return (
-    <TrainingShell
-      showHeader={false}
-      showBottomNav={false}
-      onTodayPress={onTodayPress}
+    <View
+      className="flex-1 bg-surface-background"
+      style={{ paddingTop: insets.top }}
     >
-      <TopBar title={day.label} onBack={onBack} />
-      <ScrollView
-        testID="routine-day-screen"
-        className="flex-1"
-        contentContainerStyle={trainingScreenStyles.scrollContent}
-      >
-        <View className="gap-lg py-lg">
-          <View className="gap-xl">
-            <Badge
-              label={
-                isToday ? 'Entrenamiento de hoy' : 'Programada para esta semana'
-              }
-              tone={isToday ? 'secondary' : 'neutral'}
-              icon={isToday ? 'bolt' : 'calendar_month'}
-            />
+      <TopBar
+        title={day?.label ?? 'Día de rutina'}
+        onBack={navigation.goBack}
+      />
+      <ScrollView contentContainerClassName="gap-lg p-xl">
+        {loading ? (
+          <EmptyState title="Cargando sesión" icon="hourglass_top" />
+        ) : error ? (
+          <EmptyState
+            title="No pudimos cargar la sesión"
+            action={{ label: 'Reintentar', onPress: retry }}
+          />
+        ) : !day ? (
+          <EmptyState title="Sesión no disponible" />
+        ) : (
+          <>
             <Text variant="body-l" tone="secondary">
-              Podrás registrar las series de esta sesión el día que te toque
-              realizarla.
+              {day.order === routine?.todaySessionOrder
+                ? 'Entrenamiento de hoy'
+                : 'Sesión de tu rutina vigente'}
             </Text>
-          </View>
-          {day.exercises.map(exercise => (
-            <RoutineExerciseCard
-              key={exercise.exerciseId}
-              exercise={exercise}
-            />
-          ))}
-        </View>
+            {day.exercises.map(exercise => (
+              <RoutineExerciseCard
+                key={exercise.exerciseId}
+                exercise={exercise}
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
-    </TrainingShell>
+    </View>
   );
 }

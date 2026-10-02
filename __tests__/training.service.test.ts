@@ -1,84 +1,68 @@
-import {
-  mockTrainingService,
-  resetMockTrainingData,
-} from '@/services/mock-training.service';
+/**
+ * Training resource requests.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
+import { ApiError, apiClient } from '@/services/api-client';
+import { trainingService } from '@/services/training.service';
+
+jest.mock('@/services/api-client', () => {
+  const actual = jest.requireActual('@/services/api-client');
+  return { ...actual, apiClient: { get: jest.fn(), post: jest.fn() } };
+});
+
+const get = apiClient.get as jest.Mock;
+const post = apiClient.post as jest.Mock;
+const input = { exerciseId: 'exercise-1', setNumber: 1, loadKg: 25, reps: 10 };
 
 beforeEach(() => {
-  resetMockTrainingData();
+  get.mockReset();
+  post.mockReset();
 });
 
-test('registra una serie una sola vez y recalcula el volumen', async () => {
-  const routine = await mockTrainingService.getActiveRoutine();
-  expect(routine).not.toBeNull();
+test('returns null for an unassigned routine', async () => {
+  get.mockRejectedValue(new ApiError(404, 'not found'));
+  await expect(trainingService.getActiveRoutine()).resolves.toBeNull();
+  expect(get).toHaveBeenCalledWith('/v1/active-routines/me');
+});
 
-  const sessionId = routine!.todayWorkoutSessionId;
-  const before = await mockTrainingService.getWorkoutSession(sessionId);
-  const updated = await mockTrainingService.recordSet(sessionId, {
-    exerciseId: 'press-inclinado',
-    setNumber: 3,
-    loadKg: 32,
-    reps: 10,
+test('preserves a rest day with nullable today fields', async () => {
+  const routine = {
+    routineId: 'routine-1',
+    routineName: 'Fuerza',
+    trainingDays: ['MONDAY'],
+    todaySessionOrder: null,
+    todayWorkoutSessionId: null,
+    sessions: [],
+  };
+  get.mockResolvedValue(routine);
+  await expect(trainingService.getActiveRoutine()).resolves.toEqual(routine);
+});
+
+test('records, corrects and finishes a partial workout at dedicated endpoints', async () => {
+  post.mockResolvedValue({ id: 'session-1', status: 'PARTIAL' });
+  await trainingService.recordSet('session-1', input);
+  await trainingService.correctSet('session-1', input);
+  await trainingService.finishSession('session-1', true);
+  expect(post.mock.calls).toEqual([
+    ['/v1/workout-sessions/session-1/sets', input],
+    ['/v1/workout-sessions/session-1/corrections', input],
+    ['/v1/workout-sessions/session-1/completions', { confirmPartial: true }],
+  ]);
+});
+
+test('requests paginated filtered workout history', async () => {
+  get.mockResolvedValue({
+    content: [],
+    page: 1,
+    size: 20,
+    totalElements: 0,
+    totalPages: 2,
   });
-
-  expect(updated.exercises[0].sets).toHaveLength(3);
-  expect(updated.totalVolumeKg).toBeGreaterThan(before.totalVolumeKg);
-
-  const replaced = await mockTrainingService.recordSet(sessionId, {
-    exerciseId: 'press-inclinado',
-    setNumber: 3,
-    loadKg: 34,
-    reps: 9,
-  });
-  expect(replaced.exercises[0].sets).toHaveLength(3);
-  expect(replaced.exercises[0].sets[2]).toMatchObject({ loadKg: 34, reps: 9 });
-});
-
-test('valida valores y exige confirmación para finalizar una sesión parcial', async () => {
-  const routine = await mockTrainingService.getActiveRoutine();
-  const sessionId = routine!.todayWorkoutSessionId;
-
-  await expect(
-    mockTrainingService.recordSet(sessionId, {
-      exerciseId: 'press-inclinado',
-      setNumber: 3,
-      loadKg: -1,
-      reps: 10,
-    }),
-  ).rejects.toThrow('peso');
-
-  await expect(
-    mockTrainingService.finishSession(sessionId, false),
-  ).rejects.toThrow('Confirma');
-
-  const finished = await mockTrainingService.finishSession(sessionId, true);
-  expect(finished.status).toBe('COMPLETED');
-  expect(finished.finishedAt).toBeDefined();
-});
-
-test('finaliza sin confirmación adicional cuando todas las series están registradas', async () => {
-  const routine = await mockTrainingService.getActiveRoutine();
-  const sessionId = routine!.todayWorkoutSessionId;
-  const initial = await mockTrainingService.getWorkoutSession(sessionId);
-
-  for (const exercise of initial.exercises) {
-    for (let setNumber = 1; setNumber <= exercise.targetSets; setNumber += 1) {
-      if (exercise.sets.some(set => set.setNumber === setNumber)) {
-        continue;
-      }
-      await mockTrainingService.recordSet(sessionId, {
-        exerciseId: exercise.exerciseId,
-        setNumber,
-        loadKg: exercise.targetLoadKg,
-        reps: exercise.targetReps,
-      });
-    }
-  }
-
-  const finished = await mockTrainingService.finishSession(sessionId, false);
-  expect(finished.status).toBe('COMPLETED');
-  expect(
-    finished.exercises.every(
-      exercise => exercise.sets.length === exercise.targetSets,
-    ),
-  ).toBe(true);
+  await trainingService.listWorkoutSessions(1, '2026-09-01', '2026-09-30');
+  expect(get).toHaveBeenCalledWith(
+    '/v1/workout-sessions?page=1&size=20&from=2026-09-01&to=2026-09-30',
+  );
 });

@@ -1,5 +1,8 @@
 /**
- * @format
+ * Integration tests.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
  */
 
 import ReactTestRenderer from 'react-test-renderer';
@@ -149,9 +152,9 @@ test('avisa cuando el correo o la contraseña son incorrectos', async () => {
 
   await signInWith('diego.paredes@correo.com', 'incorrecta');
 
-  expect(
-    hasText('Correo o contraseña incorrectos. Inténtalo de nuevo.'),
-  ).toBe(true);
+  expect(hasText('Correo o contraseña incorrectos. Inténtalo de nuevo.')).toBe(
+    true,
+  );
   expect(hasTabs()).toBe(false);
 });
 
@@ -336,4 +339,29 @@ test('no pide el perfil mientras no hay sesión', async () => {
   await renderApp();
 
   expect(requestsTo(PROFILE)).toHaveLength(0);
+});
+
+test('muestra nombre, correo y rutina vigente en Perfil', async () => {
+  mockBackend({
+    [REFRESH]: { status: 200, body: client },
+    [PROFILE]: { status: 200, body: profile },
+    '/v1/active-routines/me': {
+      status: 200,
+      body: {
+        routineId: 'r1',
+        routineName: 'Fuerza inicial',
+        version: 1,
+        startDate: '2026-10-01',
+        trainingDays: ['MONDAY'],
+        todaySessionOrder: null,
+        todayWorkoutSessionId: null,
+        sessions: [],
+      },
+    },
+  });
+  await renderApp();
+  await openProfile();
+  expect(hasText('Diego Paredes')).toBe(true);
+  expect(hasText('diego.paredes@correo.com')).toBe(true);
+  expect(hasText('Fuerza inicial')).toBe(true);
 });

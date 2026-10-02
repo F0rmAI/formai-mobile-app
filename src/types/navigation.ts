@@ -1,25 +1,36 @@
-/** Pantallas de primer nivel: acceso a la app y pestañas principales. */
+/**
+ * navigation module.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
+/** Top-level authentication and client routes. */
 export type RootStackParamList = {
   Welcome: undefined;
   /**
-   * `activatedEmail`: llega al terminar la activación, para precargar el correo.
-   * `passwordUpdated`: llega al crear una nueva contraseña; `email` precarga el correo si se conoce.
+   * `activatedEmail`: prefilled after activation.
+   * `passwordUpdated`: set after password reset; `email` optionally prefills the address.
    */
   SignIn:
     | { activatedEmail?: string; passwordUpdated?: boolean; email?: string }
     | undefined;
-  /** `codeRejected`: el código dejó de servir mientras se creaba la contraseña. */
+  /** `codeRejected`: the code expired during password entry. */
   ActivationCode: { codeRejected?: boolean } | undefined;
   ActivationPassword: { activationCode: string };
-  /** `renewal`: se pide un enlace otra vez porque el anterior venció o ya se usó. */
+  /** `renewal`: another reset link is needed. */
   ForgotPassword: { email?: string; renewal?: boolean } | undefined;
   PasswordResetSent: { email: string; renewal?: boolean };
-  /** `token`: llega en el enlace del correo (`…/password-reset?token=…`). */
+  /** `token`: supplied by the password-reset link. */
   ResetPassword: { token?: string } | undefined;
   Main: undefined;
+  Routine: undefined;
+  RoutineDay: { order: number };
+  WorkoutSummary: { sessionId: string };
+  WorkoutDetail: { sessionId: string };
 };
 
-/** Pestañas principales de la app (MVP: Hoy, Progreso, Perfil · TB2 agrega Escanear). */
+/** Main client tabs. */
 export type MainTabParamList = {
   Today: undefined;
   Progress: undefined;

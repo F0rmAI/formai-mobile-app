@@ -1,5 +1,8 @@
 /**
- * @format
+ * Integration tests.
+ *
+ * @author Carlos
+ * @packageDocumentation
  */
 
 import { Linking } from 'react-native';

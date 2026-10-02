@@ -1,3 +1,10 @@
+/**
+ * ActivationPasswordScreen module.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -13,7 +20,7 @@ type ActivationPasswordScreenProps = NativeStackScreenProps<
   'ActivationPassword'
 >;
 
-/** Activación de cuenta, paso 2: correo, contraseña y consentimiento. */
+/** Activation step two: email, password and consent. */
 export function ActivationPasswordScreen({
   navigation,
   route,
@@ -22,7 +29,7 @@ export function ActivationPasswordScreen({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // La activación no deja sesión abierta: el cliente continúa en el inicio de sesión.
+  // Activation does not sign in the client; continue to the sign-in screen.
   const onActivated = useCallback(
     (activatedEmail: string) =>
       navigation.reset({
@@ -69,11 +76,11 @@ export function ActivationPasswordScreen({
       >
         <View className="gap-xs">
           <Text variant="headline" accessibilityRole="header">
-            Crea tu contraseña
+            Configura tu acceso
           </Text>
           <Text variant="body-l" tone="secondary">
-            Código verificado. Define la contraseña con la que ingresarás a
-            FormAI.
+            Código verificado. Si ya tienes una cuenta, usa tu correo y tu
+            contraseña actual para unirte a tu nuevo entrenador.
           </Text>
         </View>
 
@@ -99,15 +106,15 @@ export function ActivationPasswordScreen({
             showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
           }
           onTrailingIconPress={() => setShowPassword(visible => !visible)}
-          helper="Mínimo 8 caracteres, con letras y números."
+          helper="Entre 8 y 128 caracteres."
           value={password}
           error={errors.password}
           editable={!isSubmitting}
           secureTextEntry={!showPassword}
           autoCapitalize="none"
           autoCorrect={false}
-          autoComplete="new-password"
-          textContentType="newPassword"
+          autoComplete="password"
+          textContentType="password"
           returnKeyType="next"
           onChangeText={changePassword}
         />
@@ -129,8 +136,8 @@ export function ActivationPasswordScreen({
           secureTextEntry={!showConfirmPassword}
           autoCapitalize="none"
           autoCorrect={false}
-          autoComplete="new-password"
-          textContentType="newPassword"
+          autoComplete="password"
+          textContentType="password"
           returnKeyType="done"
           onChangeText={changeConfirmPassword}
         />

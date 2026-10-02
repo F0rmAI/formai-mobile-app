@@ -26,3 +26,5 @@ export function useClients() {
 
 `useActivationCode.ts` (verifica el código del entrenador) y `useAccountActivation.ts` (correo, contraseña
 y consentimiento), `useForgotPassword.ts` (pide el enlace de recuperación), `useResetPassword.ts` (nueva contraseña con el token del enlace), `useMailApp.ts` (abre el correo del cliente: su app o la bandeja web), `useSignIn.ts` (formulario de inicio de sesión), `useClientProfile.ts` (nombre del cliente con sesión) y `useSignOut.ts` (cierre con confirmación) son los primeros ejemplos: la pantalla solo pinta lo que devuelven.
+
+`useTraining.ts` gestiona la sesión de hoy; `useActiveRoutine.ts` carga la rutina; `useWorkoutHistory.ts` maneja filtro y paginación; `useWorkoutSession.ts` carga detalles y resúmenes.

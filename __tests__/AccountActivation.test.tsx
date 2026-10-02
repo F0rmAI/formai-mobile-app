@@ -1,5 +1,8 @@
 /**
- * @format
+ * Integration tests.
+ *
+ * @author Carlos
+ * @packageDocumentation
  */
 
 import ReactTestRenderer from 'react-test-renderer';
@@ -84,7 +87,7 @@ async function acceptConsent() {
   });
 }
 
-/** Llega a "Crea tu contraseña" con un código que el backend acepta. */
+/** Llega a "Configura tu acceso" con un código que el backend acepta. */
 async function reachPasswordStep() {
   await press('Activar mi cuenta');
   await type('Código de activación', 'ABCD2345');
@@ -125,7 +128,7 @@ test('verifica el código y pasa a crear la contraseña', async () => {
   await press('Continuar');
 
   expect(bodyOf(VERIFY)).toEqual({ activationCode: 'ABCD2345' });
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
 });
 
 test('avisa cuando el código no es válido o venció', async () => {
@@ -136,7 +139,7 @@ test('avisa cuando el código no es válido o venció', async () => {
   await press('Continuar');
 
   expect(hasText(INVALID_CODE)).toBe(true);
-  expect(hasText('Crea tu contraseña')).toBe(false);
+  expect(hasText('Configura tu acceso')).toBe(false);
 });
 
 test('no llama al backend si el código está vacío', async () => {
@@ -184,11 +187,9 @@ test('valida correo, contraseña y confirmación antes de activar', async () => 
   await press('Activar cuenta');
 
   expect(hasText('Ingresa un correo válido.')).toBe(true);
-  expect(
-    hasText(
-      'La contraseña debe tener mínimo 8 caracteres, con letras y números.',
-    ),
-  ).toBe(true);
+  expect(hasText('La contraseña debe tener entre 8 y 128 caracteres.')).toBe(
+    true,
+  );
 
   await type('Contraseña', 'secreta123');
   await type('Confirmar contraseña', 'secreta124');
@@ -246,9 +247,11 @@ test('avisa cuando el correo ya pertenece a otra cuenta', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
   expect(
-    hasText('Este correo ya está registrado. Usa otro o inicia sesión.'),
+    hasText(
+      'No pudimos activar la cuenta con esos datos. Si ya tienes una cuenta, usa tu correo y tu contraseña actual; de lo contrario, revisa el correo o usa uno distinto.',
+    ),
   ).toBe(true);
 });
 
@@ -262,7 +265,7 @@ test('avisa cuando el backend no acepta el formato del correo', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
   expect(hasText('Ingresa un correo válido.')).toBe(true);
 });
 
@@ -276,7 +279,7 @@ test('avisa cuando no hay conexión al activar', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
   expect(
     hasText('No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.'),
   ).toBe(true);
@@ -286,7 +289,7 @@ test('normaliza el código y aplica la política de contraseña', () => {
   expect(normalizeActivationCode(' abcd 2345 ')).toBe('ABCD2345');
   expect(isValidPassword('secreta123')).toBe(true);
   expect(isValidPassword('corta1')).toBe(false);
-  expect(isValidPassword('sololetras')).toBe(false);
-  expect(isValidPassword('12345678')).toBe(false);
+  expect(isValidPassword('sololetras')).toBe(true);
+  expect(isValidPassword('12345678')).toBe(true);
   expect(isValidPassword(`a1${'x'.repeat(127)}`)).toBe(false);
 });

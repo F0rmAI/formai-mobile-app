@@ -1,28 +1,19 @@
 # MEMORY.md - FormAI Mobile App
 
-Inter-session project memory. This file contains about 50 lines: summarize or remove content that no longer adds value.
+## Current status (2026-10-02)
+- Branch `feature/api-integration` unifies authentication, React Navigation, training, history and profile. The Today tab uses the real `/api` resources; the state-based TrainingFlow, its second navigation bar and the mock training service are removed.
+- Authenticated requests retry once after one shared in-flight refresh on an initial 401 or 403. A failed refresh returns the app to Welcome; a retried 403 remains a forbidden response. Startup restoration uses the same refresh path.
+- Today covers no routine, rest day, pending workout, set registration and correction, partial confirmation, and finished summary. Routine and day views use typed stack routes.
+- Progress lists paginated sessions with a validated date range and per-session details. Profile shows the backend full name, email and current routine. Activation supports an existing account moving to another trainer with its current password.
+- Verification: `npm run typecheck` passes; `npm test -- --runInBand --watchman=false` passes 68 tests. Plain Jest cannot access the Watchman socket in this environment. `npm run lint` reports only the existing `@format` TSDoc errors in `__tests__/dates.test.ts` and `__tests__/names.test.ts`.
 
-## Current status (2026-10-01)
-- `main` holds the project base: design tokens, 22 UI primitives, layout components (AppHeader, TopBar, BottomNav), API client, starter screen with a counter.
-- The base passes the frontend audit (layers, tokens, TSDoc, tests): 0 errors, 0 warnings.
-- Jest: 12 tests pass. ESLint validates TSDoc syntax.
-- The base was run on the iOS simulator and the Android emulator on 2026-09-28; the changes since then are comments, tests and lint config only.
-- Feature work lives in remote branches not merged into `main`: `feature/mobile-app-shell`, `feature/mobile-training-flow`.
+## Decisions
+- Backend DTOs are authoritative: session states are PENDING, COMPLETED, PARTIAL and SKIPPED; rest-day fields are nullable. Screens show no fabricated trainer, exercise image, duration or progress metrics.
+- Training uses one real `training.service.ts`; session and history hooks call it through `apiClient`. Error details from the backend are never displayed to users.
+- Account activation validates the backend password range of 8–128 characters so a valid existing password can be used for trainer transfer. HTTP 409 has one neutral message for both conflict cases.
 
-## Decisions (and why)
-- React Native 0.87.1 with the Community CLI, not Expo: the owner requires 0.87 and no Expo SDK targets it (SDK 57 uses 0.86, SDK 58 uses 0.88).
-- React 19.3.0 although the RN 0.87 template pins 19.2.3: required by the owner, allowed by the peer range `^19.2.3`, and verified on both platforms.
-- Uniwind for Tailwind v4: the stable binding for Tailwind 4; NativeWind 5 was still a release candidate.
-- Fonts shipped as TTF named after their PostScript name: the same family name then works on iOS and Android.
-- TSDoc in English with a per-file `@author` taken from git: one documentation standard for the whole team.
-
-## Lessons learned and mistakes to avoid
-- `className` is ignored by non-core components such as `SafeAreaView`; wrap them in a core `View`.
-- Android rejects `accessibilityRole="tabbar"` at runtime; use `tablist`. Always run both platforms.
-- `tokens.css` is shared with the web repo: never edit it in one repo only.
-- Local machine: `ANDROID_SDK_ROOT` and `ANDROID_HOME` point to different SDKs and Gradle fails with both set; build with `ANDROID_HOME` only and JDK 17. `bundle install` cannot compile native gems here; use the global `pod install`.
-
-## Next steps
-- Merging the feature branches will conflict with `main` in `components/ui`, `components/layout` and `services/api-client.ts` (comments were rewritten).
-- Audit the feature branches and align them with the documentation and layering rules.
-- Choose camera, video and push libraries that support React Native 0.87 when those features start.
+## Pitfalls
+- Do not call refresh independently: rotated-token reuse can revoke every session. Use `refreshSession` in `api-client.ts`.
+- Keep `tokens.css` byte-identical with the web repo; no token change was needed here.
+- `className` is ignored by non-core components such as `SafeAreaView`; use a core View for Uniwind classes.
+- Android rejects `accessibilityRole="tabbar"`; use `tablist`. Native runtime verification on both platforms remains necessary when available.

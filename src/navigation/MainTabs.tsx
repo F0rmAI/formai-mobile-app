@@ -1,3 +1,10 @@
+/**
+ * MainTabs module.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import {
   createBottomTabNavigator,
   type BottomTabBarProps,
@@ -5,7 +12,7 @@ import {
 import { BottomNav, type BottomNavItem } from '@/components/layout';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { ProgressScreen } from '@/screens/ProgressScreen';
-import { TrainingFlow } from '@/screens/TrainingFlow';
+import { TodayScreen } from '@/screens/TodayScreen';
 import type { MainTabParamList } from '@/types/navigation';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -16,7 +23,7 @@ const tabItems: BottomNavItem<keyof MainTabParamList>[] = [
   { key: 'Profile', label: 'Perfil', icon: 'person' },
 ];
 
-/** Conecta el estado del navegador con el `BottomNav` del design system. */
+/** Connects tab navigation state to the design-system bottom bar. */
 function MainTabBar({ state, navigation }: BottomTabBarProps) {
   const activeRoute = state.routes[state.index];
 
@@ -35,7 +42,7 @@ function MainTabBar({ state, navigation }: BottomTabBarProps) {
     }
   };
 
-  // Absoluta: el contenido de la pantalla pasa por detrás de las esquinas redondeadas.
+  // The absolute bar overlays content at the rounded corners.
   return (
     <BottomNav
       items={tabItems}
@@ -48,7 +55,7 @@ function MainTabBar({ state, navigation }: BottomTabBarProps) {
 
 const renderTabBar = (props: BottomTabBarProps) => <MainTabBar {...props} />;
 
-/** Navegación principal del cliente: Hoy, Progreso y Perfil. */
+/** Client tabs: Today, Progress and Profile. */
 export function MainTabs() {
   return (
     <Tab.Navigator
@@ -56,7 +63,7 @@ export function MainTabs() {
       tabBar={renderTabBar}
       screenOptions={{ headerShown: false }}
     >
-      <Tab.Screen name="Today" component={TrainingFlow} />
+      <Tab.Screen name="Today" component={TodayScreen} />
       <Tab.Screen name="Progress" component={ProgressScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

@@ -1,3 +1,10 @@
+/**
+ * Account activation API resource.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { ApiError, apiClient } from './api-client';
 import type {
   AccountActivation,
@@ -5,41 +12,42 @@ import type {
   ActivationCodeVerification,
 } from '@/types/account-activation';
 
-/** Activación de la cuenta que el entrenador creó para el cliente. */
+/** Account activation and transfer resource. */
 export const accountActivationService = {
-  /** Comprueba que el código exista y no haya vencido; no lo consume. */
+  /** Verifies an activation code without consuming it. */
   verifyCode: (activationCode: string) =>
     apiClient.post<ActivationCodeVerification>(
       '/v1/activation-code-verifications',
       { activationCode },
     ),
-  /** Canjea el código: registra el correo y la contraseña del cliente y su consentimiento. */
+  /** Redeems the code with account credentials and consent. */
   activate: (input: ActivateAccountInput) =>
     apiClient.post<AccountActivation>('/v1/account-activations', input),
 };
 
-/** El backend responde 422 cuando el código no existe, venció o ya se usó. */
+/** A rejected code yields HTTP 422 or validation error 400. */
 export const isRejectedActivationCode = (error: unknown) =>
   error instanceof ApiError && (error.status === 422 || error.status === 400);
 
-/** Por qué el backend rechazó la activación de la cuenta. */
+/** Reason for an activation rejection. */
 export type ActivationFailure =
   | 'code-rejected'
-  | 'email-taken'
+  | 'account-conflict'
   | 'invalid-email'
   | 'unavailable';
 
+/** Maps activation responses without exposing account ownership. */
 export function activationFailureOf(error: unknown): ActivationFailure {
   if (!(error instanceof ApiError)) {
     return 'unavailable';
   }
   switch (error.status) {
-    // Contraseña y consentimiento se validan en la app: un 422 solo puede ser el código.
+    // The app validates password range and consent before submission.
     case 422:
       return 'code-rejected';
-    // Otra cuenta ya usa ese correo.
+    // A different account owns the email, or the existing password is wrong.
     case 409:
-      return 'email-taken';
+      return 'account-conflict';
     case 400:
       return 'invalid-email';
     default:

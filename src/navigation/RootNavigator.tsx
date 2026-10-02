@@ -1,3 +1,10 @@
+/**
+ * RootNavigator module.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
@@ -8,15 +15,17 @@ import { PasswordResetSentScreen } from '@/screens/PasswordResetSentScreen';
 import { ResetPasswordScreen } from '@/screens/ResetPasswordScreen';
 import { SignInScreen } from '@/screens/SignInScreen';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
+import { RoutineScreen } from '@/screens/RoutineScreen';
+import { RoutineDayScreen } from '@/screens/RoutineDayScreen';
+import { WorkoutSummaryScreen } from '@/screens/WorkoutSummaryScreen';
+import { WorkoutDetailScreen } from '@/screens/WorkoutDetailScreen';
 import type { RootStackParamList } from '@/types/navigation';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /**
- * Navegación de primer nivel. Sin sesión solo existen las pantallas de acceso
- * (bienvenida, inicio de sesión, activación y recuperación de contraseña); con
- * sesión, solo las pestañas.
+ * Top-level navigation switches between authentication and client screens.
  */
 export function RootNavigator() {
   const { status } = useAuth();
@@ -28,7 +37,16 @@ export function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {status === 'signedIn' ? (
-        <Stack.Screen name="Main" component={MainTabs} />
+        <>
+          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Routine" component={RoutineScreen} />
+          <Stack.Screen name="RoutineDay" component={RoutineDayScreen} />
+          <Stack.Screen
+            name="WorkoutSummary"
+            component={WorkoutSummaryScreen}
+          />
+          <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
+        </>
       ) : (
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />

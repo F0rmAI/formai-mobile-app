@@ -12,6 +12,7 @@ del design system.
 | `client-profile.ts` | Datos propios del cliente con sesión (nombre y correo). |
 | `account-activation.ts` | Datos de la verificación del código y de la activación de cuenta. |
 | `navigation.ts` | Parámetros de las rutas de React Navigation (`RootStackParamList`, `MainTabParamList`). |
+| `training.ts` | DTO de rutina vigente y sesiones, estados del backend y tipos de registro. |
 | `assets.d.ts` | Tipos para importar `*.css` y `*.png`. |
 | `uniwind-types.d.ts` | **Generado por Uniwind** al iniciar Metro: no se edita a mano, pero se versiona para que TypeScript funcione en un clon limpio. |
 

@@ -1,18 +1,25 @@
+/**
+ * Client profile presentation hook.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { firstNameOf } from '@/utils/names';
 
 /**
- * Nombre del cliente con sesión iniciada, listo para pintar. Todo queda sin
- * definir mientras el perfil carga o si no se pudo obtener.
+ * Provides the signed-in client profile and display name when available.
  */
 export function useClientProfile() {
   const { profile } = useAuth();
 
   return useMemo(
     () => ({
+      profile,
       firstName: profile ? firstNameOf(profile.fullName) : undefined,
-      /** Datos para el avatar del encabezado. */
+      /** Avatar data for the header. */
       headerUser: profile ? { name: profile.fullName } : undefined,
     }),
     [profile],
