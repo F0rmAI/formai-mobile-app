@@ -1,3 +1,10 @@
+/**
+ * Shared authentication and client profile state.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import {
   createContext,
   useCallback,
@@ -8,17 +15,18 @@ import {
   type ReactNode,
 } from 'react';
 import { authService } from '@/services/auth.service';
+import { setUnauthorizedHandler } from '@/services/api-client';
 import { clientProfileService } from '@/services/client-profile.service';
 import type { AuthenticatedUser, SignInInput } from '@/types/auth';
 import type { ClientProfile } from '@/types/client-profile';
 
-/** `restoring`: aún no se sabe si el dispositivo conserva una sesión. */
+/** Authentication phase during restoration or normal use. */
 export type AuthStatus = 'restoring' | 'signedOut' | 'signedIn';
 
 interface AuthState {
   status: AuthStatus;
   user?: AuthenticatedUser;
-  /** Nombre y correo del cliente; sin definir mientras carga o si no se pudo obtener. */
+  /** Profile while available after sign-in. */
   profile?: ClientProfile;
   signIn: (input: SignInInput) => Promise<void>;
   signOut: () => Promise<void>;
@@ -26,10 +34,19 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+/** Provides cookie-backed authentication state to the application. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('restoring');
   const [user, setUser] = useState<AuthenticatedUser>();
   const [profile, setProfile] = useState<ClientProfile>();
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setUser(undefined);
+      setStatus('signedOut');
+    });
+    return () => setUnauthorizedHandler();
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -51,8 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // El inicio de sesión no devuelve el nombre: se pide aparte al tener sesión. Si falla,
-  // la app sigue funcionando sin nombre.
+  // The sign-in response has no name, so load the profile separately.
   useEffect(() => {
     if (status !== 'signedIn') {
       setProfile(undefined);
@@ -77,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('signedIn');
   }, []);
 
-  // Solo el backend puede borrar las cookies: si la llamada falla, la sesión sigue abierta.
+  // Only the backend can clear the cookies; keep local state if sign-out fails.
   const signOut = useCallback(async () => {
     await authService.signOut();
     setUser(undefined);
@@ -92,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/** Reads the current authentication state. */
 export function useAuth() {
   const value = useContext(AuthContext);
   if (!value) {

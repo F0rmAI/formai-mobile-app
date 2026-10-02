@@ -1,5 +1,8 @@
 /**
- * @format
+ * Integration tests for useActivationCode and useAccountActivation through the app.
+ *
+ * @author Carlos
+ * @packageDocumentation
  */
 
 import ReactTestRenderer from 'react-test-renderer';
@@ -18,7 +21,7 @@ const INVALID_CODE =
 
 const fetchMock = jest.fn();
 
-/** Responde cada endpoint de activación con la respuesta indicada. */
+/** Returns the configured response for each activation endpoint. */
 function mockBackend(replies: Record<string, Reply>) {
   fetchMock.mockImplementation(async (url: string) => {
     const path = Object.keys(replies).find(key => url.endsWith(key));
@@ -47,7 +50,7 @@ let renderer: ReactTestRenderer.ReactTestRenderer;
 const hasText = (text: string) =>
   renderer.root.findAll(node => node.props.children === text).length > 0;
 
-/** Pulsa el último botón visible con ese texto (el de la pantalla superior). */
+/** Presses the last visible button bearing the given label. */
 async function press(label: string) {
   const buttons = renderer.root.findAll(
     node =>
@@ -84,7 +87,7 @@ async function acceptConsent() {
   });
 }
 
-/** Llega a "Crea tu contraseña" con un código que el backend acepta. */
+/** Opens credential setup with a code accepted by the backend. */
 async function reachPasswordStep() {
   await press('Activar mi cuenta');
   await type('Código de activación', 'ABCD2345');
@@ -115,7 +118,7 @@ afterEach(async () => {
   });
 });
 
-test('verifica el código y pasa a crear la contraseña', async () => {
+test('verifies the code before requesting account credentials', async () => {
   mockBackend({ [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } } });
 
   await press('Activar mi cuenta');
@@ -125,10 +128,10 @@ test('verifica el código y pasa a crear la contraseña', async () => {
   await press('Continuar');
 
   expect(bodyOf(VERIFY)).toEqual({ activationCode: 'ABCD2345' });
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
 });
 
-test('avisa cuando el código no es válido o venció', async () => {
+test('shows an error for an invalid or expired code', async () => {
   mockBackend({ [VERIFY]: { status: 422, body: { status: 422 } } });
 
   await press('Activar mi cuenta');
@@ -136,10 +139,10 @@ test('avisa cuando el código no es válido o venció', async () => {
   await press('Continuar');
 
   expect(hasText(INVALID_CODE)).toBe(true);
-  expect(hasText('Crea tu contraseña')).toBe(false);
+  expect(hasText('Configura tu acceso')).toBe(false);
 });
 
-test('no llama al backend si el código está vacío', async () => {
+test('does not call the backend for an empty code', async () => {
   await press('Activar mi cuenta');
   await press('Continuar');
 
@@ -147,7 +150,7 @@ test('no llama al backend si el código está vacío', async () => {
   expect(requestsTo(VERIFY)).toHaveLength(0);
 });
 
-test('avisa cuando no hay conexión al verificar el código', async () => {
+test('shows a connection error while verifying a code', async () => {
   mockBackend({ [VERIFY]: 'network-error' });
 
   await press('Activar mi cuenta');
@@ -159,7 +162,7 @@ test('avisa cuando no hay conexión al verificar el código', async () => {
   ).toBe(true);
 });
 
-test('exige aceptar el consentimiento antes de activar', async () => {
+test('requires consent before account activation', async () => {
   mockBackend({ [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } } });
   await reachPasswordStep();
 
@@ -174,7 +177,7 @@ test('exige aceptar el consentimiento antes de activar', async () => {
   expect(requestsTo(ACTIVATE)).toHaveLength(0);
 });
 
-test('valida correo, contraseña y confirmación antes de activar', async () => {
+test('validates email, password and confirmation before activation', async () => {
   mockBackend({ [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } } });
   await reachPasswordStep();
 
@@ -184,11 +187,9 @@ test('valida correo, contraseña y confirmación antes de activar', async () => 
   await press('Activar cuenta');
 
   expect(hasText('Ingresa un correo válido.')).toBe(true);
-  expect(
-    hasText(
-      'La contraseña debe tener mínimo 8 caracteres, con letras y números.',
-    ),
-  ).toBe(true);
+  expect(hasText('La contraseña debe tener entre 8 y 128 caracteres.')).toBe(
+    true,
+  );
 
   await type('Contraseña', 'secreta123');
   await type('Confirmar contraseña', 'secreta124');
@@ -198,7 +199,7 @@ test('valida correo, contraseña y confirmación antes de activar', async () => 
   expect(requestsTo(ACTIVATE)).toHaveLength(0);
 });
 
-test('activa la cuenta y lleva al inicio de sesión con el correo', async () => {
+test('activates the account and preloads the sign-in email', async () => {
   mockBackend({
     [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
     [ACTIVATE]: { status: 201, body: { userId: 'u1', status: 'ACTIVE' } },
@@ -222,7 +223,7 @@ test('activa la cuenta y lleva al inicio de sesión con el correo', async () => 
   );
 });
 
-test('vuelve al código si deja de ser válido al activar', async () => {
+test('returns to code entry when a verified code is later rejected', async () => {
   mockBackend({
     [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
     [ACTIVATE]: { status: 422, body: { status: 422 } },
@@ -236,7 +237,7 @@ test('vuelve al código si deja de ser válido al activar', async () => {
   expect(hasText(INVALID_CODE)).toBe(true);
 });
 
-test('avisa cuando el correo ya pertenece a otra cuenta', async () => {
+test('shows a neutral message when the email belongs to another account', async () => {
   mockBackend({
     [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
     [ACTIVATE]: { status: 409, body: { status: 409 } },
@@ -246,13 +247,15 @@ test('avisa cuando el correo ya pertenece a otra cuenta', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
   expect(
-    hasText('Este correo ya está registrado. Usa otro o inicia sesión.'),
+    hasText(
+      'No pudimos activar la cuenta con esos datos. Si ya tienes una cuenta, usa tu correo y tu contraseña actual; de lo contrario, revisa el correo o usa uno distinto.',
+    ),
   ).toBe(true);
 });
 
-test('avisa cuando el backend no acepta el formato del correo', async () => {
+test('shows an error when the backend rejects the email format', async () => {
   mockBackend({
     [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
     [ACTIVATE]: { status: 400, body: { status: 400 } },
@@ -262,11 +265,11 @@ test('avisa cuando el backend no acepta el formato del correo', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
   expect(hasText('Ingresa un correo válido.')).toBe(true);
 });
 
-test('avisa cuando no hay conexión al activar', async () => {
+test('shows a connection error during activation', async () => {
   mockBackend({
     [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
     [ACTIVATE]: 'network-error',
@@ -276,17 +279,17 @@ test('avisa cuando no hay conexión al activar', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Configura tu acceso')).toBe(true);
   expect(
     hasText('No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.'),
   ).toBe(true);
 });
 
-test('normaliza el código y aplica la política de contraseña', () => {
+test('normalizes the code and applies the password policy', () => {
   expect(normalizeActivationCode(' abcd 2345 ')).toBe('ABCD2345');
   expect(isValidPassword('secreta123')).toBe(true);
   expect(isValidPassword('corta1')).toBe(false);
-  expect(isValidPassword('sololetras')).toBe(false);
-  expect(isValidPassword('12345678')).toBe(false);
+  expect(isValidPassword('sololetras')).toBe(true);
+  expect(isValidPassword('12345678')).toBe(true);
   expect(isValidPassword(`a1${'x'.repeat(127)}`)).toBe(false);
 });

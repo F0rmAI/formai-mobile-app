@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 
-  // Enlaces `formai://…` (p. ej. el de recuperación de contraseña): los recibe React Navigation.
+  // React Navigation receives `formai://` links, including password-reset links.
   func application(
     _ app: UIApplication,
     open url: URL,

@@ -1,17 +1,22 @@
+/**
+ * Client sign-in screen.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
-import { Button, Text, TextField, Toast } from '@/components/ui';
+import { InsetToast, ScreenContainer, TopBar } from '@/components/layout';
+import { Button, Text, TextField } from '@/components/ui';
 import { useSignIn } from '@/hooks/useSignIn';
 import type { RootStackParamList } from '@/types/navigation';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
-/** Inicio de sesión del cliente con correo y contraseña. */
+/** Shows client credentials using useSignIn for validation and submission. */
 export function SignInScreen({ navigation, route }: SignInScreenProps) {
-  const insets = useSafeAreaInsets();
   const { activatedEmail, passwordUpdated } = route.params ?? {};
   const toast = activatedEmail
     ? 'Cuenta activada'
@@ -30,10 +35,7 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
   } = useSignIn(activatedEmail ?? route.params?.email);
 
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Iniciar sesión" onBack={navigation.goBack} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -46,7 +48,7 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           <Text variant="body-l" tone="secondary">
             {passwordUpdated
               ? 'Ingresa con tu nueva contraseña.'
-              : 'Ingresa con el correo que registró tu entrenador.'}
+              : 'Ingresa con el correo y la contraseña de tu cuenta.'}
           </Text>
         </View>
 
@@ -101,14 +103,7 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           onPress={submit}
         />
       </ScrollView>
-      {toast && (
-        <View
-          className="absolute inset-x-xl"
-          style={{ bottom: insets.bottom + 16 }}
-        >
-          <Toast message={toast} tone="success" />
-        </View>
-      )}
-    </View>
+      {toast && <InsetToast message={toast} />}
+    </ScreenContainer>
   );
 }

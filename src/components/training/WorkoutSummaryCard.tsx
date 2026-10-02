@@ -1,18 +1,26 @@
+/**
+ * Workout summary totals card.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
 import { View } from 'react-native';
 import { Card, Icon, Text } from '@/components/ui';
 import type { TrainingSummary } from '@/types/training';
 
-export function WorkoutSummaryCard({ summary }: { summary: TrainingSummary }) {
+/** Props accepted by {@link WorkoutSummaryCard}. */
+interface WorkoutSummaryCardProps {
+  /** Backend totals and derived set counts for the session. */
+  summary: TrainingSummary;
+}
+
+/** Displays volume and completed set totals. */
+export function WorkoutSummaryCard({ summary }: WorkoutSummaryCardProps) {
   const stats = [
     {
       icon: 'open_in_full',
-      value: `${Math.round(summary.session.totalVolumeKg)} kg`,
-    },
-    {
-      icon: 'timer',
-      value: summary.session.durationMinutes
-        ? `${summary.session.durationMinutes} min`
-        : '—',
+      value: `${summary.session.totalVolumeKg} kg`,
     },
     {
       icon: 'checklist',

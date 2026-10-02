@@ -1,6 +1,13 @@
+/**
+ * Password reset request state and actions.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useCallback, useState } from 'react';
 import { ApiError } from '@/services/api-client';
-import { authService } from '@/services/auth.service';
+import { passwordResetService } from '@/services/password-reset.service';
 import {
   CONNECTION_ERROR_MESSAGE,
   INVALID_EMAIL_MESSAGE,
@@ -8,8 +15,16 @@ import {
 } from '@/utils/account-activation';
 
 /**
- * Recuperación de contraseña, paso 1: el cliente escribe su correo y el backend
- * le envía el enlace para crear una nueva contraseña.
+ * Requests a password-reset link for the client email.
+ *
+ * @param initialEmail - Email carried over from the sign-in form.
+ * @param onSent - Opens the confirmation screen after the request succeeds.
+ * @returns The `email`, `error`, `isSubmitting` and request actions.
+ *
+ * @example
+ * ```tsx
+ * const recovery = useForgotPassword(email, openConfirmation);
+ * ```
  */
 export function useForgotPassword(
   initialEmail: string,
@@ -34,10 +49,10 @@ export function useForgotPassword(
     setError(undefined);
     setIsSubmitting(true);
     try {
-      await authService.requestPasswordReset(trimmedEmail);
+      await passwordResetService.requestLink(trimmedEmail);
       onSent(trimmedEmail);
     } catch (requestError) {
-      // 400: el backend no reconoce el formato del correo.
+      // The backend rejects an email format with HTTP 400.
       setError(
         requestError instanceof ApiError && requestError.status === 400
           ? INVALID_EMAIL_MESSAGE

@@ -1,27 +1,58 @@
+/**
+ * Client profile screen.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { TabScreenLayout } from '@/components/layout';
-import { Button, Dialog, EmptyState, Toast } from '@/components/ui';
+import { Button, Card, Dialog, ListItem, Text, Toast } from '@/components/ui';
+import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useSignOut } from '@/hooks/useSignOut';
+import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
 
-/**
- * Pestaña Perfil. Los datos de la cuenta son provisionales (llegan con FE-MOB-023);
- * el cierre de sesión ya es definitivo.
- */
-export function ProfileScreen() {
+/** Shows profile and routine data using useClientProfile, useActiveRoutine and useSignOut. */
+export function ProfileScreen({
+  navigation,
+}: {
+  navigation: BottomTabNavigationProp<MainTabParamList, 'Profile'>;
+}) {
   const { isConfirming, isSigningOut, error, requestSignOut, cancel, confirm } =
     useSignOut();
-  const { headerUser } = useClientProfile();
-
+  const { profile, headerUser } = useClientProfile();
+  const {
+    routine,
+    isLoading,
+    error: routineError,
+    retry,
+  } = useActiveRoutine('No pudimos cargar tu rutina.');
+  const root =
+    navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <TabScreenLayout
       headerSubtitle="Tu cuenta"
       user={headerUser}
       title="Perfil"
     >
-      <EmptyState
-        icon="person"
-        title="Tu cuenta"
-        description="Aquí verás tus datos, tu entrenador y tu rutina vigente."
+      <Card className="gap-sm">
+        <Text variant="title">{profile?.fullName ?? 'Cargando perfil'}</Text>
+        <Text variant="body-m" tone="secondary">
+          {profile?.email ?? ''}
+        </Text>
+      </Card>
+      {routineError && <Toast message={routineError} tone="error" />}
+      <ListItem
+        title="Mi rutina vigente"
+        subtitle={
+          isLoading
+            ? 'Cargando...'
+            : routine?.routineName ?? 'Sin rutina asignada'
+        }
+        onPress={() => (routine ? root?.navigate('Routine') : retry())}
+        showChevron={Boolean(routine)}
       />
       {error && <Toast message={error} tone="error" />}
       <Button

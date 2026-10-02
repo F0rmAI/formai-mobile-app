@@ -1,8 +1,16 @@
-/** Datos propios del cliente con sesión iniciada, tal como los devuelve el backend. */
+/**
+ * Authenticated client profile type.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
+/** Describes the signed-in client profile returned by the backend. */
 export interface ClientProfile {
+  /** Stable client identifier. */
   id: string;
-  /** Nombre con el que el entrenador registró al cliente. */
+  /** Full name registered by the trainer. */
   fullName: string;
-  /** Correo que el cliente eligió al activar su cuenta. */
+  /** Email chosen when the account was activated. */
   email: string;
 }

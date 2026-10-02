@@ -49,6 +49,7 @@ export function Icon({
       accessibilityLabel={label}
       accessibilityRole={label ? 'image' : undefined}
       importantForAccessibility={label ? 'auto' : 'no-hide-descendants'}
+      accessibilityElementsHidden={!label}
       allowFontScaling={false}
       className={cn('font-icon text-center text-primary', className)}
       style={[

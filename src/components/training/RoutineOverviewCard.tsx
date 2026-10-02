@@ -1,15 +1,30 @@
+/**
+ * Today's routine overview card.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
 import { View } from 'react-native';
 import { Button, Card, ProgressBar, SectionLabel, Text } from '@/components/ui';
 import type { ActiveRoutine, WorkoutSession } from '@/types/training';
 
 interface RoutineOverviewCardProps {
+  /** Current routine assigned to the client. */
   routine: ActiveRoutine;
+  /** Today's workout session. */
   session: WorkoutSession;
+  /** Number of sets already recorded. */
   completedSets: number;
+  /** Number of sets prescribed for the session. */
   targetSets: number;
+  /** Opens the full routine. */
   onViewRoutine: () => void;
 }
 
+/**
+ * Shows today's prescribed workout and reports requests to open the full routine.
+ */
 export function RoutineOverviewCard({
   routine,
   session,

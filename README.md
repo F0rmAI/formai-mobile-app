@@ -1,157 +1,55 @@
 # FormAI Mobile App
 
-## Summary
+Aplicación iOS y Android para clientes de gimnasios que entrenan con una rutina asignada. Es un proyecto bare de React Native 0.87.1 (Community CLI) con React 19.3.0, TypeScript y Tailwind CSS 4.3.3 mediante Uniwind. No usa Expo.
 
-**FormAI** es una plataforma de seguimiento de entrenamientos personalizados en gimnasios que conecta
-a **entrenadores personales** con sus **clientes**. Centraliza la gestión de la cartera de atletas, la
-prescripción de rutinas y el registro en tiempo real de lo que se ejecuta, y reemplaza las hojas de
-cálculo y los chats informales. Su diferenciador es un módulo de **IA que reconoce máquinas de gimnasio
-por foto** y muestra guías de uso animadas.
+Las ramas `feature/mobile-auth` y `feature/mobile-training-flow` ya fueron integradas en `develop`. Esta rama, `feature/api-integration`, conecta los flujos con el backend real bajo `/api`; las pantallas actuales no usan datos simulados.
 
-Este repositorio es la **aplicación móvil (iOS / Android)** para el **cliente o atleta** que entrena
-con un plan personalizado y necesita autonomía en el gimnasio.
+## Funciones disponibles
 
-### Ecosistema FormAI
+- Bienvenida, activación con código del entrenador, consentimiento, inicio y cierre de sesión.
+- Recuperación de contraseña mediante un enlace que abre la app.
+- Pestaña **Hoy**: rutina vigente, día de descanso o sesión programada; registro y corrección de series; confirmación de sesión completa o parcial; resumen final.
+- Detalle de la rutina vigente y de cada día prescrito.
+- Pestaña **Progreso**: historial paginado, filtro por rango de fechas y detalle de cada sesión.
+- Pestaña **Perfil**: nombre y correo del backend, rutina vigente y cierre de sesión confirmado.
+- Renovación compartida de sesión: ante el primer HTTP 401 o 403 de una solicitud autenticada, se renuevan las cookies y se reintenta una vez. Si falla la renovación, la app vuelve a Bienvenida. Un 403 después del reintento sigue siendo una respuesta de acceso denegado.
 
-| Repositorio | Qué es | Quién lo usa |
-|---|---|---|
-| `formai-mobile-app` (este) | App React Native (iOS/Android) | Cliente / atleta |
-| `formai-web-app` | SPA React servida por Caddy | Entrenador · Administrador |
-| `formai-api` | Backend Spring Boot (monolito modular DDD) | Ambas apps vía `/api` |
-
-## Stack
-
-| Capa | Tecnología | Versión |
-|---|---|---|
-| Framework | React Native (Community CLI, New Architecture, Hermes) | **0.87.1** |
-| UI | React | **19.3.0** |
-| Estilos | Tailwind CSS + Uniwind (bindings de Tailwind v4 para React Native) | **4.3.3** / 1.12 |
-| Lenguaje | TypeScript | 6.0 |
-| Bundler | Metro | 0.87 |
-| Tests / lint | Jest + react-test-renderer · ESLint (`@react-native/eslint-config`, `eslint-plugin-tsdoc`) + Prettier | — |
-| Navegación | React Navigation (`native-stack`, `bottom-tabs`) + `react-native-screens` | 7.x / 4.x |
-| Safe area | `react-native-safe-area-context` | 5.x |
-| Tipografía | Plus Jakarta Sans (TTF 400/600/700/800) | — |
-| Íconos | Material Symbols Rounded (TTF por ligaduras, peso 400) | — |
-| Utilidades de clases | `clsx` + `tailwind-merge` | 2.1 / 3.7 |
-| Backend (contexto) | Spring Boot · PostgreSQL · Caddy (HTTPS, `/api`, `/media`) | — |
-
-> Se usa la **Community CLI** según la guía oficial *Get Started Without a Framework*, porque ningún SDK
-> de Expo trabaja sobre React Native 0.87. Los módulos de cámara, video y notificaciones se eligen en
-> sus ramas de feature, entre librerías compatibles con 0.87.
-
-## Features
-
-- **Activación de cuenta** con el código de invitación de 72 h del entrenador, definición de contraseña y consentimiento obligatorio para datos personales y de salud (Ley N.° 29733).
-- **Recuperación de contraseña**: el cliente pide un enlace a su correo (válido 30 minutos y de un solo uso) y crea su nueva contraseña al abrirlo en la app.
-- **Rutina del día**: sesión programada con ejercicios, series, cargas objetivo y descansos; detalle de cualquier otra sesión.
-- **Registro de entrenamiento**: carga (kg) y repeticiones reales por serie, con corrección antes de cerrar.
-- **Cierre de sesión** como **Completada** o **Parcial**; marcado automático como **Omitida** si el día termina sin registros.
-- **Historial y progreso**: entrenamientos pasados por serie, volumen acumulado y gráficos de evolución.
-- **Recordatorios push** de sesiones pendientes.
-- **Reconocimiento de máquinas con IA**: foto con la cámara → máquina identificada y nivel de confianza.
-- **Fallback**: si la confianza es menor a 0,70 o la foto es ilegible, se muestran las 3 opciones más probables y un buscador manual.
-- **Guía animada** (MP4 ≤ 30 s en streaming) junto con los datos del ejercicio de la rutina.
-- **Indicaciones de texto**: hasta 4 pasos clave y 2 errores comunes, indicando qué requiere supervisión profesional.
-- **Retroalimentación**: el cliente confirma o corrige la máquina reconocida para mejorar el modelo.
+**Siguiente incremento:** métricas y gráficos de progreso, recordatorios y reconocimiento de máquinas con cámara, alternativas y guías. No están implementados en estas pantallas.
 
 ## Arquitectura
 
-```
-src/
-├── components/   ui/ (design system) + layout/ (AppHeader, TopBar, BottomNav, TabScreenLayout)
-├── screens/      pantallas completas
-├── navigation/   navegadores de React Navigation (pestañas…)
-├── hooks/        estado y casos de uso de la UI
-├── services/     acceso al backend (apiClient + config)
-├── context/      estado global (sesión…)
-├── utils/        funciones puras (cn…)
-├── types/        tipos compartidos
-├── assets/       imágenes estáticas (isotipo)
-├── tokens.css    design tokens de FormAI (idéntico en web y mobile)
-├── global.css    Tailwind + Uniwind + tokens + fuentes
-└── App.tsx       providers + navegación (registrado en index.js)
-assets/fonts/     TTF enlazados en iOS y Android (react-native.config.js)
+```text
+App → Navigation → Screens → Components
+                         │
+                         ▼
+                       Hooks → Services → Backend /api
 ```
 
-```
-App ──► Navigation ──► Screens ──► Components
-                          │
-                          ▼
-                        Hooks ──► Services ──► Backend/API
-```
+`src/components/ui` contiene los primitivos del design system; `src/components/layout` contiene los contenedores y la navegación propios de mobile. Las pantallas componen componentes y consumen hooks; los hooks manejan estado y llaman a services; solo los services usan `apiClient`. `src/context` comparte la sesión y el perfil entre pantallas. Cada capa tiene un `README.md` con sus reglas. `src/tokens.css` es compartido byte por byte con la app web y no se debe cambiar solo en este repositorio.
 
-Cada carpeta tiene un `README.md` que explica para qué sirve la capa, qué va y qué no, y un ejemplo:
-[components](src/components/README.md) · [screens](src/screens/README.md) · [navigation](src/navigation/README.md) · [hooks](src/hooks/README.md) ·
-[services](src/services/README.md) · [context](src/context/README.md) · [utils](src/utils/README.md) ·
-[types](src/types/README.md).
+## Desarrollo con formai-api local
 
-## Design system
+Requisitos: Node.js ≥ 22.11.0, Xcode y CocoaPods para iOS, o Android Studio y JDK 17 para Android. Instala las dependencias ya declaradas con `npm install` si aún no están disponibles. La API debe estar activa en el puerto 8080 y atender `/api`.
 
-- Fuente: Figma **FormAI › `formai_design_system`** (Foundations + Components).
-- `src/tokens.css` define los tokens como variables `@theme` de Tailwind v4 (el mismo archivo que la web): colores (`bg-primary`, `text-content-secondary`, `border-line-subtle`…), tipografía (`text-title`, `text-body-l`…), radios (`rounded-md`), espaciado (`p-xl`, `gap-md`) y elevación (`shadow-card`, `shadow-glow-primary`).
-- Uniwind compila esas clases en build time y agrega `className` a los componentes de React Native.
-- Los componentes de `components/ui` tienen **la misma API que en la web** (en mobile el evento es `onPress`) y usan **`primary` como color por defecto**.
-- En React Native cada peso tipográfico es una familia (`font-sans`, `font-sans-semibold`, `font-sans-bold`, `font-sans-extrabold`): usa siempre `<Text variant="…">`.
-- Íconos por ligadura: `<Icon name="fitness_center" />`.
-
-## Convenciones de código
-
-- **Mobile-first:** la base es el teléfono en vertical; lo que cambie en pantallas más anchas se agrega con prefijos de ancho mínimo.
-- **Documentación TSDoc en inglés:** cada archivo lleva una cabecera con `@packageDocumentation` y `@author`, y todo lo exportado tiene su comentario. `@author` está declarado como tag propio en `tsdoc.json` y ESLint valida la sintaxis (`tsdoc/syntax`).
-- **Tests en `__tests__/`:** utilidades, hooks, services y la pantalla inicial.
-
-## Primeros pasos
-
-Requisitos: Node.js ≥ 22.13, Xcode + CocoaPods (iOS) y Android Studio con JDK 17 (Android).
-Sigue la guía oficial [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment).
+Configura **`JWT_COOKIE_SECURE=false` al iniciar formai-api local**. iOS Simulator y Android Emulator acceden al backend por HTTP y no envían cookies marcadas `Secure`; sin esa configuración, el inicio y la renovación de sesión no funcionan. En desarrollo, [`src/services/config.ts`](src/services/config.ts) usa `http://localhost:8080/api` en iOS Simulator y `http://10.0.2.2:8080/api` en Android Emulator. Para un dispositivo físico, configura una dirección alcanzable desde ese dispositivo antes de ejecutar la app.
 
 ```bash
-npm install
-
-# iOS
-bundle install && (cd ios && bundle exec pod install)   # o: (cd ios && pod install)
-npm run ios
-
-# Android
-npm run android
-
-# Metro (si no se abrió solo)
 npm start
+npm run ios       # o npm run android
+npm run typecheck
+npm run lint
+npm test -- --watchman=false
 ```
 
-Al iniciar verás la **bienvenida**; después de iniciar sesión, la pestaña **Hoy** y la barra inferior
-para moverte entre **Hoy**, **Progreso** y **Perfil**. El contenido de cada pestaña es provisional hasta que llegue su feature.
+Después de agregar una dependencia nativa en iOS, ejecuta `cd ios && bundle exec pod install`. Los archivos de prueba viven en `__tests__/`; Jest simula los módulos nativos necesarios y no requiere red.
 
-| Script | Qué hace |
-|---|---|
-| `npm start` | Inicia Metro. |
-| `npm run ios` / `npm run android` | Compila e instala la app en simulador o emulador. |
-| `npm test` | Tests con Jest. |
-| `npm run lint` | ESLint + Prettier + sintaxis TSDoc. |
-| `npm run typecheck` | `tsc --noEmit`. |
+## Enlace de recuperación de contraseña
 
-### Enlaces que abren la app
-
-El correo de recuperación trae un enlace `…/password-reset?token=…` que abre la pantalla **Nueva contraseña**
-(`src/navigation/linking.ts`). La app responde a `formai://password-reset` y a `https://formai.app/password-reset`.
-
-En desarrollo el backend apunta ese enlace a la web local (`PASSWORD_RESET_URL`), así que se copia el token y se abre a mano:
+El correo contiene `…/password-reset?token=…`. [`src/navigation/linking.ts`](src/navigation/linking.ts) acepta `formai://password-reset?token=…` y `https://formai.app/password-reset?token=…` y abre **Nueva contraseña**. Para probar el esquema local:
 
 ```bash
-# iOS
-xcrun simctl openurl booted "formai://password-reset?token=<token>"
-
-# Android
-adb shell am start -a android.intent.action.VIEW -d "formai://password-reset?token=<token>"
+xcrun simctl openurl booted 'formai://password-reset?token=<token>'
+adb shell am start -a android.intent.action.VIEW -d 'formai://password-reset?token=<token>'
 ```
 
-Para que el enlace `https://formai.app/…` abra la app sin pasar por el navegador faltan, fuera de este repositorio,
-`/.well-known/assetlinks.json` (Android) y `/.well-known/apple-app-site-association` junto con la capability
-*Associated Domains* (iOS).
-
-### Agregar una fuente
-
-1. Copia el `.ttf` a `assets/fonts/` (nombre del archivo = nombre PostScript).
-2. Ejecuta `npx react-native-asset`.
-3. Declárala en el bloque `@theme` de `src/global.css`.
+El enlace HTTPS requiere la asociación de dominio de iOS y `/.well-known/assetlinks.json` en Android para abrir directamente la app. Si el backend local genera un enlace web, copia el token y usa el esquema `formai://` para probar el flujo en el simulador o emulador.

@@ -1,5 +1,14 @@
+/**
+ * Today's workout state and recording actions.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { trainingService } from '@/services/training.service';
+import { ApiError } from '@/services/api-client';
+import { activeRoutineService } from '@/services/active-routine.service';
+import { workoutSessionService } from '@/services/workout-session.service';
 import type {
   ActiveRoutine,
   RecordSetInput,
@@ -7,28 +16,45 @@ import type {
   WorkoutSession,
 } from '@/types/training';
 
+/** Maps backend failures to safe Spanish messages. */
 function messageOf(error: unknown) {
-  return error instanceof Error
-    ? error.message
-    : 'Ocurrió un error inesperado. Inténtalo nuevamente.';
+  if (error instanceof ApiError) {
+    if (error.status === 422)
+      return 'Revisa el peso y las repeticiones e inténtalo de nuevo.';
+    if (error.status === 409)
+      return 'La sesión ya terminó o esta acción no está disponible. Actualiza la pantalla.';
+    if (error.status === 404)
+      return 'No encontramos esta sesión. Actualiza la pantalla.';
+  }
+  return 'No pudimos completar la solicitud. Revisa tu conexión e inténtalo de nuevo.';
 }
 
+/**
+ * Loads today's routine and handles set recording and session completion.
+ *
+ * @returns The routine, session, summary, request state and workout actions.
+ *
+ * @example
+ * ```tsx
+ * const { session, isLoading, error, recordSet } = useTraining();
+ * ```
+ */
 export function useTraining() {
   const [routine, setRoutine] = useState<ActiveRoutine | null>();
   const [session, setSession] = useState<WorkoutSession>();
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>();
 
   const load = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
     setError(undefined);
     try {
-      const activeRoutine = await trainingService.getActiveRoutine();
+      const activeRoutine = await activeRoutineService.getActiveRoutine();
       setRoutine(activeRoutine);
-      if (activeRoutine) {
+      if (activeRoutine?.todayWorkoutSessionId) {
         setSession(
-          await trainingService.getWorkoutSession(
+          await workoutSessionService.getWorkoutSession(
             activeRoutine.todayWorkoutSessionId,
           ),
         );
@@ -38,7 +64,7 @@ export function useTraining() {
     } catch (loadError) {
       setError(messageOf(loadError));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
@@ -51,10 +77,46 @@ export function useTraining() {
       if (!session) {
         return false;
       }
+      if (
+        !Number.isFinite(input.loadKg) ||
+        input.loadKg < 0 ||
+        !Number.isInteger(input.reps) ||
+        input.reps < 1
+      ) {
+        setError('Ingresa un peso válido y al menos una repetición.');
+        return false;
+      }
       setSaving(true);
       setError(undefined);
       try {
-        setSession(await trainingService.recordSet(session.id, input));
+        setSession(await workoutSessionService.recordSet(session.id, input));
+        return true;
+      } catch (saveError) {
+        setError(messageOf(saveError));
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [session],
+  );
+
+  const correctSet = useCallback(
+    async (input: RecordSetInput) => {
+      if (!session || session.status !== 'PENDING') return false;
+      if (
+        !Number.isFinite(input.loadKg) ||
+        input.loadKg < 0 ||
+        !Number.isInteger(input.reps) ||
+        input.reps < 1
+      ) {
+        setError('Ingresa un peso válido y al menos una repetición.');
+        return false;
+      }
+      setSaving(true);
+      setError(undefined);
+      try {
+        setSession(await workoutSessionService.correctSet(session.id, input));
         return true;
       } catch (saveError) {
         setError(messageOf(saveError));
@@ -74,7 +136,7 @@ export function useTraining() {
       setSaving(true);
       setError(undefined);
       try {
-        const completed = await trainingService.finishSession(
+        const completed = await workoutSessionService.finishSession(
           session.id,
           confirmPartial,
         );
@@ -114,11 +176,12 @@ export function useTraining() {
     routine,
     session,
     summary,
-    loading,
+    isLoading,
     saving,
     error,
     retry: load,
     recordSet,
+    correctSet,
     finishSession,
   };
 }

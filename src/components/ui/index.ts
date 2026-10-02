@@ -30,3 +30,4 @@ export { Text, type TextProps } from './Text';
 export { TextField, type TextFieldProps } from './TextField';
 export { Toast, type ToastProps } from './Toast';
 export { Toggle, type ToggleProps } from './Toggle';
+export { WelcomeHero } from './WelcomeHero';

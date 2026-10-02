@@ -1,5 +1,15 @@
+/**
+ * Password reset redemption state and actions.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useCallback, useState } from 'react';
-import { authService, isRejectedResetLink } from '@/services/auth.service';
+import {
+  isRejectedResetLink,
+  passwordResetService,
+} from '@/services/password-reset.service';
 import {
   CONNECTION_ERROR_MESSAGE,
   isValidPassword,
@@ -8,13 +18,21 @@ import {
 interface ResetPasswordErrors {
   password?: string;
   confirmPassword?: string;
-  /** Fallo que no pertenece a un campo (p. ej. sin conexión). */
+  /** Failure unrelated to either field, such as loss of connectivity. */
   form?: string;
 }
 
 /**
- * Recuperación de contraseña, paso 2: el cliente crea una nueva contraseña con el
- * token del enlace. `isLinkExpired` indica que el enlace falta, venció o ya se usó.
+ * Redeems a password-reset token and validates the new credentials.
+ *
+ * @param token - Single-use token from the email deep link.
+ * @param onReset - Opens sign-in after the password changes.
+ * @returns The field values, `errors`, `isSubmitting`, `isLinkExpired` and actions.
+ *
+ * @example
+ * ```tsx
+ * const recovery = useResetPassword(token, openSignIn);
+ * ```
  */
 export function useResetPassword(
   token: string | undefined,
@@ -25,7 +43,7 @@ export function useResetPassword(
   const [errors, setErrors] = useState<ResetPasswordErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRejected, setIsRejected] = useState(false);
-  // Un enlace sin token tampoco sirve, aunque llegue con la pantalla ya abierta.
+  // A link without a token is invalid even if this screen is already open.
   const isLinkExpired = !token || isRejected;
 
   const clearError = (field: keyof ResetPasswordErrors) =>
@@ -60,7 +78,7 @@ export function useResetPassword(
     setErrors({});
     setIsSubmitting(true);
     try {
-      await authService.resetPassword({ token, password });
+      await passwordResetService.resetPassword({ token, password });
       onReset();
     } catch (resetError) {
       if (isRejectedResetLink(resetError)) {

@@ -41,25 +41,48 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
-/**
- * Sends a JSON request to the backend and parses the response.
- *
- * @typeParam T - Shape of the response body.
- * @param method - HTTP method.
- * @param path - Path appended to the base URL, starting with `/`.
- * @param options - Body, extra headers and abort signal.
- * @returns The parsed response body, or `undefined` when the response is not JSON.
- * @throws {@link ApiError} when the response status is not in the 2xx range.
- */
-async function request<T>(
+let refreshInFlight: Promise<unknown> | undefined;
+let unauthorizedHandler: (() => void) | undefined;
+
+/** Registers the callback used when session renewal fails. */
+export function setUnauthorizedHandler(handler?: () => void) {
+  unauthorizedHandler = handler;
+}
+
+/** Shares one refresh request across startup restoration and protected requests. */
+export function refreshSession<T>(): Promise<T> {
+  if (!refreshInFlight) {
+    refreshInFlight = send<T>('POST', '/v1/authentication/refresh')
+      .catch(error => {
+        unauthorizedHandler?.();
+        throw error;
+      })
+      .finally(() => {
+        refreshInFlight = undefined;
+      });
+  }
+  return refreshInFlight as Promise<T>;
+}
+
+const publicPaths = [
+  '/v1/authentication/sign-in',
+  '/v1/authentication/refresh',
+  '/v1/authentication/sign-out',
+  '/v1/activation-code-verifications',
+  '/v1/account-activations',
+  '/v1/password-reset-requests',
+  '/v1/password-resets',
+];
+
+/** Performs one request and parses optional JSON, including empty error bodies. */
+async function send<T>(
   method: HttpMethod,
   path: string,
   { body, headers, signal }: RequestOptions = {},
-) {
+): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     method,
     signal,
-    // The session travels in httpOnly cookies issued by the backend.
     credentials: 'include',
     headers: {
       Accept: 'application/json',
@@ -68,11 +91,14 @@ async function request<T>(
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-
-  // Los errores del backend llegan como `application/problem+json` (RFC 7807).
-  const isJson = response.headers.get('content-type')?.includes('json');
-  const data: unknown = isJson ? await response.json() : undefined;
-
+  let data: unknown;
+  if (response.headers.get('content-type')?.includes('json')) {
+    try {
+      data = await response.json();
+    } catch {
+      data = undefined;
+    }
+  }
   if (!response.ok) {
     throw new ApiError(
       response.status,
@@ -80,8 +106,28 @@ async function request<T>(
       data,
     );
   }
-
   return data as T;
+}
+
+/** Retries an authenticated request once after shared session renewal. */
+async function request<T>(
+  method: HttpMethod,
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  try {
+    return await send<T>(method, path, options);
+  } catch (error) {
+    if (
+      publicPaths.includes(path) ||
+      !(error instanceof ApiError) ||
+      (error.status !== 401 && error.status !== 403)
+    ) {
+      throw error;
+    }
+    await refreshSession();
+    return send<T>(method, path, options);
+  }
 }
 
 /**

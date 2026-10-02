@@ -15,9 +15,17 @@ import { cn } from '@/utils/cn';
  */
 export interface NavItemProps
   extends Omit<PressableProps, 'children' | 'style'> {
+  /** Ligature name of the tab icon. */
   icon: IconName;
+  /** Tab label shown below the icon. */
   label: string;
+  /**
+   * Marks the currently selected tab.
+   *
+   * @defaultValue `false`
+   */
   active?: boolean;
+  /** Extra classes for layout adjustments. */
   className?: string;
 }
 

@@ -1,8 +1,14 @@
+/**
+ * Account activation code entry screen.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TopBar } from '@/components/layout';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { Button, Text, TextField } from '@/components/ui';
 import { useActivationCode } from '@/hooks/useActivationCode';
 import type { RootStackParamList } from '@/types/navigation';
@@ -12,12 +18,11 @@ type ActivationCodeScreenProps = NativeStackScreenProps<
   'ActivationCode'
 >;
 
-/** Activación de cuenta, paso 1: el código que entregó el entrenador. */
+/** Shows trainer code entry using useActivationCode for verification. */
 export function ActivationCodeScreen({
   navigation,
   route,
 }: ActivationCodeScreenProps) {
-  const insets = useSafeAreaInsets();
   const goToPassword = useCallback(
     (activationCode: string) =>
       navigation.navigate('ActivationPassword', { activationCode }),
@@ -35,10 +40,7 @@ export function ActivationCodeScreen({
   }, [codeRejected, markRejected, navigation]);
 
   return (
-    <View
-      className="flex-1 bg-surface-background"
-      style={{ paddingTop: insets.top }}
-    >
+    <ScreenContainer>
       <TopBar title="Activar cuenta" onBack={navigation.goBack} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -76,6 +78,6 @@ export function ActivationCodeScreen({
           onPress={submit}
         />
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

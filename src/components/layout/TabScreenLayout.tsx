@@ -1,3 +1,10 @@
+/**
+ * Scrollable layout for main tab screens.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -5,19 +12,31 @@ import { Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AppHeader, type AppHeaderProps } from './AppHeader';
 
+/**
+ * Props accepted by {@link TabScreenLayout}.
+ */
 export interface TabScreenLayoutProps {
-  /** Texto bajo la marca en el header (p. ej. "Entrenamiento de hoy"). */
+  /** Text shown below the brand in the header. */
   headerSubtitle: string;
+  /** Signed-in user shown in the header. */
   user?: AppHeaderProps['user'];
+  /** Main screen heading. */
   title: string;
+  /** Supporting text below the heading. */
   subtitle?: string;
+  /** Scrollable screen content. */
   children?: ReactNode;
+  /** Extra classes for the outer container. */
   className?: string;
 }
 
 /**
- * Estructura de las pantallas con navegación inferior: header de marca, título
- * y contenido desplazable con espacio para que el `BottomNav` no lo tape.
+ * Renders the branded tab header and scrollable content above the bottom navigation.
+ *
+ * @example
+ * ```tsx
+ * <TabScreenLayout headerSubtitle="Today" title="Workout">{content}</TabScreenLayout>
+ * ```
  */
 export function TabScreenLayout({
   headerSubtitle,

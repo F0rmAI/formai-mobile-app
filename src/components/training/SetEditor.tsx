@@ -1,111 +1,67 @@
+/**
+ * Editable set recording form.
+ *
+ * @author Melina
+ * @packageDocumentation
+ */
+
 import { useEffect, useState } from 'react';
-import { TextInput, View } from 'react-native';
-import { Badge, Button, IconButton, Text } from '@/components/ui';
+import { View } from 'react-native';
+import { Badge, Button, Text } from '@/components/ui';
 import type { RecordSetInput, WorkoutExercise } from '@/types/training';
-import { cn } from '@/utils/cn';
+import { StepperField } from './StepperField';
 
-interface StepperFieldProps {
-  label: string;
-  value: string;
-  suffix: string;
-  step: number;
-  error?: string;
-  onChange: (value: string) => void;
-}
-
-function StepperField({
-  label,
-  value,
-  suffix,
-  step,
-  error,
-  onChange,
-}: StepperFieldProps) {
-  const changeBy = (delta: number) => {
-    const numericValue = Number(value.replace(',', '.')) || 0;
-    onChange(String(Math.max(0, Math.round((numericValue + delta) * 10) / 10)));
-  };
-
-  return (
-    <View
-      className={cn(
-        'min-w-0 flex-1 gap-sm rounded-md bg-surface-card px-md py-xl',
-        error && 'border border-error',
-      )}
-    >
-      <Text variant="overline" tone="secondary" className="text-center">
-        {label}
-      </Text>
-      <View className="flex-row items-center gap-xs">
-        <IconButton
-          icon="remove"
-          label={`Disminuir ${label.toLowerCase()}`}
-          onPress={() => changeBy(-step)}
-        />
-        <View className="min-w-0 flex-1 flex-row items-baseline justify-center gap-2xs">
-          <TextInput
-            accessibilityLabel={label}
-            keyboardType="decimal-pad"
-            value={value}
-            maxLength={5}
-            onChangeText={onChange}
-            selectTextOnFocus
-            className="w-10 p-0 text-right font-sans-extrabold text-headline text-content-primary"
-          />
-          <Text variant="caption" tone="secondary" numberOfLines={1}>
-            {suffix}
-          </Text>
-        </View>
-        <IconButton
-          icon="add"
-          label={`Aumentar ${label.toLowerCase()}`}
-          onPress={() => changeBy(step)}
-        />
-      </View>
-      {error && (
-        <Text variant="caption" tone="error" accessibilityRole="alert">
-          {error}
-        </Text>
-      )}
-    </View>
-  );
-}
-
+/** Props accepted by the set editor. */
 interface SetEditorProps {
+  /** Exercise whose set is being edited. */
   exercise: WorkoutExercise;
+  /** One-based number of the set. */
   setNumber: number;
+  /** Disables submission while the request is in progress. */
   saving: boolean;
+  /** Previously recorded load in kilograms. */
+  initialLoad?: number;
+  /** Previously recorded repetition count. */
+  initialReps?: number;
+  /** Saves the entered values and reports whether the request succeeded. */
   onSave: (input: RecordSetInput) => Promise<boolean>;
 }
 
+/** Edits a prescribed or recorded set with numeric validation. */
 export function SetEditor({
   exercise,
   setNumber,
   saving,
+  initialLoad,
+  initialReps,
   onSave,
 }: SetEditorProps) {
-  const [load, setLoad] = useState(String(exercise.targetLoadKg));
-  const [reps, setReps] = useState(String(exercise.targetReps));
+  const [load, setLoad] = useState(
+    String(initialLoad ?? exercise.targetLoadKg),
+  );
+  const [reps, setReps] = useState(String(initialReps ?? exercise.targetReps));
   const [validation, setValidation] = useState<{
     field: 'load' | 'reps';
     message: string;
   }>();
 
   useEffect(() => {
-    setLoad(String(exercise.targetLoadKg));
-    setReps(String(exercise.targetReps));
+    setLoad(String(initialLoad ?? exercise.targetLoadKg));
+    setReps(String(initialReps ?? exercise.targetReps));
     setValidation(undefined);
   }, [
     exercise.exerciseId,
     exercise.targetLoadKg,
     exercise.targetReps,
+    initialLoad,
+    initialReps,
     setNumber,
   ]);
 
   const save = async () => {
     const parsedLoad = Number(load.replace(',', '.'));
     const parsedReps = Number(reps.replace(',', '.'));
-    if (!Number.isFinite(parsedLoad) || parsedLoad < 0) {
+    if (!load.trim() || !Number.isFinite(parsedLoad) || parsedLoad < 0) {
       setValidation({ field: 'load', message: 'Ingresa un peso válido.' });
       return;
     }
@@ -129,7 +85,10 @@ export function SetEditor({
     <View className="gap-md rounded-md bg-surface-container-low p-3">
       <View className="flex-row items-center justify-between">
         <Text variant="label-l">Serie {setNumber}</Text>
-        <Badge label="En curso" tone="secondary" />
+        <Badge
+          label={initialLoad !== undefined ? 'Corrigiendo' : 'En curso'}
+          tone="secondary"
+        />
       </View>
       <View className="flex-row gap-md">
         <StepperField
@@ -150,7 +109,9 @@ export function SetEditor({
         />
       </View>
       <Button
-        label="Registrar serie"
+        label={
+          initialLoad !== undefined ? 'Guardar corrección' : 'Registrar serie'
+        }
         icon="check"
         size="md"
         variant="accent"

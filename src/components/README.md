@@ -19,6 +19,7 @@ de FormAI (Figma › `formai_design_system`).
 | `TopBar` | Barra superior con botón volver y acción opcional. |
 | `BottomNav` / `NavItem` | Navegación inferior (MVP: Hoy, Progreso, Perfil; TB2 agrega Escanear). |
 | `TabScreenLayout` | Estructura de las pantallas con navegación inferior: header, título y contenido desplazable. |
+| `ScreenContainer` / `InsetToast` | Insets del sistema para rutas completas y avisos sobre la zona de gestos. |
 
 ## Reglas
 

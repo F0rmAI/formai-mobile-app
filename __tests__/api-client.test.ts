@@ -5,7 +5,12 @@
  * @packageDocumentation
  */
 
-import { ApiError, apiClient } from '@/services/api-client';
+import {
+  ApiError,
+  apiClient,
+  refreshSession,
+  setUnauthorizedHandler,
+} from '@/services/api-client';
 import { API_URL } from '@/services/config';
 
 /** Builds the minimal response shape the client reads. */
@@ -72,5 +77,110 @@ describe('apiClient', () => {
     fetchMock.mockResolvedValue(jsonResponse(undefined, 204));
 
     await expect(apiClient.delete('/items/1')).resolves.toBeUndefined();
+  });
+  it('renews on a protected 403 and retries once', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(undefined, 403))
+      .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
+      .mockResolvedValueOnce(jsonResponse({ id: 'routine' }));
+    await expect(apiClient.get('/v1/active-routines/me')).resolves.toEqual({
+      id: 'routine',
+    });
+    expect(
+      fetchMock.mock.calls.map(([url]) => String(url).split('/api')[1]),
+    ).toEqual([
+      '/v1/active-routines/me',
+      '/v1/authentication/refresh',
+      '/v1/active-routines/me',
+    ]);
+  });
+
+  it('calls the unauthorized handler after a failed refresh', async () => {
+    const handler = jest.fn();
+    setUnauthorizedHandler(handler);
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(undefined, 403))
+      .mockResolvedValueOnce(jsonResponse(undefined, 401));
+    await expect(apiClient.get('/v1/client-profiles/me')).rejects.toMatchObject(
+      { status: 401 },
+    );
+    expect(handler).toHaveBeenCalledTimes(1);
+    setUnauthorizedHandler();
+  });
+
+  it('keeps the session after a retried genuine 403', async () => {
+    const handler = jest.fn();
+    setUnauthorizedHandler(handler);
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(undefined, 403))
+      .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
+      .mockResolvedValueOnce(jsonResponse(undefined, 403));
+    await expect(apiClient.get('/v1/active-routines/me')).rejects.toMatchObject(
+      { status: 403 },
+    );
+    expect(handler).not.toHaveBeenCalled();
+    setUnauthorizedHandler();
+  });
+
+  it('shares one refresh across concurrent protected requests and startup restore', async () => {
+    let resolveRefresh!: (response: Response) => void;
+    const deferred = new Promise<Response>(resolve => {
+      resolveRefresh = resolve;
+    });
+    fetchMock.mockImplementation(async url => {
+      const path = String(url);
+      if (path.endsWith('/refresh')) return deferred;
+      if (
+        fetchMock.mock.calls.filter(([requestUrl]) => requestUrl === url)
+          .length === 1
+      )
+        return jsonResponse(undefined, 403);
+      return jsonResponse({ ok: true });
+    });
+    const first = apiClient.get('/v1/a');
+    const second = apiClient.get('/v1/b');
+    await Promise.resolve();
+    const restore = refreshSession();
+    resolveRefresh(jsonResponse({ id: 'user' }));
+    await expect(Promise.all([first, second, restore])).resolves.toEqual([
+      { ok: true },
+      { ok: true },
+      { id: 'user' },
+    ]);
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/refresh')),
+    ).toHaveLength(1);
+  });
+
+  it('renews after an initial 401, but skips public sign-in errors', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(undefined, 401))
+      .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
+      .mockResolvedValueOnce(jsonResponse({ ok: true }))
+      .mockResolvedValueOnce(jsonResponse(undefined, 401));
+    await expect(apiClient.get('/v1/client-profiles/me')).resolves.toEqual({
+      ok: true,
+    });
+    await expect(
+      apiClient.post('/v1/authentication/sign-in', {}),
+    ).rejects.toMatchObject({ status: 401 });
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/refresh')),
+    ).toHaveLength(1);
+  });
+
+  it('accepts malformed JSON error bodies without crashing', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      headers: { get: () => 'application/problem+json' },
+      json: async () => {
+        throw new Error('bad json');
+      },
+    } as unknown as Response);
+    await expect(apiClient.get('/v1/items')).rejects.toMatchObject({
+      status: 500,
+      body: undefined,
+    });
   });
 });

@@ -1,3 +1,10 @@
+/**
+ * Account activation form state and actions.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
 import { useCallback, useState } from 'react';
 import {
   accountActivationService,
@@ -6,7 +13,7 @@ import {
 import {
   CONNECTION_ERROR_MESSAGE,
   DATA_CONSENT,
-  EMAIL_TAKEN_MESSAGE,
+  ACTIVATION_CONFLICT_MESSAGE,
   INVALID_EMAIL_MESSAGE,
   isValidEmail,
   isValidPassword,
@@ -17,19 +24,27 @@ interface ActivationErrors {
   password?: string;
   confirmPassword?: string;
   consent?: string;
-  /** Fallo que no pertenece a un campo (p. ej. sin conexión). */
+  /** Failure unrelated to one field, such as a connection error. */
   form?: string;
 }
 
 interface ActivationCallbacks {
   onActivated: (email: string) => void;
-  /** El código dejó de ser válido entre la verificación y la activación. */
+  /** The code became invalid between verification and activation. */
   onCodeRejected: () => void;
 }
 
 /**
- * Paso 2 de la activación: el cliente registra el correo con el que iniciará sesión,
- * su contraseña y el consentimiento.
+ * Validates credentials and consent before activating a client account.
+ *
+ * @param activationCode - Code previously verified with the backend.
+ * @param callbacks - Navigation actions after activation or code rejection.
+ * @returns The field values, `errors`, `isSubmitting` and form actions.
+ *
+ * @example
+ * ```tsx
+ * const activation = useAccountActivation(code, { onActivated, onCodeRejected });
+ * ```
  */
 export function useAccountActivation(
   activationCode: string,
@@ -72,8 +87,7 @@ export function useAccountActivation(
       found.email = INVALID_EMAIL_MESSAGE;
     }
     if (!isValidPassword(password)) {
-      found.password =
-        'La contraseña debe tener mínimo 8 caracteres, con letras y números.';
+      found.password = 'La contraseña debe tener entre 8 y 128 caracteres.';
     } else if (confirmPassword !== password) {
       found.confirmPassword = 'Las contraseñas no coinciden.';
     }
@@ -101,8 +115,8 @@ export function useAccountActivation(
         case 'code-rejected':
           onCodeRejected();
           break;
-        case 'email-taken':
-          setErrors({ email: EMAIL_TAKEN_MESSAGE });
+        case 'account-conflict':
+          setErrors({ form: ACTIVATION_CONFLICT_MESSAGE });
           break;
         case 'invalid-email':
           setErrors({ email: INVALID_EMAIL_MESSAGE });

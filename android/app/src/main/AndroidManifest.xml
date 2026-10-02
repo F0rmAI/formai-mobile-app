@@ -22,14 +22,14 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
-        <!-- Enlace del correo de recuperación de contraseña (src/navigation/linking.ts). -->
+        <!-- Password-reset email link (src/navigation/linking.ts). -->
         <intent-filter>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="formai" android:host="password-reset" />
         </intent-filter>
-        <!-- App Link: requiere https://formai.app/.well-known/assetlinks.json para abrir la app sin preguntar. -->
+        <!-- App Link: requires https://formai.app/.well-known/assetlinks.json to open the app directly. -->
         <intent-filter android:autoVerify="true">
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />

@@ -8,10 +8,15 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 | Archivo | Uso |
 |---|---|
 | `config.ts` | URL base del backend y prefijos de los enlaces que abren la app. La URL base vive en `services/config.ts` (RN no lee `.env` sin una librería adicional). |
-| `auth.service.ts` | Inicio, renovación y cierre de sesión (`/v1/authentication/*`); la sesión viaja en cookies httpOnly. También la recuperación de contraseña: pedir el enlace (`/v1/password-reset-requests`) y canjear su token (`/v1/password-resets`). |
+| `auth.service.ts` | Inicio, renovación y cierre de sesión (`/v1/authentication/*`); la sesión viaja en cookies httpOnly. |
+| `password-reset.service.ts` | Solicitud del enlace (`/v1/password-reset-requests`) y canje de su token (`/v1/password-resets`). |
 | `client-profile.service.ts` | Nombre y correo del cliente con sesión (`/v1/client-profiles/me`). |
 | `account-activation.service.ts` | Verificación del código (`/v1/activation-code-verifications`) y activación de la cuenta con el correo que elige el cliente (`/v1/account-activations`). |
-| `api-client.ts` | Cliente `fetch` único (`apiClient.get/post/put/patch/delete`) con JSON y `ApiError` tipado. |
+| `api-client.ts` | Cliente `fetch` único (`apiClient.get/post/put/patch/delete`) con JSON, `ApiError` y refresh compartido de sesión. |
+| `active-routine.service.ts` | Rutina vigente del cliente. |
+| `workout-session.service.ts` | Sesiones, historial, series, correcciones y finalización. |
+
+En desarrollo, la API local debe ejecutarse con `JWT_COOKIE_SECURE=false`: las cookies `Secure` no viajan por HTTP desde los simuladores. `config.ts` usa `localhost:8080` en iOS y `10.0.2.2:8080` en Android.
 
 ## Reglas
 
