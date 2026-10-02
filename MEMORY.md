@@ -1,22 +1,33 @@
-# MEMORY.md — FormAI Mobile App
+# MEMORY.md - FormAI Mobile App
 
-## Estado actual (2026-10-02)
-- `feature/mobile-auth` y `feature/mobile-training-flow` ya están integradas en `develop`; `feature/api-integration` conecta autenticación, entrenamiento, historial y perfil con recursos reales de `/api`.
-- La app muestra Bienvenida, activación, inicio/cierre de sesión, recuperación por deep link, Hoy, rutina/día, resumen, historial/detalle y Perfil. No hay servicios simulados en los flujos actuales.
-- Progreso lista sesiones y permite filtrar fechas; las métricas y los gráficos todavía pertenecen al siguiente incremento, junto con recordatorios y reconocimiento de máquinas.
-- La renovación de sesión usa una sola petición compartida tras un 401 o 403 inicial y reintenta una vez. Si falla, vuelve a Bienvenida; un 403 posterior se conserva como rechazo.
-- Tras los ajustes del simulador: auditoría frontend PASS (0 errores, 0 advertencias), lint y typecheck pasan; Jest pasa con `--watchman=false` (14 suites, 84 tests).
+Inter-session project memory. This file contains about 50 lines: summarize or remove content that no longer adds value.
 
-## Decisiones
-- Los DTO del backend mandan: estados `PENDING`, `COMPLETED`, `PARTIAL`, `SKIPPED`, días de descanso con campos nulos y sin métricas inventadas.
-- Cada recurso usa su service mediante `apiClient`; recuperación, rutina vigente y sesiones tienen archivos separados. Los hooks de datos exponen `isLoading`, errores seguros en español y acciones de recarga.
-- Los insets de pantalla y toast viven en primitivas de layout; las medidas de la bienvenida viven en UI. `tokens.css` no cambió.
-- Los tests están en `__tests__/`; los flujos de activación, autenticación y recuperación prueban sus hooks mediante la app, y los hooks de carga tienen pruebas directas.
-- El diálogo usa un fondo táctil hermano del panel para que VoiceOver alcance título, descripción y botones. Los iconos decorativos se ocultan a accesibilidad y Button anuncia su etiqueta.
-- El historial distingue un rango aplicado, muestra el total del backend y permite quitar el filtro; la fecha local se formatea en español desde `src/utils/dates.ts`.
+## Current status (2026-10-02)
+- `develop` contains authentication, training, `/api` integration, and a single standard; it is the deployment branch. The feature branches are integrated.
+- The app shows Welcome, activation, sign-in/sign-out, deep-link password recovery, Today, routine/day, summary, history/detail, and Profile. Current flows have no mock services.
+- On 2026-10-02, the full client flow ran against local `formai-api` on iOS Simulator (iPhone 17, iOS 26.4) and Android Emulator (Medium_Phone_API_36.1, Android 16): code activation and consent, sign-in, no-routine state, today's session, set logging and correction, partial completion with confirmation, summary, history and detail, profile, routine, sign-out, and deep-link password recovery. No platform-specific fix was needed.
+- Progress lists sessions and supports date filtering. Metrics, charts, reminders, and machine recognition belong to the next increment.
+- After simulator adjustments, the frontend audit passes (0 errors, 0 warnings), lint and typecheck pass, and Jest passes with `--watchman=false` (14 suites, 84 tests).
 
-## Riesgos y cuidados
-- Para formai-api local usar `JWT_COOKIE_SECURE=false`: iOS Simulator y Android Emulator no envían cookies `Secure` por HTTP. Android usa `10.0.2.2:8080`; iOS usa `localhost:8080`.
-- No lanzar renovaciones independientes: la reutilización de un token rotado puede revocar las sesiones. Usar `refreshSession` en `api-client.ts`.
-- `className` solo funciona en componentes core de React Native; Android rechaza `accessibilityRole="tabbar"` y usa `tablist`.
-- Tras estos ajustes de UI falta repetir la validación nativa en iOS y Android cuando haya simuladores disponibles.
+## Decisions (and why)
+- Backend DTOs are authoritative: use `PENDING`, `COMPLETED`, `PARTIAL`, and `SKIPPED`, nullable fields on rest days, and no invented metrics.
+- Each resource has its own service through `apiClient`; recovery, current routine, and sessions have separate files. Data hooks expose `isLoading`, safe Spanish errors, and reload actions.
+- Screen insets and toast placement live in layout primitives; Welcome dimensions live in UI. `tokens.css` did not change.
+- Tests live in `__tests__/`: activation, authentication, and recovery test their hooks through the app; loading hooks have direct tests.
+- The dialog uses a touchable backdrop beside its panel so VoiceOver reaches the title, description, and buttons. Decorative icons are hidden from accessibility, and Button announces its label.
+- UI automation uses Maestro: decorative icons are hidden from accessibility and buttons expose their labels, so flows can select visible text.
+- History distinguishes an applied date range, shows the backend total, and lets users clear the filter; `src/utils/dates.ts` formats local dates in Spanish.
+- Session refresh shares one request after an initial 401 or 403 and retries once. A failed refresh returns to Welcome; a subsequent 403 remains forbidden.
+
+## Lessons learned and mistakes to avoid
+- For local `formai-api`, set `JWT_COOKIE_SECURE=false`: iOS Simulator and Android Emulator do not send `Secure` cookies over HTTP. Android uses `10.0.2.2:8080`; iOS uses `localhost:8080`.
+- Do not start independent refresh requests: reusing a rotated token can revoke sessions. Use `refreshSession` in `api-client.ts`.
+- `className` works only on React Native core components. Android rejects `accessibilityRole="tabbar"`; use `tablist`.
+- To build Android, set only `ANDROID_HOME=~/Library/Android/sdk` (without `ANDROID_SDK_ROOT`) and use JDK 17; run `adb reverse tcp:8081 tcp:8081` for Metro.
+
+## Known limits
+- On the first load from Metro, Welcome images may take a moment to appear on Android.
+- Progress metrics and charts, reminders, and machine recognition are not yet implemented.
+
+## Next steps
+- Deliver the next increment: Progress metrics and charts, reminders, and machine recognition.
