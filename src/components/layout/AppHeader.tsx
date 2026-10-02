@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import { View } from 'react-native';
+import { View, type ImageSourcePropType } from 'react-native';
 import { Avatar, BrandLogo, Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
@@ -15,8 +15,12 @@ import { cn } from '@/utils/cn';
 export interface AppHeaderProps {
   /** Text shown below the brand name. */
   subtitle?: string;
-  /** Signed-in user whose avatar is shown. */
-  user?: { name: string; avatarUrl?: string };
+  /** Signed-in user whose avatar is shown; `avatarSource` is a bundled image used instead of the URL. */
+  user?: {
+    name: string;
+    avatarUrl?: string;
+    avatarSource?: ImageSourcePropType;
+  };
   /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
@@ -48,7 +52,9 @@ export function AppHeader({ subtitle, user, className }: AppHeaderProps) {
           )}
         </View>
       </View>
-      {user && <Avatar name={user.name} src={user.avatarUrl} />}
+      {user && (
+        <Avatar name={user.name} src={user.avatarSource ?? user.avatarUrl} />
+      )}
     </View>
   );
 }

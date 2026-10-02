@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Image, View } from 'react-native';
+import { Image, View, type ImageSourcePropType } from 'react-native';
 import type { AvatarSize } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { Text } from './Text';
@@ -32,8 +32,8 @@ function initialsOf(name: string) {
 export interface AvatarProps {
   /** Name of the person, used as accessible text and for the initials. */
   name: string;
-  /** URL of the picture; initials are shown when it is missing or fails to load. */
-  src?: string;
+  /** URL or bundled image of the picture; initials are shown when it is missing or fails to load. */
+  src?: string | ImageSourcePropType;
   /**
    * Diameter preset.
    *
@@ -54,7 +54,9 @@ export interface AvatarProps {
  */
 export function Avatar({ name, src, size = 'sm', className }: AvatarProps) {
   const [failedSrc, setFailedSrc] = useState<string>();
-  const showImage = Boolean(src) && src !== failedSrc;
+  const remoteSrc = typeof src === 'string' ? src : undefined;
+  const showImage =
+    Boolean(src) && (typeof src !== 'string' || remoteSrc !== failedSrc);
 
   return (
     <View
@@ -68,10 +70,10 @@ export function Avatar({ name, src, size = 'sm', className }: AvatarProps) {
     >
       {showImage ? (
         <Image
-          source={{ uri: src }}
+          source={typeof src === 'string' ? { uri: src } : src}
           className="size-full"
           resizeMode="cover"
-          onError={() => setFailedSrc(src)}
+          onError={() => remoteSrc && setFailedSrc(remoteSrc)}
         />
       ) : (
         <Text

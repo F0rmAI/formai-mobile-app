@@ -32,6 +32,12 @@ export interface DialogProps {
   icon?: IconName;
   /** Label of the confirm button. */
   confirmLabel: string;
+  /**
+   * Whether the confirm button shows a spinner and ignores presses.
+   *
+   * @defaultValue `false`
+   */
+  confirmLoading?: boolean;
   /** Icon shown to the left of the confirm button label. */
   confirmIcon?: IconName;
   /**
@@ -71,6 +77,7 @@ export function Dialog({
   icon = tone === 'danger' ? 'warning' : 'flag',
   confirmLabel,
   confirmIcon,
+  confirmLoading = false,
   cancelLabel = 'Cancelar',
   onConfirm,
   onCancel,
@@ -120,16 +127,18 @@ export function Dialog({
               label={cancelLabel}
               variant="secondary"
               size="md"
-              className="flex-1"
+              className="flex-1 px-md"
               onPress={onCancel}
+              disabled={confirmLoading}
             />
             <Button
               label={confirmLabel}
               icon={confirmIcon}
               variant={isDanger ? 'danger' : 'primary'}
               size="md"
-              className="flex-1"
+              className="flex-1 px-md"
               onPress={onConfirm}
+              loading={confirmLoading}
             />
           </View>
         </Pressable>

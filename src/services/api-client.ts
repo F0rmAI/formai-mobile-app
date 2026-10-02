@@ -59,7 +59,7 @@ async function request<T>(
   const response = await fetch(`${API_URL}${path}`, {
     method,
     signal,
-    // La sesión viaja en cookies httpOnly que emite el backend.
+    // The session travels in httpOnly cookies issued by the backend.
     credentials: 'include',
     headers: {
       Accept: 'application/json',

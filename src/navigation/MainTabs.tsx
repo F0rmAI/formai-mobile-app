@@ -5,7 +5,7 @@ import {
 import { BottomNav, type BottomNavItem } from '@/components/layout';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { ProgressScreen } from '@/screens/ProgressScreen';
-import { TodayScreen } from '@/screens/TodayScreen';
+import { TrainingFlow } from '@/screens/TrainingFlow';
 import type { MainTabParamList } from '@/types/navigation';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -56,7 +56,7 @@ export function MainTabs() {
       tabBar={renderTabBar}
       screenOptions={{ headerShown: false }}
     >
-      <Tab.Screen name="Today" component={TodayScreen} />
+      <Tab.Screen name="Today" component={TrainingFlow} />
       <Tab.Screen name="Progress" component={ProgressScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
