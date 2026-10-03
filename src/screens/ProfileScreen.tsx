@@ -43,12 +43,11 @@ export function ProfileScreen({
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
 
-  const dayCount = routine?.trainingDays.length ?? 0;
   const routineSubtitle = isLoading
     ? 'Cargando...'
     : routine
-      ? `${routine.routineName} · ${dayCount} ${dayCount === 1 ? 'día' : 'días'}`
-      : 'Sin rutina asignada';
+    ? routine.routineName
+    : 'Sin rutina asignada';
 
   return (
     <TabScreenLayout
@@ -60,7 +59,9 @@ export function ProfileScreen({
         <View className="flex-row items-center gap-md">
           <Avatar name={profile?.fullName ?? 'Cliente'} size="md" />
           <View className="flex-1 gap-2xs">
-            <Text variant="title">{profile?.fullName ?? 'Cargando perfil'}</Text>
+            <Text variant="title">
+              {profile?.fullName ?? 'Cargando perfil'}
+            </Text>
             <Text variant="body-m" tone="secondary">
               {profile?.email ?? ''}
             </Text>
@@ -80,7 +81,7 @@ export function ProfileScreen({
         title="Recordatorios"
         subtitle={summarySubtitle}
         badge={summaryBadge}
-        badgeTone="tertiary"
+        badgeTone={summaryBadge === 'Activados' ? 'tertiary' : 'neutral'}
         onPress={() => root?.navigate('Reminders')}
       />
       {error && <Toast message={error} tone="error" />}

@@ -6,7 +6,7 @@
  */
 
 import type { ReminderPrefs, ReminderPreviewContent } from '@/types/reminders';
-import type { RoutineDay, TrainingDay } from '@/types/training';
+import type { ActiveRoutine, RoutineDay, TrainingDay } from '@/types/training';
 
 /** Maps backend training days to `Date#getDay()` values. */
 const TRAINING_DAY_TO_JS: Record<TrainingDay, number> = {
@@ -64,15 +64,15 @@ export function formatReminderSubtitle(
   prefs: ReminderPrefs,
   trainingDays: TrainingDay[] = [],
 ): string {
-  if (!prefs.enabled) {
-    return 'Desactivados';
-  }
   const time = formatClockShort(prefs.hour, prefs.minute);
-  if (trainingDays.length === 0 || trainingDays.length === 7) {
+  if (trainingDays.length === 0) {
+    return `A las ${time}`;
+  }
+  if (trainingDays.length === 7) {
     return `Todos los días a las ${time}`;
   }
-  const ordered = TRAINING_DAY_ORDER.filter((day) => trainingDays.includes(day));
-  const days = ordered.map((day) => SHORT_WEEKDAYS[day]).join(', ');
+  const ordered = TRAINING_DAY_ORDER.filter(day => trainingDays.includes(day));
+  const days = ordered.map(day => SHORT_WEEKDAYS[day]).join(', ');
   return `${days} a las ${time}`;
 }
 
@@ -93,8 +93,8 @@ export function formatClockShort(hour: number, minute: number): string {
  * @param enabled - Whether reminders are enabled.
  * @returns Badge text or `undefined` when off.
  */
-export function reminderBadgeLabel(enabled: boolean): string | undefined {
-  return enabled ? 'Activados' : undefined;
+export function reminderBadgeLabel(enabled: boolean): string {
+  return enabled ? 'Activados' : 'Desactivados';
 }
 
 /**
@@ -150,7 +150,10 @@ export function buildReminderCopy(day?: RoutineDay): ReminderPreviewContent {
     };
   }
   const exerciseCount = day.exercises.length;
-  const setCount = day.exercises.reduce((sum, exercise) => sum + exercise.sets, 0);
+  const setCount = day.exercises.reduce(
+    (sum, exercise) => sum + exercise.sets,
+    0,
+  );
   return {
     title: `Hoy toca ${day.label}`,
     body: `${exerciseCount} ejercicios · ${setCount} series. ¡Tú puedes!`,
@@ -183,18 +186,59 @@ export function resolveRoutineDayForDate(
     date.getMonth() === today.getMonth() &&
     date.getDate() === today.getDate();
   if (sameDay && todaySessionOrder != null) {
-    return sessions.find((session) => session.order === todaySessionOrder);
+    return sessions.find(session => session.order === todaySessionOrder);
   }
-  const orderedDays = TRAINING_DAY_ORDER.filter((day) =>
+  const orderedDays = TRAINING_DAY_ORDER.filter(day =>
     trainingDays.includes(day),
   );
   const jsDay = date.getDay();
   const trainingDay = (Object.keys(TRAINING_DAY_TO_JS) as TrainingDay[]).find(
-    (key) => TRAINING_DAY_TO_JS[key] === jsDay,
+    key => TRAINING_DAY_TO_JS[key] === jsDay,
   );
   if (!trainingDay || !orderedDays.includes(trainingDay)) {
     return undefined;
   }
   const index = orderedDays.indexOf(trainingDay);
   return sessions[index % sessions.length];
+}
+
+/** Finds the next scheduled date for a routine session when day mapping is unambiguous. */
+export function nextRoutineSessionDate(
+  routine: ActiveRoutine,
+  order: number,
+  today: Date = new Date(),
+): Date | undefined {
+  if (routine.sessions.length !== routine.trainingDays.length) return undefined;
+  const inferredToday = resolveRoutineDayForDate(
+    routine.sessions,
+    routine.trainingDays,
+    today,
+    null,
+    today,
+  );
+  const dayMappingChanged =
+    routine.todaySessionOrder !== null &&
+    inferredToday !== undefined &&
+    inferredToday.order !== routine.todaySessionOrder;
+  for (let offset = 0; offset <= 7; offset += 1) {
+    if (offset > 0 && dayMappingChanged) return undefined;
+    if (offset === 0 && routine.todaySessionOrder === null) continue;
+    const date = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + offset,
+    );
+    if (
+      resolveRoutineDayForDate(
+        routine.sessions,
+        routine.trainingDays,
+        date,
+        routine.todaySessionOrder,
+        today,
+      )?.order === order
+    ) {
+      return date;
+    }
+  }
+  return undefined;
 }

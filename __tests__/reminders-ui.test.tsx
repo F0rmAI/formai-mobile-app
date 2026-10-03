@@ -8,10 +8,8 @@
 import ReactTestRenderer from 'react-test-renderer';
 import { ReminderSettingsCard } from '@/components/reminders';
 
-const hasText = (
-  root: ReactTestRenderer.ReactTestInstance,
-  text: string,
-) => root.findAll(node => node.props.children === text).length > 0;
+const hasText = (root: ReactTestRenderer.ReactTestInstance, text: string) =>
+  root.findAll(node => node.props.children === text).length > 0;
 
 test('hides the time field when reminders are off', () => {
   let tree!: ReactTestRenderer.ReactTestRenderer;
@@ -25,7 +23,7 @@ test('hides the time field when reminders are off', () => {
       />,
     );
   });
-  expect(hasText(tree.root, 'Desactivados')).toBe(true);
+  expect(hasText(tree.root, 'Desactivados · no recibirás avisos')).toBe(true);
   expect(hasText(tree.root, 'Hora del aviso')).toBe(false);
 });
 

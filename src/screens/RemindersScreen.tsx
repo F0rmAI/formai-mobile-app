@@ -56,15 +56,14 @@ export function RemindersScreen({
         keyboardShouldPersistTaps="handled"
       >
         <Text variant="body-l" tone="secondary">
-          Te avisaremos cuando tengas una sesión programada pendiente. Si ya la
-          completaste, no recibirás el aviso.
+          Te avisaremos cuando tengas una sesión programada pendiente.
         </Text>
         {error && <Toast message={error} tone="error" />}
         <ReminderSettingsCard
           enabled={enabled}
           timeLabel={timeLabel}
           disabled={isSaving}
-          onEnabledChange={(value) => {
+          onEnabledChange={value => {
             setEnabled(value).catch(() => undefined);
           }}
           onPressTime={() => setShowPicker(true)}
@@ -78,7 +77,13 @@ export function RemindersScreen({
             onPress={() => setPreviewOpen(true)}
           />
         )}
-        {showPicker && <ReminderTimePicker value={pickerValue} onChange={setTime} onClose={() => setShowPicker(false)} />}
+        {showPicker && (
+          <ReminderTimePicker
+            value={pickerValue}
+            onChange={setTime}
+            onClose={() => setShowPicker(false)}
+          />
+        )}
       </ScrollView>
       <ReminderPreviewModal
         open={previewOpen}

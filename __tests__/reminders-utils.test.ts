@@ -10,12 +10,13 @@ import {
   formatClockShort,
   formatReminderSubtitle,
   formatReminderTimeLabel,
+  nextRoutineSessionDate,
   reminderBadgeLabel,
   resolveRoutineDayForDate,
   upcomingTrainingDates,
 } from '@/utils/reminders';
 import type { ReminderPrefs } from '@/types/reminders';
-import type { RoutineDay } from '@/types/training';
+import type { ActiveRoutine, RoutineDay } from '@/types/training';
 
 const enabled: ReminderPrefs = { enabled: true, hour: 7, minute: 0 };
 const disabled: ReminderPrefs = { enabled: false, hour: 7, minute: 0 };
@@ -58,9 +59,9 @@ test('formats Spanish time labels', () => {
 });
 
 test('builds profile subtitle and badge', () => {
-  expect(formatReminderSubtitle(disabled)).toBe('Desactivados');
-  expect(reminderBadgeLabel(false)).toBeUndefined();
-  expect(formatReminderSubtitle(enabled)).toBe('Todos los días a las 7:00');
+  expect(formatReminderSubtitle(disabled)).toBe('A las 7:00');
+  expect(reminderBadgeLabel(false)).toBe('Desactivados');
+  expect(formatReminderSubtitle(enabled)).toBe('A las 7:00');
   expect(reminderBadgeLabel(true)).toBe('Activados');
   expect(
     formatReminderSubtitle(enabled, ['MONDAY', 'WEDNESDAY', 'FRIDAY']),
@@ -95,4 +96,29 @@ test('resolves today session by order', () => {
     today,
   );
   expect(resolved?.label).toBe('Día A · Tren superior');
+});
+
+test('derives the next routine day only when the weekly mapping is known', () => {
+  const monday = new Date(2026, 9, 5);
+  const routine: ActiveRoutine = {
+    routineId: 'r1',
+    routineName: 'Fuerza',
+    version: 1,
+    startDate: '2026-10-01',
+    trainingDays: ['MONDAY', 'WEDNESDAY'],
+    todaySessionOrder: 1,
+    todayWorkoutSessionId: 's1',
+    sessions: [dayA, { ...dayA, order: 2, label: 'Día B' }],
+  };
+  expect(nextRoutineSessionDate(routine, 2, monday)?.getDate()).toBe(7);
+  expect(
+    nextRoutineSessionDate({ ...routine, trainingDays: ['MONDAY'] }, 2, monday),
+  ).toBeUndefined();
+  expect(
+    nextRoutineSessionDate(
+      { ...routine, todaySessionOrder: null },
+      1,
+      monday,
+    )?.getDate(),
+  ).toBe(12);
 });

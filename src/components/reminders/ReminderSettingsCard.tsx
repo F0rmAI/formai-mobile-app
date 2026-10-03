@@ -44,7 +44,7 @@ export function ReminderSettingsCard({
         <View className="flex-1 gap-2xs">
           <Text variant="body-l-strong">Recordarme mis sesiones</Text>
           <Text variant="body-m" tone="secondary">
-            {enabled ? 'Activados' : 'Desactivados'}
+            {enabled ? 'Activados' : 'Desactivados · no recibirás avisos'}
           </Text>
         </View>
         <Toggle
