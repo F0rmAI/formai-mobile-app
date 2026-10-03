@@ -7,14 +7,24 @@
 
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View } from 'react-native';
 import { TabScreenLayout } from '@/components/layout';
-import { Button, Card, Dialog, ListItem, Text, Toast } from '@/components/ui';
+import {
+  Avatar,
+  Button,
+  Card,
+  Dialog,
+  ListItem,
+  Text,
+  Toast,
+} from '@/components/ui';
 import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import { useClientProfile } from '@/hooks/useClientProfile';
+import { useReminders } from '@/hooks/useReminders';
 import { useSignOut } from '@/hooks/useSignOut';
 import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
 
-/** Shows profile and routine data using useClientProfile, useActiveRoutine and useSignOut. */
+/** Shows profile, routine, reminders entry and confirmed sign-out. */
 export function ProfileScreen({
   navigation,
 }: {
@@ -29,30 +39,49 @@ export function ProfileScreen({
     error: routineError,
     retry,
   } = useActiveRoutine('No pudimos cargar tu rutina.');
+  const { summarySubtitle, summaryBadge } = useReminders();
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
+
+  const dayCount = routine?.trainingDays.length ?? 0;
+  const routineSubtitle = isLoading
+    ? 'Cargando...'
+    : routine
+      ? `${routine.routineName} · ${dayCount} ${dayCount === 1 ? 'día' : 'días'}`
+      : 'Sin rutina asignada';
+
   return (
     <TabScreenLayout
       headerSubtitle="Tu cuenta"
       user={headerUser}
       title="Perfil"
     >
-      <Card className="gap-sm">
-        <Text variant="title">{profile?.fullName ?? 'Cargando perfil'}</Text>
-        <Text variant="body-m" tone="secondary">
-          {profile?.email ?? ''}
-        </Text>
+      <Card>
+        <View className="flex-row items-center gap-md">
+          <Avatar name={profile?.fullName ?? 'Cliente'} size="md" />
+          <View className="flex-1 gap-2xs">
+            <Text variant="title">{profile?.fullName ?? 'Cargando perfil'}</Text>
+            <Text variant="body-m" tone="secondary">
+              {profile?.email ?? ''}
+            </Text>
+          </View>
+        </View>
       </Card>
       {routineError && <Toast message={routineError} tone="error" />}
       <ListItem
+        icon="event_note"
         title="Mi rutina vigente"
-        subtitle={
-          isLoading
-            ? 'Cargando...'
-            : routine?.routineName ?? 'Sin rutina asignada'
-        }
+        subtitle={routineSubtitle}
         onPress={() => (routine ? root?.navigate('Routine') : retry())}
         showChevron={Boolean(routine)}
+      />
+      <ListItem
+        icon="notifications"
+        title="Recordatorios"
+        subtitle={summarySubtitle}
+        badge={summaryBadge}
+        badgeTone="tertiary"
+        onPress={() => root?.navigate('Reminders')}
       />
       {error && <Toast message={error} tone="error" />}
       <Button

@@ -29,6 +29,7 @@ export type RootStackParamList = {
   WorkoutSummary: { sessionId: string };
   WorkoutHistory: undefined;
   WorkoutDetail: { sessionId: string };
+  Reminders: undefined;
 };
 
 /** Main client tabs. */

@@ -51,6 +51,13 @@ export function RootNavigator() {
             component={WorkoutHistoryScreen}
           />
           <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
+          <Stack.Screen
+            name="Reminders"
+            getComponent={() =>
+              // Lazy require avoids a circular init crash while MainTabs/Profile load.
+              require('@/screens/RemindersScreen').RemindersScreen
+            }
+          />
         </>
       ) : (
         <>
