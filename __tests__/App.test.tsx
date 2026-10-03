@@ -373,5 +373,7 @@ test('shows the client name, email and active routine in Profile', async () => {
   await openProfile();
   expect(hasText('Diego Paredes')).toBe(true);
   expect(hasText('diego.paredes@correo.com')).toBe(true);
-  expect(hasText('Fuerza inicial')).toBe(true);
+  expect(hasText('Fuerza inicial · 1 día')).toBe(true);
+  expect(hasText('Recordatorios')).toBe(true);
+  expect(hasText('Desactivados')).toBe(true);
 });

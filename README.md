@@ -11,10 +11,11 @@ Las ramas `feature/mobile-auth` y `feature/mobile-training-flow` ya fueron integ
 - Pestaña **Hoy**: rutina vigente, día de descanso o sesión programada; registro y corrección de series; confirmación de sesión completa o parcial; resumen final.
 - Detalle de la rutina vigente y de cada día prescrito.
 - Pestaña **Progreso**: historial paginado, filtro por rango de fechas y detalle de cada sesión.
-- Pestaña **Perfil**: nombre y correo del backend, rutina vigente y cierre de sesión confirmado.
+- Pestaña **Perfil**: nombre y correo del backend, rutina vigente, recordatorios locales y cierre de sesión confirmado.
+- **Recordatorios** (on-device): toggle, hora del aviso y preview; prefs en AsyncStorage y Notifee (no hay endpoint de recordatorios en la API).
 - Renovación compartida de sesión: ante el primer HTTP 401 o 403 de una solicitud autenticada, se renuevan las cookies y se reintenta una vez. Si falla la renovación, la app vuelve a Bienvenida. Un 403 después del reintento sigue siendo una respuesta de acceso denegado.
 
-**Siguiente incremento:** métricas y gráficos de progreso, recordatorios y reconocimiento de máquinas con cámara, alternativas y guías. No están implementados en estas pantallas.
+**Siguiente incremento:** reconocimiento de máquinas con cámara, alternativas y guías.
 
 ## Arquitectura
 
