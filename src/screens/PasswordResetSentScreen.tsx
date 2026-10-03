@@ -31,7 +31,7 @@ export function PasswordResetSentScreen({
         <EmptyState
           icon="mark_email_read"
           title="Revisa tu correo"
-          description="Si el correo está registrado, recibirás un enlace para crear una nueva contraseña. El enlace vence en 30 minutos y solo puede usarse una vez."
+          description="Si el correo está registrado, recibirás un enlace para crear una nueva contraseña."
           action={{
             label: 'Abrir enlace del correo',
             icon: 'open_in_new',

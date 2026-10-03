@@ -132,9 +132,9 @@ test('describes sign-in using the email chosen for the account', async () => {
   await renderApp();
   await press('Iniciar sesión');
 
-  expect(
-    hasText('Ingresa con el correo y la contraseña de tu cuenta.'),
-  ).toBe(true);
+  expect(hasText('Ingresa con el correo que registró tu entrenador.')).toBe(
+    true,
+  );
 });
 
 test('signs in a client and opens the main tabs', async () => {
@@ -373,7 +373,7 @@ test('shows the client name, email and active routine in Profile', async () => {
   await openProfile();
   expect(hasText('Diego Paredes')).toBe(true);
   expect(hasText('diego.paredes@correo.com')).toBe(true);
-  expect(hasText('Fuerza inicial · 1 día')).toBe(true);
+  expect(hasText('Fuerza inicial')).toBe(true);
   expect(hasText('Recordatorios')).toBe(true);
   expect(hasText('Desactivados')).toBe(true);
 });

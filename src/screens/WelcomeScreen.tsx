@@ -8,7 +8,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScrollView, View } from 'react-native';
 import { ScreenContainer } from '@/components/layout';
-import { BrandLogo, Button, Text, WelcomeHero } from '@/components/ui';
+import { BrandLogo, Button, Text } from '@/components/ui';
 import type { RootStackParamList } from '@/types/navigation';
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
@@ -18,7 +18,7 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   return (
     <ScreenContainer bottomInset>
       <ScrollView
-        contentContainerClassName="grow justify-center gap-2xl px-xl pb-8 pt-12"
+        contentContainerClassName="grow justify-between gap-2xl px-xl pb-2xl pt-2xl"
         alwaysBounceVertical={false}
       >
         <View className="items-center gap-xl">
@@ -29,10 +29,6 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
           <Text variant="body-l" tone="secondary" className="text-center">
             Tu rutina, tu progreso y la técnica correcta en cada máquina.
           </Text>
-        </View>
-
-        <View className="rounded-md shadow-card">
-          <WelcomeHero />
         </View>
 
         <View className="gap-md">

@@ -48,7 +48,7 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
           <Text variant="body-l" tone="secondary">
             {passwordUpdated
               ? 'Ingresa con tu nueva contraseña.'
-              : 'Ingresa con el correo y la contraseña de tu cuenta.'}
+              : 'Ingresa con el correo que registró tu entrenador.'}
           </Text>
         </View>
 

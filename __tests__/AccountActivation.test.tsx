@@ -16,6 +16,7 @@ type Reply = { status: number; body?: unknown } | 'network-error';
 
 const VERIFY = '/activation-code-verifications';
 const ACTIVATE = '/account-activations';
+const SIGN_IN = '/authentication/sign-in';
 const INVALID_CODE =
   'Este código no es válido o ya venció. Pídele uno nuevo a tu entrenador.';
 
@@ -128,7 +129,7 @@ test('verifies the code before requesting account credentials', async () => {
   await press('Continuar');
 
   expect(bodyOf(VERIFY)).toEqual({ activationCode: 'ABCD2345' });
-  expect(hasText('Configura tu acceso')).toBe(true);
+  expect(hasText('Crea tu contraseña')).toBe(true);
 });
 
 test('shows an error for an invalid or expired code', async () => {
@@ -139,7 +140,7 @@ test('shows an error for an invalid or expired code', async () => {
   await press('Continuar');
 
   expect(hasText(INVALID_CODE)).toBe(true);
-  expect(hasText('Configura tu acceso')).toBe(false);
+  expect(hasText('Crea tu contraseña')).toBe(false);
 });
 
 test('does not call the backend for an empty code', async () => {
@@ -223,6 +224,33 @@ test('activates the account and preloads the sign-in email', async () => {
   );
 });
 
+test('opens Today after activation when automatic sign-in succeeds', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 201, body: { userId: 'u1', status: 'ACTIVE' } },
+    [SIGN_IN]: {
+      status: 200,
+      body: {
+        id: 'u1',
+        email: 'diego.paredes@correo.com',
+        roles: ['CLIENT'],
+        status: 'ACTIVE',
+      },
+    },
+  });
+  await reachPasswordStep();
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(requestsTo(SIGN_IN)).toHaveLength(1);
+  expect(
+    renderer.root.findAllByProps({
+      accessibilityRole: 'tab',
+      accessibilityLabel: 'Hoy',
+    }).length,
+  ).toBeGreaterThan(0);
+});
+
 test('returns to code entry when a verified code is later rejected', async () => {
   mockBackend({
     [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
@@ -247,7 +275,7 @@ test('shows a neutral message when the email belongs to another account', async 
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Configura tu acceso')).toBe(true);
+  expect(hasText('Crea tu contraseña')).toBe(true);
   expect(
     hasText(
       'No pudimos activar la cuenta con esos datos. Si ya tienes una cuenta, usa tu correo y tu contraseña actual; de lo contrario, revisa el correo o usa uno distinto.',
@@ -265,7 +293,7 @@ test('shows an error when the backend rejects the email format', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Configura tu acceso')).toBe(true);
+  expect(hasText('Crea tu contraseña')).toBe(true);
   expect(hasText('Ingresa un correo válido.')).toBe(true);
 });
 
@@ -279,7 +307,7 @@ test('shows a connection error during activation', async () => {
   await fillPasswordStep();
   await press('Activar cuenta');
 
-  expect(hasText('Configura tu acceso')).toBe(true);
+  expect(hasText('Crea tu contraseña')).toBe(true);
   expect(
     hasText('No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.'),
   ).toBe(true);

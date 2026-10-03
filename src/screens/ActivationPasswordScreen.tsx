@@ -9,7 +9,14 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { ScreenContainer, TopBar } from '@/components/layout';
-import { Button, Checkbox, Text, TextField, Toast } from '@/components/ui';
+import {
+  Button,
+  Checkbox,
+  Icon,
+  Text,
+  TextField,
+  Toast,
+} from '@/components/ui';
 import { useAccountActivation } from '@/hooks/useAccountActivation';
 import type { RootStackParamList } from '@/types/navigation';
 import { DATA_CONSENT } from '@/utils/account-activation';
@@ -27,7 +34,7 @@ export function ActivationPasswordScreen({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Activation does not sign in the client; continue to the sign-in screen.
+  // If automatic sign-in fails after activation, continue to the sign-in screen.
   const onActivated = useCallback(
     (activatedEmail: string) =>
       navigation.reset({
@@ -71,11 +78,11 @@ export function ActivationPasswordScreen({
       >
         <View className="gap-xs">
           <Text variant="headline" accessibilityRole="header">
-            Configura tu acceso
+            Crea tu contraseña
           </Text>
           <Text variant="body-l" tone="secondary">
-            Código verificado. Si ya tienes una cuenta, usa tu correo y tu
-            contraseña actual para unirte a tu nuevo entrenador.
+            Código verificado. Define la contraseña con la que ingresarás a
+            FormAI.
           </Text>
         </View>
 
@@ -101,7 +108,7 @@ export function ActivationPasswordScreen({
             showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
           }
           onTrailingIconPress={() => setShowPassword(visible => !visible)}
-          helper="Entre 8 y 128 caracteres."
+          helper="Mínimo 8 caracteres, con letras y números."
           value={password}
           error={errors.password}
           editable={!isSubmitting}
@@ -145,9 +152,12 @@ export function ActivationPasswordScreen({
             onChange={changeConsent}
           />
           {errors.consent && (
-            <Text variant="body-m" tone="error" accessibilityRole="alert">
-              {errors.consent}
-            </Text>
+            <View className="flex-row items-start gap-xs">
+              <Icon name="error" size={16} className="text-error" />
+              <Text variant="body-m" tone="error" accessibilityRole="alert">
+                {errors.consent}
+              </Text>
+            </View>
           )}
         </View>
 

@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import {
   accountActivationService,
   activationFailureOf,
@@ -29,6 +30,7 @@ interface ActivationErrors {
 }
 
 interface ActivationCallbacks {
+  /** Opens manual sign-in if authentication after activation is unavailable. */
   onActivated: (email: string) => void;
   /** The code became invalid between verification and activation. */
   onCodeRejected: () => void;
@@ -50,6 +52,7 @@ export function useAccountActivation(
   activationCode: string,
   { onActivated, onCodeRejected }: ActivationCallbacks,
 ) {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -109,7 +112,11 @@ export function useAccountActivation(
         consentAccepted,
         consentVersion: DATA_CONSENT.version,
       });
-      onActivated(trimmedEmail);
+      try {
+        await signIn({ email: trimmedEmail, password });
+      } catch {
+        onActivated(trimmedEmail);
+      }
     } catch (activationError) {
       switch (activationFailureOf(activationError)) {
         case 'code-rejected':
@@ -134,6 +141,7 @@ export function useAccountActivation(
     onActivated,
     onCodeRejected,
     password,
+    signIn,
   ]);
 
   return {
