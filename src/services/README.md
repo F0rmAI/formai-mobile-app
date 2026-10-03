@@ -16,6 +16,9 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 | `active-routine.service.ts` | Rutina vigente del cliente. |
 | `workout-session.service.ts` | Sesiones, historial, series, correcciones y finalización. |
 | `progress-chart.service.ts` | Evolución de carga y volumen del cliente (`/v1/progress-charts/me`). |
+| `reminder-prefs.service.ts` | Prefs de recordatorios en AsyncStorage (no HTTP; no hay endpoint). |
+| `reminder-notifications.service.ts` | Canal y programación local con Notifee (no HTTP). |
+| `reminder-session.service.ts` | Limpia prefs y avisos al cerrar sesión. |
 
 En desarrollo, la API local debe ejecutarse con `JWT_COOKIE_SECURE=false`: las cookies `Secure` no viajan por HTTP desde los simuladores. `config.ts` usa `localhost:8080` en iOS y `10.0.2.2:8080` en Android.
 

@@ -7,6 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { clearRemindersOnSignOut } from '@/services/reminder-session.service';
 
 /**
  * Manages sign-out confirmation and request state.
@@ -35,6 +36,7 @@ export function useSignOut() {
     setIsConfirming(false);
     setIsSigningOut(true);
     try {
+      await clearRemindersOnSignOut();
       // The navigator replaces the tabs with Welcome after sign-out.
       await signOut();
     } catch {

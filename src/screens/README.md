@@ -35,6 +35,7 @@ Backend/API
 - `ForgotPasswordScreen`, `PasswordResetSentScreen` y `ResetPasswordScreen` son la recuperación de contraseña: pedir el enlace, la confirmación del envío y la nueva contraseña (o el aviso de enlace vencido) al abrir el enlace del correo.
 - `TodayScreen`, `ProgressScreen` y `ProfileScreen` son las pestañas principales; `ProgressScreen` es el dashboard de progreso.
 - `WorkoutHistoryScreen` es el historial filtrable; `RoutineScreen`, `RoutineDayScreen`, `WorkoutSummaryScreen` y `WorkoutDetailScreen` completan el stack autenticado.
+- `RemindersScreen` configura recordatorios locales (toggle, hora y ejemplo de aviso).
 
 ## Ejemplo
 

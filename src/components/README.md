@@ -11,6 +11,7 @@ de FormAI (Figma › `formai_design_system`).
 | `ui/` | Primitivos del design system: `Text`, `Icon`, `Button`, `IconButton`, `Badge`, `Chip`, `SectionLabel`, `Card`, `TextField`, `Checkbox`, `Toggle`, `ProgressBar`, `SegmentedControl`, `Toast`, `Dialog`, `Avatar`, `BrandLogo`, `EmptyState`, `ListItem`, `Callout`, `SectionHeader`, `TabItem`. **Misma API en web y mobile.** |
 | `layout/` | Navegación y estructura propias de esta plataforma. |
 | `progress/` | Componentes del flujo Progreso: `StatCard`, `AdherenceCard`, `ProgressLineChart`, `WorkoutHistoryItem`, `HistoryFilterDialog`, `SetSummaryTile`. |
+| `reminders/` | Ajustes y preview de recordatorios locales: `ReminderSettingsCard`, `ReminderPreviewModal`. |
 | `training/` | Componentes de la sesión de hoy y rutina. |
 
 ### `layout/` en esta app
