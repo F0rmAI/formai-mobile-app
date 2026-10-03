@@ -45,10 +45,9 @@ export function SetSummaryTile({
         className,
       )}
     >
-      <Text variant="label-m" tone="muted">
-        {`Serie ${setNumber}`}
-      </Text>
-      <Text variant="title">{`${loadKg} × ${reps}`}</Text>
+      <Text variant="label-m" tone="muted">{`Serie ${setNumber} ✓`}</Text>
+      <Text variant="title">{`${loadKg} kg`}</Text>
+      <Text variant="body-m" tone="secondary">{`${reps} reps`}</Text>
     </View>
   );
 }

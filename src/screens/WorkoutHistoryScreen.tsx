@@ -6,22 +6,20 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { HistoryDateRangeChip } from '@/components/history';
-import {
-  HistoryFilterDialog,
-  WorkoutHistoryItem,
-} from '@/components/progress';
-import { InsetToast, ScreenContainer, TopBar } from '@/components/layout';
+import { HistoryFilterDialog, WorkoutHistoryItem } from '@/components/progress';
+import { ScreenContainer, TopBar } from '@/components/layout';
 import { Button, EmptyState, Text, Toast } from '@/components/ui';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import type { RootStackParamList } from '@/types/navigation';
-import { formatDateRangeChip } from '@/utils/dates';
+import { formatDateRangeChip, formatFilterInputDate } from '@/utils/dates';
 
 /** Lists paginated history and applies an inclusive date filter. */
 export function WorkoutHistoryScreen({
   navigation,
+  route,
 }: NativeStackScreenProps<RootStackParamList, 'WorkoutHistory'>) {
   const {
     from,
@@ -40,39 +38,15 @@ export function WorkoutHistoryScreen({
     retry,
     loadMore,
     hasMore,
-  } = useWorkoutHistory();
+  } = useWorkoutHistory(route.params);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [toast, setToast] = useState<string>();
-  const pendingToast = useRef(false);
-
-  useEffect(() => {
-    if (!toast) {
-      return;
-    }
-    const timer = setTimeout(() => setToast(undefined), 3200);
-    return () => clearTimeout(timer);
-  }, [toast]);
-
-  useEffect(() => {
-    if (!pendingToast.current || isLoading) {
-      return;
-    }
-    pendingToast.current = false;
-    if (isFiltered) {
-      setToast(
-        `Historial filtrado · ${totalElements} ${
-          totalElements === 1 ? 'sesión' : 'sesiones'
-        }`,
-      );
-    }
-  }, [isLoading, isFiltered, totalElements]);
 
   const openFilter = () => {
     if (appliedFrom) {
-      setFrom(appliedFrom);
+      setFrom(formatFilterInputDate(appliedFrom));
     }
     if (appliedTo) {
-      setTo(appliedTo);
+      setTo(formatFilterInputDate(appliedTo));
     }
     setFilterOpen(true);
   };
@@ -82,7 +56,6 @@ export function WorkoutHistoryScreen({
       return;
     }
     setFilterOpen(false);
-    pendingToast.current = Boolean(from && to);
   };
 
   return (
@@ -169,12 +142,12 @@ export function WorkoutHistoryScreen({
         open={filterOpen}
         from={from}
         to={to}
+        error={error}
         onChangeFrom={setFrom}
         onChangeTo={setTo}
         onApply={handleApply}
         onCancel={() => setFilterOpen(false)}
       />
-      {toast && <InsetToast message={toast} />}
     </ScreenContainer>
   );
 }

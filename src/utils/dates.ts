@@ -117,3 +117,22 @@ export function formatDateRangeChip(from: string, to: string) {
   }
   return `${short(start, true)} – ${short(end, true)}`;
 }
+
+/** Converts a valid `dd/mm/yyyy` or `yyyy-mm-dd` filter entry to an ISO date. */
+export function parseFilterDate(value: string) {
+  const parts = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  const iso = parts ? `${parts[3]}-${parts[2]}-${parts[1]}` : value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return undefined;
+  const [year, month, day] = iso.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+    ? iso
+    : undefined;
+}
+
+/** Formats an ISO date for the filter dialog. */
+export function formatFilterInputDate(iso?: string) {
+  return iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '';
+}

@@ -121,3 +121,34 @@ test('reloads the chart when the period changes', async () => {
   expect(dashboard.weeks).toBe(8);
   expect(dashboard.chart?.enoughData).toBe(true);
 });
+
+test('derives maximum load and calendar-week volume from backend data', async () => {
+  jest.useFakeTimers().setSystemTime(new Date(2026, 9, 3, 12));
+  sessions.mockResolvedValue({
+    content: [
+      session,
+      { ...session, id: 's0', scheduledFor: '2026-09-25', totalVolumeKg: 100 },
+    ],
+    page: 0,
+    size: 20,
+    totalElements: 2,
+    totalPages: 1,
+  });
+  charts.mockResolvedValue({
+    exerciseId: 'e1',
+    weeks: 4,
+    enoughData: true,
+    points: [
+      { date: '2026-09-25', maxLoadKg: 18, volumeKg: 100 },
+      { date: '2026-10-02', maxLoadKg: 20, volumeKg: 200 },
+    ],
+  });
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<Harness />);
+  });
+  expect(dashboard.maxLoadKg).toBe(20);
+  expect(dashboard.maxLoadDeltaKg).toBe(2);
+  expect(dashboard.weeklyVolumeKg).toBe(200);
+  expect(dashboard.weeklyVolumeDeltaPercent).toBe(100);
+  jest.useRealTimers();
+});

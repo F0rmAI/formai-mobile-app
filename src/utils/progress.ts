@@ -34,43 +34,12 @@ export function progressWindowRange(weeks: ProgressWeeks, today = new Date()) {
 }
 
 /**
- * Formats volume for dashboard stats (Spanish decimal comma, `k` above 999).
+ * Formats kilograms with full grouped digits for progress and history cards.
  *
  * @param kg - Total kilograms.
  */
 export function formatVolumeKg(kg: number) {
-  if (kg >= 1000) {
-    const value = (kg / 1000).toLocaleString('es-PE', {
-      maximumFractionDigits: 1,
-      minimumFractionDigits: 0,
-    });
-    return `${value}k kg`;
-  }
-  return `${kg.toLocaleString('es-PE')} kg`;
-}
-
-/**
- * Minutes between the earliest recorded set and `finishedAt`, when both exist.
- *
- * @param session - Workout session DTO.
- * @returns Whole minutes, or `undefined` when duration cannot be derived.
- */
-export function sessionDurationMinutes(session: WorkoutSession) {
-  if (!session.finishedAt) {
-    return undefined;
-  }
-  const starts = session.exercises.flatMap(exercise =>
-    exercise.sets.map(set => Date.parse(set.recordedAt)),
-  );
-  if (starts.length === 0) {
-    return undefined;
-  }
-  const start = Math.min(...starts);
-  const end = Date.parse(session.finishedAt);
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) {
-    return undefined;
-  }
-  return Math.max(1, Math.round((end - start) / 60_000));
+  return `${kg.toLocaleString('es-PE').replace(/,/g, ' ')} kg`;
 }
 
 /** Count of exercises that have at least one recorded set. */
@@ -102,6 +71,10 @@ export function aggregateProgressStats(sessions: WorkoutSession[]) {
     completedCount: completed,
     scheduledCount: counted.length,
     adherencePercentage,
+    partialCount: counted.filter(session => session.status === 'PARTIAL')
+      .length,
+    skippedCount: counted.filter(session => session.status === 'SKIPPED')
+      .length,
   };
 }
 
@@ -135,4 +108,20 @@ export function statusLabel(status: WorkoutStatus) {
     default:
       return 'Pendiente';
   }
+}
+
+/** Formats the outcome badge using the recorded portion of a partial session. */
+export function workoutStatusLabel(session: WorkoutSession) {
+  if (session.status !== 'PARTIAL') return statusLabel(session.status);
+  const target = session.exercises.reduce(
+    (sum, exercise) => sum + exercise.targetSets,
+    0,
+  );
+  const recorded = session.exercises.reduce(
+    (sum, exercise) => sum + exercise.sets.length,
+    0,
+  );
+  return target > 0
+    ? `Parcial (${Math.round((recorded / target) * 100)} %)`
+    : 'Parcial';
 }

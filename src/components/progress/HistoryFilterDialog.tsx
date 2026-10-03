@@ -14,9 +14,9 @@ import { Button, Text, TextField } from '@/components/ui';
 export interface HistoryFilterDialogProps {
   /** Whether the dialog is visible. */
   open: boolean;
-  /** Draft start date in `yyyy-MM-dd`. */
+  /** Draft start date in `dd/mm/yyyy`. */
   from: string;
-  /** Draft end date in `yyyy-MM-dd`. */
+  /** Draft end date in `dd/mm/yyyy`. */
   to: string;
   /** Updates the draft start date. */
   onChangeFrom: (value: string) => void;
@@ -24,6 +24,8 @@ export interface HistoryFilterDialogProps {
   onChangeTo: (value: string) => void;
   /** Applies the draft range. */
   onApply: () => void;
+  /** Validation error shown below the fields. */
+  error?: string;
   /** Closes without applying. */
   onCancel: () => void;
 }
@@ -43,6 +45,7 @@ export function HistoryFilterDialog({
   onChangeFrom,
   onChangeTo,
   onApply,
+  error,
   onCancel,
 }: HistoryFilterDialogProps) {
   return (
@@ -68,35 +71,45 @@ export function HistoryFilterDialog({
               Filtrar historial
             </Text>
             <Text variant="body-m" tone="secondary">
-              Elige el rango de fechas de tus entrenamientos.
+              Muestra solo los entrenamientos de un rango de fechas.
             </Text>
           </View>
           <View className="gap-md">
             <TextField
               label="Desde"
-              helper="aaaa-mm-dd"
-              placeholder="aaaa-mm-dd"
+              leadingIcon="calendar_month"
+              placeholder="dd/mm/aaaa"
               value={from}
               onChangeText={onChangeFrom}
               autoCapitalize="none"
             />
             <TextField
               label="Hasta"
-              helper="aaaa-mm-dd"
-              placeholder="aaaa-mm-dd"
+              leadingIcon="calendar_month"
+              placeholder="dd/mm/aaaa"
               value={to}
               onChangeText={onChangeTo}
               autoCapitalize="none"
             />
           </View>
-          <View className="flex-row gap-md">
+          {error && (
+            <Text variant="body-m" tone="error" accessibilityRole="alert">
+              {error}
+            </Text>
+          )}
+          <View className="gap-md">
+            <Button
+              label="Aplicar filtro"
+              icon="filter_alt"
+              fullWidth
+              onPress={onApply}
+            />
             <Button
               label="Cancelar"
-              variant="secondary"
-              className="flex-1"
+              variant="ghost"
+              fullWidth
               onPress={onCancel}
             />
-            <Button label="Aplicar" className="flex-1" onPress={onApply} />
           </View>
         </View>
       </View>

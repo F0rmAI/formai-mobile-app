@@ -9,12 +9,11 @@ import { Pressable, View } from 'react-native';
 import { Badge, Card, Icon, Text } from '@/components/ui';
 import type { WorkoutSession, WorkoutStatus } from '@/types/training';
 import { cn } from '@/utils/cn';
-import { formatWorkoutHistoryDate } from '@/utils/dates';
+import { formatTime, formatWorkoutHistoryDate } from '@/utils/dates';
 import {
   formatVolumeKg,
   recordedExerciseCount,
-  sessionDurationMinutes,
-  statusLabel,
+  workoutStatusLabel,
 } from '@/utils/progress';
 
 const badgeTone: Record<
@@ -40,7 +39,7 @@ export interface WorkoutHistoryItemProps {
 }
 
 /**
- * Renders one historical workout with volume, duration and exercise count.
+ * Renders one historical workout with volume and exercise count.
  *
  * @example
  * ```tsx
@@ -52,7 +51,6 @@ export function WorkoutHistoryItem({
   onPress,
   className,
 }: WorkoutHistoryItemProps) {
-  const minutes = sessionDurationMinutes(session);
   const exerciseCount = recordedExerciseCount(session);
   const exerciseMeta =
     exerciseCount === 0
@@ -62,7 +60,7 @@ export function WorkoutHistoryItem({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${session.dayLabel}, ${statusLabel(session.status)}`}
+      accessibilityLabel={`${session.dayLabel}, ${workoutStatusLabel(session)}`}
       onPress={onPress}
       className={cn('active:opacity-80', className)}
     >
@@ -70,10 +68,22 @@ export function WorkoutHistoryItem({
         <View className="flex-row items-center justify-between gap-md">
           <Text variant="body-m" tone="secondary">
             {formatWorkoutHistoryDate(session.scheduledFor, 'list')}
+            {session.finishedAt
+              ? ` · ${formatTime(new Date(session.finishedAt))}`
+              : ''}
           </Text>
           <Badge
-            label={statusLabel(session.status)}
+            label={workoutStatusLabel(session)}
             tone={badgeTone[session.status]}
+            icon={
+              session.status === 'COMPLETED'
+                ? 'check'
+                : session.status === 'PARTIAL'
+                ? 'fiber_manual_record'
+                : session.status === 'SKIPPED'
+                ? 'event_busy'
+                : undefined
+            }
           />
         </View>
         <View className="flex-row items-center justify-between gap-md">
@@ -91,12 +101,6 @@ export function WorkoutHistoryItem({
             />
             <Text variant="body-m" tone="secondary">
               {formatVolumeKg(Number(session.totalVolumeKg || 0))}
-            </Text>
-          </View>
-          <View className="flex-row items-center gap-xs">
-            <Icon name="schedule" size={16} className="text-content-muted" />
-            <Text variant="body-m" tone="secondary">
-              {minutes === undefined ? '—' : `${minutes} min`}
             </Text>
           </View>
           <View className="flex-row items-center gap-xs">

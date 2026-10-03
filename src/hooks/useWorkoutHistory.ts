@@ -8,18 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { workoutSessionService } from '@/services/workout-session.service';
 import type { WorkoutSession } from '@/types/training';
-
-const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-function validDate(value: string) {
-  if (!datePattern.test(value)) return false;
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  return (
-    date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day
-  );
-}
+import { formatFilterInputDate, parseFilterDate } from '@/utils/dates';
 
 /**
  * Loads workout history with a validated date range and incremental pages.
@@ -31,10 +20,15 @@ function validDate(value: string) {
  * const { sessions, isLoading, applyFilter, loadMore } = useWorkoutHistory();
  * ```
  */
-export function useWorkoutHistory() {
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [range, setRange] = useState<{ from?: string; to?: string }>({});
+export function useWorkoutHistory(initialRange?: {
+  from?: string;
+  to?: string;
+}) {
+  const [from, setFrom] = useState(formatFilterInputDate(initialRange?.from));
+  const [to, setTo] = useState(formatFilterInputDate(initialRange?.to));
+  const [range, setRange] = useState<{ from?: string; to?: string }>(
+    initialRange ?? {},
+  );
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [page, setPage] = useState(-1);
   const [totalPages, setTotalPages] = useState(0);
@@ -74,13 +68,15 @@ export function useWorkoutHistory() {
       setSessions([]);
       return true;
     }
-    if (!validDate(from) || !validDate(to) || from > to) {
+    const parsedFrom = parseFilterDate(from);
+    const parsedTo = parseFilterDate(to);
+    if (!parsedFrom || !parsedTo || parsedFrom > parsedTo) {
       setError(
-        'Ingresa dos fechas válidas en formato aaaa-mm-dd. La fecha inicial debe ser anterior a la final.',
+        'Ingresa dos fechas válidas en formato dd/mm/aaaa. La fecha inicial debe ser anterior a la final.',
       );
       return false;
     }
-    setRange({ from, to });
+    setRange({ from: parsedFrom, to: parsedTo });
     setSessions([]);
     return true;
   }, [from, to]);

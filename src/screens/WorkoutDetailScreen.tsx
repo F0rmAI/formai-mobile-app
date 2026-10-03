@@ -13,13 +13,8 @@ import { Badge, Card, EmptyState, Icon, Text } from '@/components/ui';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
 import type { RootStackParamList } from '@/types/navigation';
 import type { WorkoutStatus } from '@/types/training';
-import { formatWorkoutHistoryDate } from '@/utils/dates';
-import {
-  formatVolumeKg,
-  recordedExerciseCount,
-  sessionDurationMinutes,
-  statusLabel,
-} from '@/utils/progress';
+import { formatTime, formatWorkoutHistoryDate } from '@/utils/dates';
+import { formatVolumeKg, workoutStatusLabel } from '@/utils/progress';
 
 const badgeTone: Record<
   WorkoutStatus,
@@ -59,10 +54,22 @@ export function WorkoutDetailScreen({
               <View className="flex-row items-center justify-between gap-md">
                 <Text variant="body-m" tone="secondary">
                   {formatWorkoutHistoryDate(session.scheduledFor, 'detail')}
+                  {session.finishedAt
+                    ? ` · ${formatTime(new Date(session.finishedAt))}`
+                    : ''}
                 </Text>
                 <Badge
-                  label={statusLabel(session.status)}
+                  label={workoutStatusLabel(session)}
                   tone={badgeTone[session.status]}
+                  icon={
+                    session.status === 'COMPLETED'
+                      ? 'check'
+                      : session.status === 'PARTIAL'
+                      ? 'fiber_manual_record'
+                      : session.status === 'SKIPPED'
+                      ? 'event_busy'
+                      : undefined
+                  }
                 />
               </View>
               <Text variant="headline">{session.dayLabel}</Text>
@@ -79,32 +86,15 @@ export function WorkoutDetailScreen({
                 </View>
                 <View className="flex-row items-center gap-xs">
                   <Icon
-                    name="schedule"
+                    name="checklist"
                     size={16}
                     className="text-content-muted"
                   />
                   <Text variant="body-m" tone="secondary">
-                    {(() => {
-                      const minutes = sessionDurationMinutes(session);
-                      return minutes === undefined ? '—' : `${minutes} min`;
-                    })()}
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-xs">
-                  <Icon
-                    name="list_alt"
-                    size={16}
-                    className="text-content-muted"
-                  />
-                  <Text variant="body-m" tone="secondary">
-                    {(() => {
-                      const count = recordedExerciseCount(session);
-                      return count === 0
-                        ? 'Sin registros'
-                        : `${count} ${
-                            count === 1 ? 'ejercicio' : 'ejercicios'
-                          }`;
-                    })()}
+                    {`${session.exercises.reduce(
+                      (sum, exercise) => sum + exercise.sets.length,
+                      0,
+                    )} series`}
                   </Text>
                 </View>
               </View>

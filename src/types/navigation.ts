@@ -5,6 +5,8 @@
  * @packageDocumentation
  */
 
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 /** Top-level authentication and client routes. */
 export type RootStackParamList = {
   Welcome: undefined;
@@ -23,11 +25,11 @@ export type RootStackParamList = {
   PasswordResetSent: { email: string; renewal?: boolean };
   /** `token`: supplied by the password-reset link. */
   ResetPassword: { token?: string } | undefined;
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   Routine: undefined;
   RoutineDay: { order: number };
   WorkoutSummary: { sessionId: string };
-  WorkoutHistory: undefined;
+  WorkoutHistory: { from?: string; to?: string } | undefined;
   WorkoutDetail: { sessionId: string };
   Reminders: undefined;
 };

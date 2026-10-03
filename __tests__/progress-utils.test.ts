@@ -11,7 +11,6 @@ import {
   exercisesWithRecords,
   formatVolumeKg,
   progressWindowRange,
-  sessionDurationMinutes,
 } from '@/utils/progress';
 import { formatDateRangeChip } from '@/utils/dates';
 
@@ -42,9 +41,9 @@ const base: WorkoutSession = {
   ],
 };
 
-test('formats volume with Spanish thousands and k suffix', () => {
+test('formats volume with full grouped kilograms', () => {
   expect(formatVolumeKg(200)).toBe('200 kg');
-  expect(formatVolumeKg(28400)).toMatch(/28[,.]4k kg/);
+  expect(formatVolumeKg(28400)).toBe('28 400 kg');
 });
 
 test('aggregates adherence from completed, partial and skipped sessions', () => {
@@ -95,13 +94,6 @@ test('lists unique exercises that already have recorded sets', () => {
     },
   ]);
   expect(options).toEqual([{ exerciseId: 'e1', exerciseName: 'Press' }]);
-});
-
-test('derives session duration from finishedAt and first recorded set', () => {
-  expect(sessionDurationMinutes(base)).toBe(47);
-  expect(
-    sessionDurationMinutes({ ...base, finishedAt: null }),
-  ).toBeUndefined();
 });
 
 test('builds an inclusive progress window ending today', () => {

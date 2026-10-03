@@ -19,6 +19,12 @@ export interface AdherenceCardProps {
   completedCount: number;
   /** Count of completed, partial and skipped sessions. */
   scheduledCount: number;
+  /** Partial sessions in the window. */
+  partialCount?: number;
+  /** Skipped sessions in the window. */
+  skippedCount?: number;
+  /** Number of weeks in the selected window. */
+  weeks?: number;
   /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
@@ -35,6 +41,9 @@ export function AdherenceCard({
   percentage,
   completedCount,
   scheduledCount,
+  partialCount = 0,
+  skippedCount = 0,
+  weeks = 4,
   className,
 }: AdherenceCardProps) {
   const label =
@@ -42,7 +51,7 @@ export function AdherenceCard({
   return (
     <Card className={cn('gap-md', className)}>
       <View className="flex-row items-center justify-between">
-        <Text variant="title">Adherencia</Text>
+        <Text variant="title">¿Estás cumpliendo tu plan?</Text>
         <Badge label={label} tone="tertiary" />
       </View>
       <ProgressBar value={percentage} label="Adherencia" />
@@ -51,7 +60,7 @@ export function AdherenceCard({
           ? 'Aún no hay sesiones en este periodo.'
           : `${completedCount} de ${scheduledCount} ${
               scheduledCount === 1 ? 'sesión' : 'sesiones'
-            } completadas`}
+            } completadas en las últimas ${weeks} semanas · ${partialCount} parciales · ${skippedCount} omitidas`}
       </Text>
     </Card>
   );

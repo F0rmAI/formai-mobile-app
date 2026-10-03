@@ -6,7 +6,12 @@
  */
 
 import { useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type ViewStyle,
+} from 'react-native';
 import { Text } from '@/components/ui';
 import type { ProgressPoint } from '@/types/training';
 import { cn } from '@/utils/cn';
@@ -101,7 +106,7 @@ export function ProgressLineChart({
         <View className="flex-row items-center gap-sm">
           <View className="size-2 rounded-full bg-primary" />
           <Text variant="body-m" tone="secondary">
-            Carga máx. (kg)
+            Carga máxima (kg)
           </Text>
         </View>
         <View className="flex-row items-center gap-sm">
@@ -157,12 +162,11 @@ export function ProgressLineChart({
       </View>
       {points.length > 0 && (
         <View className="flex-row justify-between">
-          <Text variant="body-m" tone="muted">
-            {points[0].date.slice(5).replace('-', '/')}
-          </Text>
-          <Text variant="body-m" tone="muted">
-            {points[points.length - 1].date.slice(5).replace('-', '/')}
-          </Text>
+          {points.map((point, index) => (
+            <Text key={`${point.date}-${index}`} variant="body-m" tone="muted">
+              {`S${index + 1}`}
+            </Text>
+          ))}
         </View>
       )}
     </View>

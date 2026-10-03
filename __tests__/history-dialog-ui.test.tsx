@@ -9,6 +9,7 @@ import ReactTestRenderer from 'react-test-renderer';
 import { Dialog } from '@/components/ui/Dialog';
 import { SetEditor } from '@/components/training/SetEditor';
 import { useClientProfile } from '@/hooks/useClientProfile';
+import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import { useProgressDashboard } from '@/hooks/useProgressDashboard';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
@@ -18,11 +19,16 @@ import { WorkoutHistoryScreen } from '@/screens/WorkoutHistoryScreen';
 import type { WorkoutSession } from '@/types/training';
 
 jest.mock('@/hooks/useClientProfile', () => ({ useClientProfile: jest.fn() }));
+jest.mock('@/hooks/useActiveRoutine', () => ({ useActiveRoutine: jest.fn() }));
 jest.mock('@/hooks/useProgressDashboard', () => ({
   useProgressDashboard: jest.fn(),
 }));
-jest.mock('@/hooks/useWorkoutHistory', () => ({ useWorkoutHistory: jest.fn() }));
-jest.mock('@/hooks/useWorkoutSession', () => ({ useWorkoutSession: jest.fn() }));
+jest.mock('@/hooks/useWorkoutHistory', () => ({
+  useWorkoutHistory: jest.fn(),
+}));
+jest.mock('@/hooks/useWorkoutSession', () => ({
+  useWorkoutSession: jest.fn(),
+}));
 
 const session: WorkoutSession = {
   id: 's1',
@@ -52,6 +58,7 @@ const session: WorkoutSession = {
 };
 
 const mockedProfile = jest.mocked(useClientProfile);
+const mockedRoutine = jest.mocked(useActiveRoutine);
 const mockedDashboard = jest.mocked(useProgressDashboard);
 const mockedHistory = jest.mocked(useWorkoutHistory);
 const mockedSession = jest.mocked(useWorkoutSession);
@@ -78,9 +85,9 @@ const historyState = {
 const dashboardState = {
   weeks: 4 as const,
   weekOptions: [
-    { label: '4 sem', value: '4' as const },
-    { label: '8 sem', value: '8' as const },
-    { label: '12 sem', value: '12' as const },
+    { label: '4 semanas', value: '4' as const },
+    { label: '8 semanas', value: '8' as const },
+    { label: '12 semanas', value: '12' as const },
   ],
   weeksValue: '4' as const,
   setWeeks: jest.fn(),
@@ -97,7 +104,13 @@ const dashboardState = {
     completedCount: 0,
     scheduledCount: 0,
     adherencePercentage: 0,
+    partialCount: 0,
+    skippedCount: 0,
   },
+  maxLoadKg: undefined,
+  maxLoadDeltaKg: undefined,
+  weeklyVolumeKg: 0,
+  weeklyVolumeDeltaPercent: undefined,
   isLoading: false,
   isChartLoading: false,
   error: undefined,
@@ -113,6 +126,12 @@ beforeEach(() => {
   mockedProfile.mockReturnValue({
     headerUser: undefined,
   } as ReturnType<typeof useClientProfile>);
+  mockedRoutine.mockReturnValue({
+    routine: null,
+    isLoading: false,
+    error: undefined,
+    retry: jest.fn(),
+  });
   mockedDashboard.mockReturnValue(
     dashboardState as ReturnType<typeof useProgressDashboard>,
   );
@@ -181,7 +200,7 @@ test('progress dashboard shows the empty history preview', async () => {
   });
   expect(hasText('Tu progreso')).toBe(true);
   expect(hasText('Aún no hay entrenamientos')).toBe(true);
-  expect(hasText('Datos insuficientes')).toBe(false);
+  expect(hasText('Aún no hay datos suficientes')).toBe(true);
 });
 
 test('progress dashboard shows insufficient chart data for one point', async () => {
@@ -201,7 +220,49 @@ test('progress dashboard shows insufficient chart data for one point', async () 
       <ProgressScreen navigation={{ getParent: () => undefined } as never} />,
     );
   });
-  expect(hasText('Datos insuficientes')).toBe(true);
+  expect(hasText('Aún no hay datos suficientes')).toBe(true);
+});
+
+test('progress date filter opens over the dashboard and navigates with valid dates', async () => {
+  const navigate = jest.fn();
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(
+      <ProgressScreen
+        navigation={{ getParent: () => ({ navigate }) } as never}
+      />,
+    );
+  });
+  const filter = renderer.root.findAll(
+    node =>
+      node.props.accessibilityRole === 'button' &&
+      node.findAll(child => child.props.children === 'Filtrar por fechas')
+        .length > 0,
+  )[0];
+  await ReactTestRenderer.act(async () => filter.props.onPress());
+  expect(hasText('Filtrar historial')).toBe(true);
+  const inputs = renderer.root.findAll(
+    node =>
+      typeof node.props.onChangeText === 'function' &&
+      ['Desde', 'Hasta'].includes(node.props.accessibilityLabel),
+  );
+  await ReactTestRenderer.act(async () => {
+    inputs
+      .find(node => node.props.accessibilityLabel === 'Desde')
+      ?.props.onChangeText('01/09/2026');
+    inputs
+      .find(node => node.props.accessibilityLabel === 'Hasta')
+      ?.props.onChangeText('13/09/2026');
+  });
+  const apply = renderer.root.findAll(
+    node =>
+      node.props.accessibilityLabel === 'Aplicar filtro' &&
+      typeof node.props.onPress === 'function',
+  )[0];
+  await ReactTestRenderer.act(async () => apply.props.onPress());
+  expect(navigate).toHaveBeenCalledWith('WorkoutHistory', {
+    from: '2026-09-01',
+    to: '2026-09-13',
+  });
 });
 
 test('history shows the filtered empty state and clears the range', async () => {
@@ -239,7 +300,7 @@ test('history shows the total filtered count and formatted list date', async () 
   });
   expect(hasText('2 entrenamientos en este rango')).toBe(true);
   expect(hasText('Día A')).toBe(true);
-  expect(hasText('Viernes 2 oct')).toBe(true);
+  expect(JSON.stringify(renderer.toJSON())).toContain('Viernes 2 oct');
 });
 
 test('detail shows the full Spanish date and set tiles', async () => {
@@ -251,12 +312,14 @@ test('detail shows the full Spanish date and set tiles', async () => {
       />,
     );
   });
-  expect(hasText('Viernes 2 de octubre de 2026')).toBe(true);
-  expect(hasText('Serie 1')).toBe(true);
-  expect(hasText('20 × 10')).toBe(true);
+  expect(JSON.stringify(renderer.toJSON())).toContain(
+    'Viernes 2 de octubre de 2026',
+  );
+  expect(hasText('Serie 1 ✓')).toBe(true);
+  expect(hasText('20 kg')).toBe(true);
 });
 
-test('recorded sets are marked as corrections in the editor', async () => {
+test('recorded sets show previous values in the correction editor', async () => {
   await ReactTestRenderer.act(async () => {
     renderer = ReactTestRenderer.create(
       <SetEditor
@@ -269,6 +332,7 @@ test('recorded sets are marked as corrections in the editor', async () => {
       />,
     );
   });
-  expect(hasText('Corrigiendo')).toBe(true);
+  expect(hasText('Antes: 20 kg')).toBe(true);
+  expect(hasText('Antes: 10 reps')).toBe(true);
   expect(hasText('En curso')).toBe(false);
 });

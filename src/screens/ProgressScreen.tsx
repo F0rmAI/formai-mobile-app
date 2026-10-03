@@ -7,9 +7,11 @@
 
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import {
   AdherenceCard,
+  HistoryFilterDialog,
   ProgressLineChart,
   StatCard,
   WorkoutHistoryItem,
@@ -25,9 +27,11 @@ import {
   Toast,
 } from '@/components/ui';
 import { useClientProfile } from '@/hooks/useClientProfile';
+import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import { useProgressDashboard } from '@/hooks/useProgressDashboard';
 import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
 import { formatVolumeKg } from '@/utils/progress';
+import { parseFilterDate } from '@/utils/dates';
 
 /** Shows progress metrics, exercise evolution and a history preview. */
 export function ProgressScreen({
@@ -36,6 +40,11 @@ export function ProgressScreen({
   navigation: BottomTabNavigationProp<MainTabParamList, 'Progress'>;
 }) {
   const { headerUser } = useClientProfile();
+  const { routine } = useActiveRoutine();
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [filterError, setFilterError] = useState<string>();
   const {
     weeks,
     weekOptions,
@@ -44,9 +53,14 @@ export function ProgressScreen({
     previewSessions,
     exercises,
     selectedExerciseId,
+    selectedExercise,
     selectExercise,
     chart,
     stats,
+    maxLoadKg,
+    maxLoadDeltaKg,
+    weeklyVolumeKg,
+    weeklyVolumeDeltaPercent,
     isLoading,
     isChartLoading,
     error,
@@ -55,26 +69,30 @@ export function ProgressScreen({
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
 
-  const openHistory = () => root?.navigate('WorkoutHistory');
+  const applyFilter = () => {
+    const parsedFrom = parseFilterDate(from);
+    const parsedTo = parseFilterDate(to);
+    if (!parsedFrom || !parsedTo || parsedFrom > parsedTo) {
+      setFilterError(
+        'Ingresa dos fechas válidas en formato dd/mm/aaaa. La fecha inicial debe ser anterior a la final.',
+      );
+      return;
+    }
+    setFilterError(undefined);
+    setFilterOpen(false);
+    root?.navigate('WorkoutHistory', { from: parsedFrom, to: parsedTo });
+  };
   const openDetail = (sessionId: string) =>
     root?.navigate('WorkoutDetail', { sessionId });
-
-  const periodCaption =
-    weeks === 4 ? 'En 4 semanas' : weeks === 8 ? 'En 8 semanas' : 'En 12 semanas';
 
   return (
     <TabScreenLayout
       headerSubtitle="Tu progreso"
       user={headerUser}
       title="Tu progreso"
+      subtitle={routine ? `Rutina ${routine.routineName}` : undefined}
     >
       <View className="gap-xl">
-        <View className="gap-xs">
-          <Text variant="body-l" tone="secondary">
-            Revisa tu adherencia, volumen y la evolución de cada ejercicio.
-          </Text>
-        </View>
-
         <SegmentedControl
           label="Periodo"
           options={weekOptions}
@@ -91,16 +109,28 @@ export function ProgressScreen({
           <>
             <View className="flex-row gap-md">
               <StatCard
-                label="Sesiones"
-                value={String(stats.sessionCount)}
-                caption={periodCaption}
-                icon="fitness_center"
+                label="Carga máxima"
+                value={maxLoadKg === undefined ? '—' : `${maxLoadKg} kg`}
+                caption={selectedExercise?.exerciseName ?? 'Sin registros'}
+                icon="military_tech"
+                delta={
+                  maxLoadDeltaKg === undefined
+                    ? undefined
+                    : `${maxLoadDeltaKg >= 0 ? '+' : ''}${maxLoadDeltaKg} kg`
+                }
               />
               <StatCard
-                label="Volumen"
-                value={formatVolumeKg(stats.volumeKg)}
-                caption="Levantados"
-                icon="monitoring"
+                label="Volumen semanal"
+                value={formatVolumeKg(weeklyVolumeKg ?? 0)}
+                caption="Esta semana"
+                icon="local_fire_department"
+                delta={
+                  weeklyVolumeDeltaPercent === undefined
+                    ? undefined
+                    : `${
+                        weeklyVolumeDeltaPercent >= 0 ? '+' : ''
+                      }${weeklyVolumeDeltaPercent} %`
+                }
               />
             </View>
 
@@ -108,15 +138,18 @@ export function ProgressScreen({
               percentage={stats.adherencePercentage}
               completedCount={stats.completedCount}
               scheduledCount={stats.scheduledCount}
+              partialCount={stats.partialCount}
+              skippedCount={stats.skippedCount}
+              weeks={weeks}
             />
 
             <Card className="gap-lg">
-              <Text variant="title">Evolución</Text>
+              <Text variant="title">Evolución por ejercicio</Text>
               {exercises.length === 0 ? (
                 <EmptyState
-                  title="Sin ejercicios registrados"
-                  description="Cuando registres series verás aquí la evolución de carga y volumen."
-                  icon="show_chart"
+                  title="Aún no hay datos suficientes"
+                  description="Registra este ejercicio en al menos dos sesiones para ver su evolución."
+                  icon="query_stats"
                 />
               ) : (
                 <>
@@ -141,9 +174,9 @@ export function ProgressScreen({
                     />
                   ) : chart && !chart.enoughData ? (
                     <EmptyState
-                      title="Datos insuficientes"
-                      description="Necesitas al menos dos sesiones con este ejercicio para ver la gráfica."
-                      icon="show_chart"
+                      title="Aún no hay datos suficientes"
+                      description="Registra este ejercicio en al menos dos sesiones para ver su evolución."
+                      icon="query_stats"
                     />
                   ) : chart ? (
                     <ProgressLineChart points={chart.points} />
@@ -160,8 +193,8 @@ export function ProgressScreen({
             <View className="gap-md">
               <SectionHeader
                 title="Historial"
-                actionLabel="Filtrar"
-                onAction={openHistory}
+                actionLabel="Filtrar por fechas"
+                onAction={() => setFilterOpen(true)}
               />
               {previewSessions.length === 0 ? (
                 <EmptyState
@@ -169,9 +202,7 @@ export function ProgressScreen({
                   description="Tus sesiones aparecerán aquí cuando tengas una rutina."
                   icon="event_busy"
                   action={
-                    error
-                      ? { label: 'Reintentar', onPress: retry }
-                      : undefined
+                    error ? { label: 'Reintentar', onPress: retry } : undefined
                   }
                 />
               ) : (
@@ -189,6 +220,25 @@ export function ProgressScreen({
           </>
         )}
       </View>
+      <HistoryFilterDialog
+        open={filterOpen}
+        from={from}
+        to={to}
+        error={filterError}
+        onChangeFrom={value => {
+          setFrom(value);
+          setFilterError(undefined);
+        }}
+        onChangeTo={value => {
+          setTo(value);
+          setFilterError(undefined);
+        }}
+        onApply={applyFilter}
+        onCancel={() => {
+          setFilterOpen(false);
+          setFilterError(undefined);
+        }}
+      />
     </TabScreenLayout>
   );
 }
