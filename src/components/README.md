@@ -13,7 +13,7 @@ de FormAI (Figma › `formai_design_system`).
 | `progress/` | Componentes del flujo Progreso: `StatCard`, `AdherenceCard`, `ProgressLineChart`, `WorkoutHistoryItem`, `HistoryFilterDialog`, `SetSummaryTile`. |
 | `history/` | Chip del rango de fechas aplicado en el historial. |
 | `reminders/` | Ajustes y preview de recordatorios locales: `ReminderSettingsCard`, `ReminderPreviewModal`. |
-| `training/` | Componentes de la sesión de hoy y rutina. |
+| `training/` | Componentes de la sesión de hoy y rutina, incluido el panel de corrección de series. |
 
 ### `layout/` en esta app
 

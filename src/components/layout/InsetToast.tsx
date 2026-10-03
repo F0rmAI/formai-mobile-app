@@ -15,6 +15,8 @@ import { Toast } from '@/components/ui';
 export interface InsetToastProps {
   /** Message shown by the toast. */
   message: string;
+  /** Positions the toast above the main tab bar. */
+  aboveTabs?: boolean;
 }
 
 /**
@@ -25,13 +27,13 @@ export interface InsetToastProps {
  * <InsetToast message="Saved" />
  * ```
  */
-export function InsetToast({ message }: InsetToastProps) {
+export function InsetToast({ message, aboveTabs = false }: InsetToastProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View
       className="absolute inset-x-xl"
-      style={{ bottom: insets.bottom + 16 }}
+      style={{ bottom: insets.bottom + (aboveTabs ? 88 : 16) }}
     >
       <Toast message={message} tone="success" />
     </View>

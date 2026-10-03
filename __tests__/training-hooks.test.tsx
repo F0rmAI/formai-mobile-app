@@ -67,8 +67,8 @@ function TrainingHarness() {
   training = useTraining();
   return null;
 }
-function HistoryHarness() {
-  history = useWorkoutHistory();
+function HistoryHarness({ range }: { range?: { from: string; to: string } }) {
+  history = useWorkoutHistory(range);
   return null;
 }
 
@@ -243,4 +243,26 @@ test('validates the date range and loads the next history page', async () => {
     undefined,
     undefined,
   );
+});
+
+test('loads the filtered history route using the supplied ISO range', async () => {
+  service.listWorkoutSessions.mockResolvedValue({
+    content: [session],
+    page: 0,
+    size: 20,
+    totalElements: 1,
+    totalPages: 1,
+  });
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(
+      <HistoryHarness range={{ from: '2026-09-01', to: '2026-09-13' }} />,
+    );
+  });
+  expect(service.listWorkoutSessions).toHaveBeenCalledWith(
+    0,
+    '2026-09-01',
+    '2026-09-13',
+  );
+  expect(history.isFiltered).toBe(true);
+  expect(history.from).toBe('01/09/2026');
 });

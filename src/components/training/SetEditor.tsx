@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Badge, Button, Text } from '@/components/ui';
+import { Badge, Button, Icon, Text } from '@/components/ui';
 import type { RecordSetInput, WorkoutExercise } from '@/types/training';
 import { StepperField } from './StepperField';
 
@@ -68,7 +68,7 @@ export function SetEditor({
     if (!Number.isInteger(parsedReps) || parsedReps <= 0) {
       setValidation({
         field: 'reps',
-        message: 'Ingresa repeticiones válidas.',
+        message: 'Ingresa las repeticiones realizadas con un número válido.',
       });
       return;
     }
@@ -82,37 +82,50 @@ export function SetEditor({
   };
 
   return (
-    <View className="gap-md rounded-md bg-surface-container-low p-3">
+    <View className="gap-md rounded-md bg-surface-container-low p-md">
       <View className="flex-row items-center justify-between">
         <Text variant="label-l">Serie {setNumber}</Text>
-        <Badge
-          label={initialLoad !== undefined ? 'Corrigiendo' : 'En curso'}
-          tone="secondary"
-        />
+        {initialLoad === undefined && (
+          <Badge label="En curso" tone="secondary" />
+        )}
       </View>
       <View className="flex-row gap-md">
         <StepperField
-          label="Peso"
+          label="Carga"
           value={load}
           suffix="kg"
           step={0.5}
+          hint={`${initialLoad === undefined ? 'Objetivo' : 'Antes'}: ${
+            initialLoad ?? exercise.targetLoadKg
+          } kg`}
           onChange={setLoad}
-          error={validation?.field === 'load' ? validation.message : undefined}
         />
         <StepperField
           label="Repeticiones"
           value={reps}
           suffix="reps"
           step={1}
+          hint={`${initialReps === undefined ? 'Objetivo' : 'Antes'}: ${
+            initialReps ?? exercise.targetReps
+          } reps`}
           onChange={setReps}
-          error={validation?.field === 'reps' ? validation.message : undefined}
         />
       </View>
+      {validation && (
+        <View className="flex-row items-center gap-xs">
+          <Icon name="error" size={16} className="text-error" />
+          <Text variant="body-m" tone="error" accessibilityRole="alert">
+            {validation.message}
+          </Text>
+        </View>
+      )}
       <Button
         label={
-          initialLoad !== undefined ? 'Guardar corrección' : 'Registrar serie'
+          initialLoad !== undefined
+            ? 'Guardar corrección'
+            : `Registrar serie ${setNumber}`
         }
-        icon="check"
+        icon={initialLoad !== undefined ? 'save' : 'check'}
         size="md"
         variant="accent"
         fullWidth

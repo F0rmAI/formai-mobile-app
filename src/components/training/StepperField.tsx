@@ -21,6 +21,8 @@ export interface StepperFieldProps {
   step: number;
   /** Validation message shown below the field. */
   error?: string;
+  /** Prescribed or previously recorded value shown below the controls. */
+  hint?: string;
   /** Reports updated numeric text. */
   onChange: (value: string) => void;
 }
@@ -32,6 +34,7 @@ export function StepperField({
   suffix,
   step,
   error,
+  hint,
   onChange,
 }: StepperFieldProps) {
   const changeBy = (delta: number) => {
@@ -58,8 +61,10 @@ export function StepperField({
         <View className="min-w-0 flex-1 flex-row items-baseline justify-center gap-2xs">
           <TextInput
             accessibilityLabel={label}
-            keyboardType="decimal-pad"
+            keyboardType={step === 1 ? 'number-pad' : 'decimal-pad'}
             value={value}
+            placeholder="—"
+            placeholderTextColorClassName="accent-content-muted"
             maxLength={5}
             onChangeText={onChange}
             selectTextOnFocus
@@ -78,6 +83,11 @@ export function StepperField({
       {error && (
         <Text variant="caption" tone="error" accessibilityRole="alert">
           {error}
+        </Text>
+      )}
+      {hint && (
+        <Text variant="caption" tone="muted" className="text-center">
+          {hint}
         </Text>
       )}
     </View>

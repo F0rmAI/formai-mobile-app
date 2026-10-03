@@ -36,21 +36,25 @@ export function RoutineOverviewCard({
 
   return (
     <Card className="gap-xl p-xl">
-      <SectionLabel label="Sesión de hoy" tone="secondary" icon="bolt" />
+      <SectionLabel
+        label="Sesión de hoy"
+        tone="secondary"
+        icon="fitness_center"
+      />
       <View className="gap-xs">
         <Text variant="title-strong">{session.dayLabel}</Text>
         <Text variant="body-m" tone="secondary" numberOfLines={1}>
-          {session.exercises.length} ejercicios · {targetSets} series ·{' '}
+          {session.exercises.length} ejercicios · {targetSets} series · Rutina{' '}
           {routine.routineName}
         </Text>
       </View>
       <View className="gap-sm">
         <View className="flex-row justify-between">
           <Text variant="label-m" tone="secondary">
-            Progreso
+            Progreso de la sesión
           </Text>
           <Text variant="label-m-bold">
-            {completedSets}/{targetSets} series
+            {completedSets} de {targetSets} series
           </Text>
         </View>
         <ProgressBar value={progress} label="Progreso de la sesión" />
@@ -58,7 +62,7 @@ export function RoutineOverviewCard({
       <Button
         testID="view-routine-button"
         label="Ver mi rutina"
-        icon="calendar_month"
+        icon="event_note"
         variant="ghost"
         size="md"
         className="h-9"

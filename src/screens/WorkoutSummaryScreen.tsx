@@ -6,12 +6,13 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { View } from 'react-native';
-import { ScreenContainer, TopBar } from '@/components/layout';
+import { ScrollView, View } from 'react-native';
+import { BottomNav, ScreenContainer } from '@/components/layout';
 import { WorkoutSummaryCard } from '@/components/training';
-import { Badge, Button, EmptyState, Text } from '@/components/ui';
+import { Badge, Button, EmptyState, Icon, Text } from '@/components/ui';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
 import type { RootStackParamList } from '@/types/navigation';
+import { formatTrainingDate } from '@/utils/training-formatters';
 
 /** Shows a completed or partial session using useWorkoutSession for backend totals. */
 export function WorkoutSummaryScreen({
@@ -33,9 +34,11 @@ export function WorkoutSummaryScreen({
       0,
     ) ?? 0;
   return (
-    <ScreenContainer className="gap-xl">
-      <TopBar title="Resumen" onBack={navigation.goBack} />
-      <View className="gap-xl p-xl">
+    <ScreenContainer>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="grow justify-center gap-xl p-xl"
+      >
         {isLoading ? (
           <EmptyState title="Cargando resumen" icon="hourglass_top" />
         ) : error ? (
@@ -45,24 +48,46 @@ export function WorkoutSummaryScreen({
           />
         ) : session ? (
           <>
-            <Text variant="headline">
-              {session.status === 'PARTIAL'
-                ? 'Sesión guardada como parcial'
-                : session.status === 'COMPLETED'
-                ? '¡Sesión completada!'
-                : 'Resumen de sesión'}
-            </Text>
-            <Badge
-              label={
-                session.status === 'PARTIAL'
-                  ? 'Parcial'
+            <View className="items-center gap-md">
+              <Icon
+                name={session.status === 'PARTIAL' ? 'flag' : 'emoji_events'}
+                size={24}
+              />
+              <Text variant="headline" className="text-center">
+                {session.status === 'PARTIAL'
+                  ? 'Sesión guardada como parcial'
                   : session.status === 'COMPLETED'
-                  ? 'Completada'
-                  : session.status === 'SKIPPED'
-                  ? 'Omitida'
-                  : 'Pendiente'
-              }
-            />
+                  ? '¡Sesión completada!'
+                  : 'Resumen de sesión'}
+              </Text>
+              {session.status === 'PARTIAL' ? (
+                <Text variant="body-l" tone="secondary" className="text-center">
+                  {`Registraste ${completedSets} de ${targetSets} series. Tu entrenador verá lo que completaste.`}
+                </Text>
+              ) : (
+                <Text variant="body-l" tone="secondary">
+                  {`${session.dayLabel} · ${formatTrainingDate(
+                    session.scheduledFor,
+                  )}`}
+                </Text>
+              )}
+              <Badge
+                label={
+                  session.status === 'PARTIAL'
+                    ? `Parcial (${
+                        targetSets
+                          ? Math.round((completedSets / targetSets) * 100)
+                          : 0
+                      } %)`
+                    : session.status === 'COMPLETED'
+                    ? 'Completada'
+                    : session.status === 'SKIPPED'
+                    ? 'Omitida'
+                    : 'Pendiente'
+                }
+                icon={session.status === 'COMPLETED' ? 'check' : undefined}
+              />
+            </View>
             <WorkoutSummaryCard
               summary={{
                 session,
@@ -72,14 +97,33 @@ export function WorkoutSummaryScreen({
               }}
             />
             <Button
+              label="Ver mi progreso"
+              icon="monitoring"
+              onPress={() =>
+                navigation.navigate('Main', { screen: 'Progress' })
+              }
+              fullWidth
+            />
+            <Button
               label="Volver a Hoy"
-              onPress={() => navigation.navigate('Main')}
+              variant="ghost"
+              onPress={() => navigation.navigate('Main', { screen: 'Today' })}
+              fullWidth
             />
           </>
         ) : (
           <EmptyState title="Sesión no disponible" />
         )}
-      </View>
+      </ScrollView>
+      <BottomNav
+        items={[
+          { key: 'Today', label: 'Hoy', icon: 'fitness_center' },
+          { key: 'Progress', label: 'Progreso', icon: 'monitoring' },
+          { key: 'Profile', label: 'Perfil', icon: 'person' },
+        ]}
+        activeKey="Today"
+        onChange={key => navigation.navigate('Main', { screen: key })}
+      />
     </ScreenContainer>
   );
 }
