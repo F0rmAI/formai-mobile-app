@@ -95,3 +95,27 @@ export interface TrainingSummary {
   /** Count of prescribed sets. */ targetSets: number;
   /** Whether some prescribed sets are missing. */ isPartial: boolean;
 }
+
+/** Supported progress-chart windows from the backend. */
+export type ProgressWeeks = 4 | 8 | 12;
+
+/** One day in an exercise progress series. */
+export interface ProgressPoint {
+  /** Local calendar date. */ date: string;
+  /** Heaviest load recorded that day. */ maxLoadKg: number;
+  /** Total volume recorded that day. */ volumeKg: number;
+}
+
+/** Exercise load and volume series for a progress window. */
+export interface ProgressChart {
+  /** Exercise identifier. */ exerciseId: string;
+  /** Window length in weeks. */ weeks: ProgressWeeks;
+  /** Whether the series has at least two points. */ enoughData: boolean;
+  /** Points ordered from oldest to newest. */ points: ProgressPoint[];
+}
+
+/** Exercise option shown as a progress chip. */
+export interface ProgressExerciseOption {
+  /** Exercise identifier. */ exerciseId: string;
+  /** Display name. */ exerciseName: string;
+}

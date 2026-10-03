@@ -15,6 +15,7 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 | `api-client.ts` | Cliente `fetch` único (`apiClient.get/post/put/patch/delete`) con JSON, `ApiError` y refresh compartido de sesión. |
 | `active-routine.service.ts` | Rutina vigente del cliente. |
 | `workout-session.service.ts` | Sesiones, historial, series, correcciones y finalización. |
+| `progress-chart.service.ts` | Evolución de carga y volumen del cliente (`/v1/progress-charts/me`). |
 
 En desarrollo, la API local debe ejecutarse con `JWT_COOKIE_SECURE=false`: las cookies `Secure` no viajan por HTTP desde los simuladores. `config.ts` usa `localhost:8080` en iOS y `10.0.2.2:8080` en Android.
 

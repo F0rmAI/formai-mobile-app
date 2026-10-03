@@ -1,36 +1,35 @@
 /**
- * Workout history screen.
+ * Progress dashboard: period stats, charts and recent history.
  *
- * @author Carlos
+ * @author Christian
  * @packageDocumentation
  */
 
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import {
+  AdherenceCard,
+  ProgressLineChart,
+  StatCard,
+  WorkoutHistoryItem,
+} from '@/components/progress';
 import { TabScreenLayout } from '@/components/layout';
 import {
-  Button,
+  Card,
+  Chip,
   EmptyState,
-  ListItem,
-  TextField,
+  SectionHeader,
+  SegmentedControl,
   Text,
   Toast,
 } from '@/components/ui';
 import { useClientProfile } from '@/hooks/useClientProfile';
-import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
+import { useProgressDashboard } from '@/hooks/useProgressDashboard';
 import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
-import type { WorkoutStatus } from '@/types/training';
-import { formatWorkoutHistoryDate } from '@/utils/dates';
+import { formatVolumeKg } from '@/utils/progress';
 
-const labels: Record<WorkoutStatus, string> = {
-  COMPLETED: 'Completada',
-  PARTIAL: 'Parcial',
-  SKIPPED: 'Omitida',
-  PENDING: 'Pendiente',
-};
-
-/** Lists workouts using useWorkoutHistory for filtering and pagination. */
+/** Shows progress metrics, exercise evolution and a history preview. */
 export function ProgressScreen({
   navigation,
 }: {
@@ -38,100 +37,158 @@ export function ProgressScreen({
 }) {
   const { headerUser } = useClientProfile();
   const {
-    from,
-    to,
-    setFrom,
-    setTo,
-    sessions,
-    totalElements,
-    isFiltered,
+    weeks,
+    weekOptions,
+    weeksValue,
+    setWeeks,
+    previewSessions,
+    exercises,
+    selectedExerciseId,
+    selectExercise,
+    chart,
+    stats,
     isLoading,
+    isChartLoading,
     error,
-    applyFilter,
-    clearFilter,
     retry,
-    loadMore,
-    hasMore,
-  } = useWorkoutHistory();
+  } = useProgressDashboard();
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
+
+  const openHistory = () => root?.navigate('WorkoutHistory');
+  const openDetail = (sessionId: string) =>
+    root?.navigate('WorkoutDetail', { sessionId });
+
+  const periodCaption =
+    weeks === 4 ? 'En 4 semanas' : weeks === 8 ? 'En 8 semanas' : 'En 12 semanas';
+
   return (
     <TabScreenLayout
-      headerSubtitle="Tu historial"
+      headerSubtitle="Tu progreso"
       user={headerUser}
-      title="Historial de entrenamientos"
+      title="Tu progreso"
     >
-      <View className="gap-md">
-        <TextField
-          label="Desde"
-          helper="aaaa-mm-dd"
-          placeholder="aaaa-mm-dd"
-          value={from}
-          onChangeText={setFrom}
-          autoCapitalize="none"
-        />
-        <TextField
-          label="Hasta"
-          helper="aaaa-mm-dd"
-          placeholder="aaaa-mm-dd"
-          value={to}
-          onChangeText={setTo}
-          autoCapitalize="none"
-        />
-        <Button label="Filtrar" onPress={applyFilter} />
-      </View>
-      {error && <Toast message={error} tone="error" />}
-      {isLoading && sessions.length === 0 ? (
-        <EmptyState title="Cargando historial" icon="hourglass_top" />
-      ) : sessions.length === 0 ? (
-        <EmptyState
-          title={
-            isFiltered
-              ? 'Sin entrenamientos en este rango'
-              : 'Aún no hay entrenamientos'
-          }
-          description={
-            isFiltered
-              ? undefined
-              : 'Tus sesiones aparecerán aquí cuando tengas una rutina.'
-          }
-          icon="event_busy"
-          action={
-            isFiltered
-              ? { label: 'Quitar filtro', onPress: clearFilter }
-              : error
-              ? { label: 'Reintentar', onPress: retry }
-              : undefined
-          }
-        />
-      ) : (
-        <View className="gap-sm">
-          {isFiltered && (
-            <Text variant="body-m" tone="secondary">
-              {`${totalElements} ${
-                totalElements === 1 ? 'entrenamiento' : 'entrenamientos'
-              } en este rango`}
-            </Text>
-          )}
-          {sessions.map(session => (
-            <ListItem
-              key={session.id}
-              title={session.dayLabel}
-              subtitle={`${formatWorkoutHistoryDate(
-                session.scheduledFor,
-                'list',
-              )} · ${session.totalVolumeKg} kg`}
-              badge={labels[session.status]}
-              onPress={() =>
-                root?.navigate('WorkoutDetail', { sessionId: session.id })
-              }
-            />
-          ))}
+      <View className="gap-xl">
+        <View className="gap-xs">
+          <Text variant="body-l" tone="secondary">
+            Revisa tu adherencia, volumen y la evolución de cada ejercicio.
+          </Text>
         </View>
-      )}
-      {hasMore && (
-        <Button label="Cargar más" loading={isLoading} onPress={loadMore} />
-      )}
+
+        <SegmentedControl
+          label="Periodo"
+          options={weekOptions}
+          value={weeksValue}
+          onChange={setWeeks}
+          className="self-stretch"
+        />
+
+        {error && <Toast message={error} tone="error" />}
+
+        {isLoading ? (
+          <EmptyState title="Cargando progreso" icon="hourglass_top" />
+        ) : (
+          <>
+            <View className="flex-row gap-md">
+              <StatCard
+                label="Sesiones"
+                value={String(stats.sessionCount)}
+                caption={periodCaption}
+                icon="fitness_center"
+              />
+              <StatCard
+                label="Volumen"
+                value={formatVolumeKg(stats.volumeKg)}
+                caption="Levantados"
+                icon="monitoring"
+              />
+            </View>
+
+            <AdherenceCard
+              percentage={stats.adherencePercentage}
+              completedCount={stats.completedCount}
+              scheduledCount={stats.scheduledCount}
+            />
+
+            <Card className="gap-lg">
+              <Text variant="title">Evolución</Text>
+              {exercises.length === 0 ? (
+                <EmptyState
+                  title="Sin ejercicios registrados"
+                  description="Cuando registres series verás aquí la evolución de carga y volumen."
+                  icon="show_chart"
+                />
+              ) : (
+                <>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerClassName="gap-sm"
+                  >
+                    {exercises.map(exercise => (
+                      <Chip
+                        key={exercise.exerciseId}
+                        label={exercise.exerciseName}
+                        selected={exercise.exerciseId === selectedExerciseId}
+                        onPress={() => selectExercise(exercise.exerciseId)}
+                      />
+                    ))}
+                  </ScrollView>
+                  {isChartLoading ? (
+                    <EmptyState
+                      title="Cargando evolución"
+                      icon="hourglass_top"
+                    />
+                  ) : chart && !chart.enoughData ? (
+                    <EmptyState
+                      title="Datos insuficientes"
+                      description="Necesitas al menos dos sesiones con este ejercicio para ver la gráfica."
+                      icon="show_chart"
+                    />
+                  ) : chart ? (
+                    <ProgressLineChart points={chart.points} />
+                  ) : (
+                    <EmptyState
+                      title="No pudimos cargar la evolución"
+                      action={{ label: 'Reintentar', onPress: retry }}
+                    />
+                  )}
+                </>
+              )}
+            </Card>
+
+            <View className="gap-md">
+              <SectionHeader
+                title="Historial"
+                actionLabel="Filtrar"
+                onAction={openHistory}
+              />
+              {previewSessions.length === 0 ? (
+                <EmptyState
+                  title="Aún no hay entrenamientos"
+                  description="Tus sesiones aparecerán aquí cuando tengas una rutina."
+                  icon="event_busy"
+                  action={
+                    error
+                      ? { label: 'Reintentar', onPress: retry }
+                      : undefined
+                  }
+                />
+              ) : (
+                <View className="gap-sm">
+                  {previewSessions.map(session => (
+                    <WorkoutHistoryItem
+                      key={session.id}
+                      session={session}
+                      onPress={() => openDetail(session.id)}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+          </>
+        )}
+      </View>
     </TabScreenLayout>
   );
 }

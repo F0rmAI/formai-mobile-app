@@ -18,6 +18,7 @@ import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { RoutineScreen } from '@/screens/RoutineScreen';
 import { RoutineDayScreen } from '@/screens/RoutineDayScreen';
 import { WorkoutSummaryScreen } from '@/screens/WorkoutSummaryScreen';
+import { WorkoutHistoryScreen } from '@/screens/WorkoutHistoryScreen';
 import { WorkoutDetailScreen } from '@/screens/WorkoutDetailScreen';
 import type { RootStackParamList } from '@/types/navigation';
 import { MainTabs } from './MainTabs';
@@ -44,6 +45,10 @@ export function RootNavigator() {
           <Stack.Screen
             name="WorkoutSummary"
             component={WorkoutSummaryScreen}
+          />
+          <Stack.Screen
+            name="WorkoutHistory"
+            component={WorkoutHistoryScreen}
           />
           <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
         </>

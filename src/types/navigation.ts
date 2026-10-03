@@ -27,6 +27,7 @@ export type RootStackParamList = {
   Routine: undefined;
   RoutineDay: { order: number };
   WorkoutSummary: { sessionId: string };
+  WorkoutHistory: undefined;
   WorkoutDetail: { sessionId: string };
 };
 
