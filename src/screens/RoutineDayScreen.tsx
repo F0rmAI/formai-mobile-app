@@ -6,12 +6,14 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { ScreenContainer, TopBar } from '@/components/layout';
 import { RoutineExerciseCard } from '@/components/training';
-import { EmptyState, Text } from '@/components/ui';
+import { EmptyState, Icon, Text } from '@/components/ui';
 import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import type { RootStackParamList } from '@/types/navigation';
+import { nextRoutineSessionDate } from '@/utils/reminders';
+import { formatLongDate } from '@/utils/dates';
 
 /** Shows prescribed exercises using useActiveRoutine for the assigned day. */
 export function RoutineDayScreen({
@@ -22,6 +24,8 @@ export function RoutineDayScreen({
     'No pudimos cargar la sesión',
   );
   const day = routine?.sessions.find(item => item.order === route.params.order);
+  const scheduledDate =
+    routine && day && nextRoutineSessionDate(routine, day.order);
   return (
     <ScreenContainer>
       <TopBar
@@ -40,11 +44,22 @@ export function RoutineDayScreen({
           <EmptyState title="Sesión no disponible" />
         ) : (
           <>
-            <Text variant="body-l" tone="secondary">
-              {day.order === routine?.todaySessionOrder
-                ? 'Entrenamiento de hoy'
-                : 'Sesión de tu rutina vigente'}
-            </Text>
+            {scheduledDate && (
+              <View className="flex-row items-center gap-xs">
+                <Icon name="event" size={16} className="text-content-muted" />
+                <Text variant="body-l" tone="secondary">
+                  {`Programada para el ${formatLongDate(
+                    scheduledDate,
+                  ).toLowerCase()}`}
+                </Text>
+              </View>
+            )}
+            {day.order !== routine?.todaySessionOrder && (
+              <Text variant="body-l" tone="secondary">
+                Podrás registrar las series de esta sesión el día que te toque
+                realizarla.
+              </Text>
+            )}
             {day.exercises.map(exercise => (
               <RoutineExerciseCard
                 key={exercise.exerciseId}
