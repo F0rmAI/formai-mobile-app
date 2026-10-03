@@ -7,7 +7,7 @@ rutas con pantallas de `screens/`; no tiene UI propia ni lógica de negocio.
 
 | Archivo | Uso |
 |---|---|
-| `RootNavigator.tsx` | Navegación de primer nivel según la sesión (`useAuth`): sin sesión, bienvenida, inicio de sesión, activación y recuperación de contraseña; con sesión, las pestañas y los detalles de rutina e historial. Se monta en `App.tsx`. |
+| `RootNavigator.tsx` | Navegación de primer nivel según la sesión (`useAuth`): sin sesión, bienvenida, inicio de sesión, activación y recuperación; con sesión, pestañas, rutina, historial filtrable y detalle. Se monta en `App.tsx`. |
 | `linking.ts` | Enlaces que abren una pantalla: el del correo de recuperación (`…/password-reset?token=…`) abre "Nueva contraseña". Se pasa a `NavigationContainer` en `App.tsx`. |
 | `MainTabs.tsx` | Pestañas del cliente: Hoy, Progreso y Perfil (TB2 agrega Escanear). Usa el `BottomNav` del design system como barra. |
 

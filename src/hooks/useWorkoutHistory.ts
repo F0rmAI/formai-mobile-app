@@ -95,6 +95,10 @@ export function useWorkoutHistory() {
     to,
     setFrom,
     setTo,
+    /** Inclusive start date of the applied filter. */
+    appliedFrom: range.from,
+    /** Inclusive end date of the applied filter. */
+    appliedTo: range.to,
     sessions,
     totalElements,
     isFiltered: Boolean(range.from && range.to),
