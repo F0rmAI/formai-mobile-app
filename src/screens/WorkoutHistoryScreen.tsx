@@ -7,13 +7,14 @@
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { HistoryDateRangeChip } from '@/components/history';
 import {
   HistoryFilterDialog,
   WorkoutHistoryItem,
 } from '@/components/progress';
 import { InsetToast, ScreenContainer, TopBar } from '@/components/layout';
-import { Button, EmptyState, Icon, Text, Toast } from '@/components/ui';
+import { Button, EmptyState, Text, Toast } from '@/components/ui';
 import { useWorkoutHistory } from '@/hooks/useWorkoutHistory';
 import type { RootStackParamList } from '@/types/navigation';
 import { formatDateRangeChip } from '@/utils/dates';
@@ -101,17 +102,10 @@ export function WorkoutHistoryScreen({
       >
         {isFiltered && appliedFrom && appliedTo && (
           <View className="flex-row flex-wrap items-center gap-sm">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Quitar filtro"
+            <HistoryDateRangeChip
+              label={formatDateRangeChip(appliedFrom, appliedTo)}
               onPress={clearFilter}
-              className="flex-row items-center gap-sm rounded-full bg-surface-container-low px-lg py-sm active:opacity-80"
-            >
-              <Text variant="label-m">
-                {formatDateRangeChip(appliedFrom, appliedTo)}
-              </Text>
-              <Icon name="close" size={16} className="text-content-secondary" />
-            </Pressable>
+            />
             <Text variant="body-m" tone="secondary">
               {`${totalElements} ${
                 totalElements === 1 ? 'entrenamiento' : 'entrenamientos'
