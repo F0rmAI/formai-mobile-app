@@ -86,3 +86,34 @@ export function formatWorkoutHistoryDate(
     ? `${prefix} ${MONTHS[date.getMonth()].slice(0, 3)}`
     : `${prefix} de ${MONTHS[date.getMonth()]} de ${date.getFullYear()}`;
 }
+
+/**
+ * Formats an inclusive ISO date range for history chips.
+ *
+ * @param from - Inclusive start in `yyyy-MM-dd`.
+ * @param to - Inclusive end in `yyyy-MM-dd`.
+ * @returns Compact Spanish range such as `1 – 13 sep 2026`.
+ */
+export function formatDateRangeChip(from: string, to: string) {
+  const parse = (iso: string) => {
+    const [year, month, day] = iso.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+  const start = parse(from);
+  const end = parse(to);
+  const short = (date: Date, withYear: boolean) => {
+    const month = MONTHS[date.getMonth()].slice(0, 3);
+    return withYear
+      ? `${date.getDate()} ${month} ${date.getFullYear()}`
+      : `${date.getDate()} ${month}`;
+  };
+  if (start.getFullYear() === end.getFullYear()) {
+    if (start.getMonth() === end.getMonth()) {
+      return `${start.getDate()} – ${end.getDate()} ${MONTHS[
+        end.getMonth()
+      ].slice(0, 3)} ${end.getFullYear()}`;
+    }
+    return `${short(start, false)} – ${short(end, true)}`;
+  }
+  return `${short(start, true)} – ${short(end, true)}`;
+}
