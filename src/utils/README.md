@@ -9,6 +9,7 @@ validaciones, cálculos.
 |---|---|
 | `dates.ts` | Formato de fechas en español (`formatLongDate`, `formatTime`, `formatDateRangeChip`). |
 | `progress.ts` | Ventana de semanas, volumen, duración derivada, stats y chips de ejercicios. |
+| `reminders.ts` | Subtítulos, hora en español, fechas de entrenamiento y copy del aviso local. |
 | `training-formatters.ts` | Fechas de entrenamiento y comienzo de rutina en español peruano. |
 | `mail.ts` | Destinos de la bandeja de correo según proveedor y plataforma. |
 | `names.ts` | Primer nombre para el saludo (`firstNameOf`). |
