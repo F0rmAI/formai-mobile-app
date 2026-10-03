@@ -14,8 +14,8 @@ import {
 
 type Reply = { status: number; body?: unknown } | 'network-error';
 
-const VERIFY = '/v1/activation-code-verifications';
-const ACTIVATE = '/v1/account-activations';
+const VERIFY = '/activation-code-verifications';
+const ACTIVATE = '/account-activations';
 const INVALID_CODE =
   'Este código no es válido o ya venció. Pídele uno nuevo a tu entrenador.';
 

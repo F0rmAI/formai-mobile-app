@@ -23,7 +23,7 @@ export const accountActivationService = {
    */
   verifyCode: (activationCode: string) =>
     apiClient.post<ActivationCodeVerification>(
-      '/v1/activation-code-verifications',
+      '/activation-code-verifications',
       { activationCode },
     ),
   /**
@@ -34,7 +34,7 @@ export const accountActivationService = {
    * @throws {@link ApiError} when the code or account data is rejected.
    */
   activate: (input: ActivateAccountInput) =>
-    apiClient.post<AccountActivation>('/v1/account-activations', input),
+    apiClient.post<AccountActivation>('/account-activations', input),
 };
 
 /** A rejected code yields HTTP 422 or validation error 400. */

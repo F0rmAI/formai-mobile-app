@@ -18,7 +18,7 @@ export const activeRoutineService = {
    */
   async getActiveRoutine(): Promise<ActiveRoutine | null> {
     try {
-      return await apiClient.get<ActiveRoutine>('/v1/active-routines/me');
+      return await apiClient.get<ActiveRoutine>('/active-routines/me');
     } catch (error) {
       if (error instanceof ApiError && error.status === 404) return null;
       throw error;

@@ -12,8 +12,8 @@ import { mailInboxUrls } from '@/utils/mail';
 
 type Reply = { status: number; body?: unknown } | 'network-error';
 
-const REQUEST = '/v1/password-reset-requests';
-const RESET = '/v1/password-resets';
+const REQUEST = '/password-reset-requests';
+const RESET = '/password-resets';
 const RESET_LINK = 'https://formai.app/password-reset?token=tok-123';
 const CONNECTION_ERROR =
   'No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.';

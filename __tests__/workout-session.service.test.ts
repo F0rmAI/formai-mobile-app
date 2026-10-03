@@ -29,9 +29,9 @@ test('records, corrects and finishes a partial workout at dedicated endpoints', 
   await workoutSessionService.correctSet('session-1', input);
   await workoutSessionService.finishSession('session-1', true);
   expect(post.mock.calls).toEqual([
-    ['/v1/workout-sessions/session-1/sets', input],
-    ['/v1/workout-sessions/session-1/corrections', input],
-    ['/v1/workout-sessions/session-1/completions', { confirmPartial: true }],
+    ['/workout-sessions/session-1/sets', input],
+    ['/workout-sessions/session-1/corrections', input],
+    ['/workout-sessions/session-1/completions', { confirmPartial: true }],
   ]);
 });
 
@@ -49,6 +49,6 @@ test('requests paginated filtered workout history', async () => {
     '2026-09-30',
   );
   expect(get).toHaveBeenCalledWith(
-    '/v1/workout-sessions?page=1&size=20&from=2026-09-01&to=2026-09-30',
+    '/workout-sessions?page=1&size=20&from=2026-09-01&to=2026-09-30',
   );
 });

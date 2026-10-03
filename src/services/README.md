@@ -8,14 +8,14 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 | Archivo | Uso |
 |---|---|
 | `config.ts` | URL base del backend y prefijos de los enlaces que abren la app. La URL base vive en `services/config.ts` (RN no lee `.env` sin una librería adicional). |
-| `auth.service.ts` | Inicio, renovación y cierre de sesión (`/v1/authentication/*`); la sesión viaja en cookies httpOnly. |
-| `password-reset.service.ts` | Solicitud del enlace (`/v1/password-reset-requests`) y canje de su token (`/v1/password-resets`). |
-| `client-profile.service.ts` | Nombre y correo del cliente con sesión (`/v1/client-profiles/me`). |
-| `account-activation.service.ts` | Verificación del código (`/v1/activation-code-verifications`) y activación de la cuenta con el correo que elige el cliente (`/v1/account-activations`). |
+| `auth.service.ts` | Inicio, renovación y cierre de sesión (`/authentication/*`); la sesión viaja en cookies httpOnly. |
+| `password-reset.service.ts` | Solicitud del enlace (`/password-reset-requests`) y canje de su token (`/password-resets`). |
+| `client-profile.service.ts` | Nombre y correo del cliente con sesión (`/client-profiles/me`). |
+| `account-activation.service.ts` | Verificación del código (`/activation-code-verifications`) y activación de la cuenta con el correo que elige el cliente (`/account-activations`). |
 | `api-client.ts` | Cliente `fetch` único (`apiClient.get/post/put/patch/delete`) con JSON, `ApiError` y refresh compartido de sesión. |
 | `active-routine.service.ts` | Rutina vigente del cliente. |
 | `workout-session.service.ts` | Sesiones, historial, series, correcciones y finalización. |
-| `progress-chart.service.ts` | Evolución de carga y volumen del cliente (`/v1/progress-charts/me`). |
+| `progress-chart.service.ts` | Evolución de carga y volumen del cliente (`/progress-charts/me`). |
 | `reminder-prefs.service.ts` | Prefs de recordatorios en AsyncStorage (no HTTP; no hay endpoint). |
 | `reminder-notifications.service.ts` | Canal y programación local con Notifee (no HTTP). |
 | `reminder-session.service.ts` | Limpia prefs y avisos al cerrar sesión. |

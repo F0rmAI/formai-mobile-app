@@ -83,15 +83,15 @@ describe('apiClient', () => {
       .mockResolvedValueOnce(jsonResponse(undefined, 403))
       .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
       .mockResolvedValueOnce(jsonResponse({ id: 'routine' }));
-    await expect(apiClient.get('/v1/active-routines/me')).resolves.toEqual({
+    await expect(apiClient.get('/active-routines/me')).resolves.toEqual({
       id: 'routine',
     });
     expect(
-      fetchMock.mock.calls.map(([url]) => String(url).split('/api')[1]),
+      fetchMock.mock.calls.map(([url]) => String(url).replace(API_URL, '')),
     ).toEqual([
-      '/v1/active-routines/me',
-      '/v1/authentication/refresh',
-      '/v1/active-routines/me',
+      '/active-routines/me',
+      '/authentication/refresh',
+      '/active-routines/me',
     ]);
   });
 
@@ -101,7 +101,7 @@ describe('apiClient', () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(undefined, 403))
       .mockResolvedValueOnce(jsonResponse(undefined, 401));
-    await expect(apiClient.get('/v1/client-profiles/me')).rejects.toMatchObject(
+    await expect(apiClient.get('/client-profiles/me')).rejects.toMatchObject(
       { status: 401 },
     );
     expect(handler).toHaveBeenCalledTimes(1);
@@ -115,7 +115,7 @@ describe('apiClient', () => {
       .mockResolvedValueOnce(jsonResponse(undefined, 403))
       .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
       .mockResolvedValueOnce(jsonResponse(undefined, 403));
-    await expect(apiClient.get('/v1/active-routines/me')).rejects.toMatchObject(
+    await expect(apiClient.get('/active-routines/me')).rejects.toMatchObject(
       { status: 403 },
     );
     expect(handler).not.toHaveBeenCalled();
@@ -137,8 +137,8 @@ describe('apiClient', () => {
         return jsonResponse(undefined, 403);
       return jsonResponse({ ok: true });
     });
-    const first = apiClient.get('/v1/a');
-    const second = apiClient.get('/v1/b');
+    const first = apiClient.get('/a');
+    const second = apiClient.get('/b');
     await Promise.resolve();
     const restore = refreshSession();
     resolveRefresh(jsonResponse({ id: 'user' }));
@@ -158,11 +158,11 @@ describe('apiClient', () => {
       .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
       .mockResolvedValueOnce(jsonResponse({ ok: true }))
       .mockResolvedValueOnce(jsonResponse(undefined, 401));
-    await expect(apiClient.get('/v1/client-profiles/me')).resolves.toEqual({
+    await expect(apiClient.get('/client-profiles/me')).resolves.toEqual({
       ok: true,
     });
     await expect(
-      apiClient.post('/v1/authentication/sign-in', {}),
+      apiClient.post('/authentication/sign-in', {}),
     ).rejects.toMatchObject({ status: 401 });
     expect(
       fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/refresh')),
@@ -178,7 +178,7 @@ describe('apiClient', () => {
         throw new Error('bad json');
       },
     } as unknown as Response);
-    await expect(apiClient.get('/v1/items')).rejects.toMatchObject({
+    await expect(apiClient.get('/items')).rejects.toMatchObject({
       status: 500,
       body: undefined,
     });

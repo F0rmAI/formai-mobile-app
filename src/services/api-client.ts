@@ -52,7 +52,7 @@ export function setUnauthorizedHandler(handler?: () => void) {
 /** Shares one refresh request across startup restoration and protected requests. */
 export function refreshSession<T>(): Promise<T> {
   if (!refreshInFlight) {
-    refreshInFlight = send<T>('POST', '/v1/authentication/refresh')
+    refreshInFlight = send<T>('POST', '/authentication/refresh')
       .catch(error => {
         unauthorizedHandler?.();
         throw error;
@@ -65,13 +65,13 @@ export function refreshSession<T>(): Promise<T> {
 }
 
 const publicPaths = [
-  '/v1/authentication/sign-in',
-  '/v1/authentication/refresh',
-  '/v1/authentication/sign-out',
-  '/v1/activation-code-verifications',
-  '/v1/account-activations',
-  '/v1/password-reset-requests',
-  '/v1/password-resets',
+  '/authentication/sign-in',
+  '/authentication/refresh',
+  '/authentication/sign-out',
+  '/activation-code-verifications',
+  '/account-activations',
+  '/password-reset-requests',
+  '/password-resets',
 ];
 
 /** Performs one request and parses optional JSON, including empty error bodies. */

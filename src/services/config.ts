@@ -10,11 +10,11 @@ import { Platform } from 'react-native';
 // React Native does not read `.env` files without an extra library, so the values live here.
 // On the Android emulator, `10.0.2.2` points to the localhost of the host machine.
 const DEV_API_URL = Platform.select({
-  android: 'http://10.0.2.2:8080/api',
-  default: 'http://localhost:8080/api',
+  android: 'http://10.0.2.2:8080/api/v1',
+  default: 'http://localhost:8080/api/v1',
 });
 
-const PROD_API_URL = 'https://formai.app/api';
+const PROD_API_URL = 'https://formai.app/api/v1';
 
 /**
  * Base URL of the backend, without a trailing slash.

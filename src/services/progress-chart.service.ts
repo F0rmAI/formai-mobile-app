@@ -20,7 +20,7 @@ export const progressChartService = {
    */
   getMine: (exerciseId: string, weeks: ProgressWeeks) =>
     apiClient.get<ProgressChart>(
-      `/v1/progress-charts/me?exerciseId=${encodeURIComponent(
+      `/progress-charts/me?exerciseId=${encodeURIComponent(
         exerciseId,
       )}&weeks=${weeks}`,
     ),

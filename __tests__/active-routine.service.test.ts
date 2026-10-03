@@ -24,7 +24,7 @@ beforeEach(() => {
 test('returns null for an unassigned routine', async () => {
   get.mockRejectedValue(new ApiError(404, 'not found'));
   await expect(activeRoutineService.getActiveRoutine()).resolves.toBeNull();
-  expect(get).toHaveBeenCalledWith('/v1/active-routines/me');
+  expect(get).toHaveBeenCalledWith('/active-routines/me');
 });
 
 test('preserves a rest day with nullable today fields', async () => {

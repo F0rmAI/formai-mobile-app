@@ -16,5 +16,5 @@ export const clientProfileService = {
    * @returns The client name and email associated with the session cookie.
    * @throws {@link ApiError} when the session is missing or the request fails.
    */
-  getMine: () => apiClient.get<ClientProfile>('/v1/client-profiles/me'),
+  getMine: () => apiClient.get<ClientProfile>('/client-profiles/me'),
 };

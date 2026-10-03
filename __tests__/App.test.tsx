@@ -10,10 +10,10 @@ import App from '@/App';
 
 type Reply = { status: number; body?: unknown } | 'network-error';
 
-const REFRESH = '/v1/authentication/refresh';
-const SIGN_IN = '/v1/authentication/sign-in';
-const SIGN_OUT = '/v1/authentication/sign-out';
-const PROFILE = '/v1/client-profiles/me';
+const REFRESH = '/authentication/refresh';
+const SIGN_IN = '/authentication/sign-in';
+const SIGN_OUT = '/authentication/sign-out';
+const PROFILE = '/client-profiles/me';
 
 const client = {
   id: 'ab5e59a7-851c-4b15-a2ea-6e3374e867a1',
@@ -355,7 +355,7 @@ test('shows the client name, email and active routine in Profile', async () => {
   mockBackend({
     [REFRESH]: { status: 200, body: client },
     [PROFILE]: { status: 200, body: profile },
-    '/v1/active-routines/me': {
+    '/active-routines/me': {
       status: 200,
       body: {
         routineId: 'r1',

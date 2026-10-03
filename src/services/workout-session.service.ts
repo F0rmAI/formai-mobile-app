@@ -22,7 +22,7 @@ export const workoutSessionService = {
    * @throws {@link ApiError} when the session cannot be loaded.
    */
   getWorkoutSession: (id: string) =>
-    apiClient.get<WorkoutSession>(`/v1/workout-sessions/${id}`),
+    apiClient.get<WorkoutSession>(`/workout-sessions/${id}`),
   /**
    * Lists a page of workout history.
    *
@@ -36,7 +36,7 @@ export const workoutSessionService = {
     const query = `page=${page}&size=20${
       from && to ? `&from=${from}&to=${to}` : ''
     }`;
-    return apiClient.get<WorkoutPage>(`/v1/workout-sessions?${query}`);
+    return apiClient.get<WorkoutPage>(`/workout-sessions?${query}`);
   },
   /**
    * Records a new set in a pending workout.
@@ -47,7 +47,7 @@ export const workoutSessionService = {
    * @throws {@link ApiError} when the set cannot be recorded.
    */
   recordSet: (id: string, input: RecordSetInput) =>
-    apiClient.post<WorkoutSession>(`/v1/workout-sessions/${id}/sets`, input),
+    apiClient.post<WorkoutSession>(`/workout-sessions/${id}/sets`, input),
   /**
    * Corrects an already recorded set.
    *
@@ -58,7 +58,7 @@ export const workoutSessionService = {
    */
   correctSet: (id: string, input: RecordSetInput) =>
     apiClient.post<WorkoutSession>(
-      `/v1/workout-sessions/${id}/corrections`,
+      `/workout-sessions/${id}/corrections`,
       input,
     ),
   /**
@@ -70,7 +70,7 @@ export const workoutSessionService = {
    * @throws {@link ApiError} when completion is rejected.
    */
   finishSession: (id: string, confirmPartial: boolean) =>
-    apiClient.post<WorkoutSession>(`/v1/workout-sessions/${id}/completions`, {
+    apiClient.post<WorkoutSession>(`/workout-sessions/${id}/completions`, {
       confirmPartial,
     }),
 };

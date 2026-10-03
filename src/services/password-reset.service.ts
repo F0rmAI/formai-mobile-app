@@ -20,7 +20,7 @@ export const passwordResetService = {
    * @throws {@link ApiError} when the backend rejects the request.
    */
   requestLink: (email: string) =>
-    apiClient.post<void>('/v1/password-reset-requests', { email }),
+    apiClient.post<void>('/password-reset-requests', { email }),
   /**
    * Redeems a token and stores the new password.
    *
@@ -29,7 +29,7 @@ export const passwordResetService = {
    * @throws {@link ApiError} when the link is invalid or expired.
    */
   resetPassword: (input: PasswordResetInput) =>
-    apiClient.post<void>('/v1/password-resets', input),
+    apiClient.post<void>('/password-resets', input),
 };
 
 /**

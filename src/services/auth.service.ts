@@ -21,7 +21,7 @@ export const authService = {
    * @throws {@link ApiError} when credentials are rejected.
    */
   signIn: ({ email, password }: SignInInput) =>
-    apiClient.post<AuthenticatedUser>('/v1/authentication/sign-in', {
+    apiClient.post<AuthenticatedUser>('/authentication/sign-in', {
       email,
       password,
       application: 'MOBILE_APP',
@@ -39,7 +39,7 @@ export const authService = {
    * @returns Resolves after the backend ends the session.
    * @throws {@link ApiError} when the sign-out request fails.
    */
-  signOut: () => apiClient.post<void>('/v1/authentication/sign-out'),
+  signOut: () => apiClient.post<void>('/authentication/sign-out'),
 };
 
 /** Reason for a rejected sign-in. */

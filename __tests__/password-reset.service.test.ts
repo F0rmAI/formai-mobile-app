@@ -38,7 +38,7 @@ test('requests a link with the entered email', async () => {
   await passwordResetService.requestLink('client@example.com');
 
   expect(fetchMock).toHaveBeenCalledWith(
-    `${API_URL}/v1/password-reset-requests`,
+    `${API_URL}/password-reset-requests`,
     expect.objectContaining({
       method: 'POST',
       body: JSON.stringify({ email: 'client@example.com' }),
@@ -55,7 +55,7 @@ test('redeems a token with the new password', async () => {
   });
 
   expect(fetchMock).toHaveBeenCalledWith(
-    `${API_URL}/v1/password-resets`,
+    `${API_URL}/password-resets`,
     expect.objectContaining({
       method: 'POST',
       body: JSON.stringify({ token: 'tok', password: 'new-pass-123' }),
