@@ -30,7 +30,6 @@ function getNotifee(): NotifeeModule | null {
   }
   try {
     // Require at call time so Profile can mount without a linked native module.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('@notifee/react-native') as NotifeeModule;
     // Touching default triggers native lookup; catch "native module not found".
     if (!mod?.default) {
