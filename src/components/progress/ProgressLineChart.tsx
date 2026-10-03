@@ -6,13 +6,16 @@
  */
 
 import { useState } from 'react';
-import { View, type LayoutChangeEvent } from 'react-native';
+import { StyleSheet, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { Text } from '@/components/ui';
 import type { ProgressPoint } from '@/types/training';
 import { cn } from '@/utils/cn';
 
 const CHART_HEIGHT = 160;
 const PAD = 12;
+
+// The plot height and measured point coordinates require pixel styles; classes cover visual tokens.
+const chartStyles = StyleSheet.create({ canvas: { height: CHART_HEIGHT } });
 
 /**
  * Props accepted by {@link ProgressLineChart}.
@@ -57,18 +60,19 @@ function Segment({
   const dy = to.y - from.y;
   const length = Math.sqrt(dx * dx + dy * dy);
   const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+  const position: ViewStyle = {
+    left: from.x,
+    top: from.y,
+    width: length,
+    transform: [{ rotate: `${angle}deg` }],
+  };
   return (
     <View
       className={cn(
         'absolute h-0.5 origin-left',
         tone === 'primary' ? 'bg-primary' : 'bg-secondary',
       )}
-      style={{
-        left: from.x,
-        top: from.y,
-        width: length,
-        transform: [{ rotate: `${angle}deg` }],
-      }}
+      style={position}
     />
   );
 }
@@ -110,11 +114,19 @@ export function ProgressLineChart({
       <View
         accessibilityLabel="Evolución de carga y volumen"
         className="w-full overflow-hidden rounded-md bg-surface-container-low"
-        style={{ height: CHART_HEIGHT }}
+        style={chartStyles.canvas}
         onLayout={onLayout}
       >
         {plot.map((point, index) => {
           const next = plot[index + 1];
+          const loadPosition: ViewStyle = {
+            left: point.x - 4,
+            top: point.yLoad - 4,
+          };
+          const volumePosition: ViewStyle = {
+            left: point.x - 4,
+            top: point.yVolume - 4,
+          };
           return (
             <View key={`${points[index].date}-${index}`}>
               {next && (
@@ -133,11 +145,11 @@ export function ProgressLineChart({
               )}
               <View
                 className="absolute size-2 rounded-full bg-primary"
-                style={{ left: point.x - 4, top: point.yLoad - 4 }}
+                style={loadPosition}
               />
               <View
                 className="absolute size-2 rounded-full bg-secondary"
-                style={{ left: point.x - 4, top: point.yVolume - 4 }}
+                style={volumePosition}
               />
             </View>
           );
