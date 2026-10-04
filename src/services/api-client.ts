@@ -76,12 +76,25 @@ const publicPaths = [
   '/password-resets',
 ];
 
+/**
+ * IANA time zone of the device (for example `America/Lima`). The API starts each calendar day at
+ * midnight in this zone, so "today" is the client's own date wherever they are.
+ */
+function deviceTimeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Performs one request and parses optional JSON, including empty error bodies. */
 async function send<T>(
   method: HttpMethod,
   path: string,
   { body, headers, signal }: RequestOptions = {},
 ): Promise<T> {
+  const timeZone = deviceTimeZone();
   const response = await fetch(`${API_URL}${path}`, {
     method,
     signal,
@@ -90,6 +103,7 @@ async function send<T>(
       Accept: 'application/json',
       ...(body !== undefined && { 'Content-Type': 'application/json' }),
       ...headers,
+      ...(timeZone && { 'X-Client-Timezone': timeZone }),
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });

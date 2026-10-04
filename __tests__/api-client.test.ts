@@ -46,6 +46,9 @@ describe('apiClient', () => {
       `${API_URL}/items`,
       expect.objectContaining({ method: 'GET', body: undefined }),
     );
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
+      'X-Client-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
   });
 
   it('serializes the body and sets the JSON content type on POST', async () => {
@@ -93,6 +96,9 @@ describe('apiClient', () => {
       '/authentication/refresh',
       '/active-routines/me',
     ]);
+    expect(fetchMock.mock.calls[2][1]?.headers).toMatchObject({
+      'X-Client-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
   });
 
   it('calls the unauthorized handler after a failed refresh', async () => {
@@ -101,9 +107,9 @@ describe('apiClient', () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(undefined, 403))
       .mockResolvedValueOnce(jsonResponse(undefined, 401));
-    await expect(apiClient.get('/client-profiles/me')).rejects.toMatchObject(
-      { status: 401 },
-    );
+    await expect(apiClient.get('/client-profiles/me')).rejects.toMatchObject({
+      status: 401,
+    });
     expect(handler).toHaveBeenCalledTimes(1);
     setUnauthorizedHandler();
   });
@@ -129,9 +135,9 @@ describe('apiClient', () => {
       .mockResolvedValueOnce(jsonResponse(undefined, 403))
       .mockResolvedValueOnce(jsonResponse({ id: 'user' }))
       .mockResolvedValueOnce(jsonResponse(undefined, 403));
-    await expect(apiClient.get('/active-routines/me')).rejects.toMatchObject(
-      { status: 403 },
-    );
+    await expect(apiClient.get('/active-routines/me')).rejects.toMatchObject({
+      status: 403,
+    });
     expect(handler).not.toHaveBeenCalled();
     setUnauthorizedHandler();
   });

@@ -13,14 +13,19 @@ import type { ExercisePrescription } from '@/types/training';
 interface RoutineExerciseCardProps {
   /** Exercise prescribed for a routine day. */
   exercise: ExercisePrescription;
+  /** Dated outcome of the latest workout for this routine day. */
+  lastResult?: string;
 }
 
 /** Shows the prescribed sets, repetitions, load and rest. */
-export function RoutineExerciseCard({ exercise }: RoutineExerciseCardProps) {
+export function RoutineExerciseCard({
+  exercise,
+  lastResult,
+}: RoutineExerciseCardProps) {
   return (
     <Card className="gap-md">
       <Text variant="label-m" tone="secondary">
-        Por realizar
+        {lastResult ?? 'Por realizar'}
       </Text>
       <Text variant="title">{exercise.exerciseName}</Text>
       <View className="flex-row flex-wrap gap-sm">
