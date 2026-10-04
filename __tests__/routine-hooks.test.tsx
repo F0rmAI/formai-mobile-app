@@ -89,6 +89,30 @@ test('retries a failed routine request', async () => {
   expect(active.error).toBeUndefined();
 });
 
+test('refreshes the routine subtitle without blanking the assigned routine', async () => {
+  service.getActiveRoutine.mockResolvedValueOnce(routine);
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<ActiveHarness />);
+  });
+  let resolveRoutine!: (value: ActiveRoutine | null) => void;
+  service.getActiveRoutine.mockReturnValueOnce(
+    new Promise(resolve => {
+      resolveRoutine = resolve;
+    }),
+  );
+  ReactTestRenderer.act(() => {
+    active.refresh();
+  });
+  expect(active.refreshing).toBe(true);
+  expect(active.isLoading).toBe(false);
+  expect(active.routine?.routineName).toBe('Fuerza');
+  await ReactTestRenderer.act(async () => {
+    resolveRoutine({ ...routine, routineName: 'Hipertrofia' });
+  });
+  expect(active.routine?.routineName).toBe('Hipertrofia');
+  expect(active.refreshing).toBe(false);
+});
+
 test('loads the requested workout session', async () => {
   service.getWorkoutSession.mockResolvedValue(session);
   await ReactTestRenderer.act(async () => {

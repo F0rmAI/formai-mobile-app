@@ -25,6 +25,8 @@ export type AuthStatus = 'restoring' | 'signedOut' | 'signedIn';
 
 interface AuthState {
   status: AuthStatus;
+  /** Reason shown when a previously valid session expires. */
+  signOutReason?: 'expired';
   user?: AuthenticatedUser;
   /** Profile while available after sign-in. */
   profile?: ClientProfile;
@@ -39,14 +41,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('restoring');
   const [user, setUser] = useState<AuthenticatedUser>();
   const [profile, setProfile] = useState<ClientProfile>();
+  const [signOutReason, setSignOutReason] = useState<'expired'>();
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
+      if (status === 'signedIn') {
+        setSignOutReason('expired');
+      }
       setUser(undefined);
+      setProfile(undefined);
       setStatus('signedOut');
     });
     return () => setUnauthorizedHandler();
-  }, []);
+  }, [status]);
 
   useEffect(() => {
     let active = true;
@@ -74,6 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(undefined);
       return;
     }
+    if (profile) {
+      return;
+    }
     let active = true;
     clientProfileService
       .getMine()
@@ -86,23 +96,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [status]);
+  }, [status, profile]);
 
   const signIn = useCallback(async (input: SignInInput) => {
-    setUser(await authService.signIn(input));
+    setSignOutReason(undefined);
+    const authenticated = await authService.signIn(input);
+    const confirmedProfile = await authService.confirmSession();
+    setProfile(confirmedProfile);
+    setUser(authenticated);
     setStatus('signedIn');
   }, []);
 
   // Only the backend can clear the cookies; keep local state if sign-out fails.
   const signOut = useCallback(async () => {
     await authService.signOut();
+    setSignOutReason(undefined);
     setUser(undefined);
     setStatus('signedOut');
   }, []);
 
   const value = useMemo(
-    () => ({ status, user, profile, signIn, signOut }),
-    [status, user, profile, signIn, signOut],
+    () => ({ status, signOutReason, user, profile, signIn, signOut }),
+    [status, signOutReason, user, profile, signIn, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

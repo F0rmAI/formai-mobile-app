@@ -6,6 +6,7 @@
  */
 
 import ReactTestRenderer from 'react-test-renderer';
+import { ScrollView } from 'react-native';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useTraining } from '@/hooks/useTraining';
 import { TodayScreen } from '@/screens/TodayScreen';
@@ -89,7 +90,11 @@ const finishSession = jest.fn().mockResolvedValue(undefined);
 let tree: ReactTestRenderer.ReactTestRenderer;
 
 function hasText(value: string) {
-  return JSON.stringify(tree.toJSON()).includes(value);
+  return tree.root.findAll(node =>
+    typeof node.props.children === 'string'
+      ? node.props.children.includes(value)
+      : false,
+  ).length > 0;
 }
 
 async function press(label: string) {
@@ -112,9 +117,12 @@ beforeEach(() => {
     session,
     summary: { session, completedSets: 1, targetSets: 3, isPartial: true },
     isLoading: false,
+    refreshing: false,
     saving: false,
     error: undefined,
+    refreshError: undefined,
     retry: jest.fn(),
+    refresh: jest.fn(),
     recordSet,
     correctSet,
     finishSession,
@@ -166,4 +174,15 @@ test('opens correction overlay and shows a success toast after recording', async
     reps: 10,
   });
   expect(hasText('Serie 2 registrada · 20 kg × 10 reps')).toBe(true);
+});
+
+test('pulling down on Today invokes the training refresh', async () => {
+  await ReactTestRenderer.act(async () => {
+    tree = ReactTestRenderer.create(
+      <TodayScreen navigation={{ getParent: () => undefined } as never} />,
+    );
+  });
+  const control = tree.root.findByType(ScrollView).props.refreshControl;
+  control.props.onRefresh();
+  expect(jest.mocked(useTraining).mock.results[0].value.refresh).toHaveBeenCalledTimes(1);
 });

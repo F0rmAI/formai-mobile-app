@@ -25,6 +25,7 @@ export {
   SegmentedControl,
   type SegmentedControlProps,
 } from './SegmentedControl';
+export { StepperField, type StepperFieldProps } from './StepperField';
 export { TabItem, type TabItemProps } from './TabItem';
 export { Text, type TextProps } from './Text';
 export { TextField, type TextFieldProps } from './TextField';

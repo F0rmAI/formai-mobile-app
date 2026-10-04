@@ -32,7 +32,7 @@ export function RoutineDayScreen({
         title={day?.label ?? 'Día de rutina'}
         onBack={navigation.goBack}
       />
-      <ScrollView contentContainerClassName="gap-lg p-xl">
+      <ScrollView contentContainerClassName="gap-xl p-xl">
         {isLoading ? (
           <EmptyState title="Cargando sesión" icon="hourglass_top" />
         ) : error ? (

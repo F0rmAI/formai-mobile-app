@@ -1,8 +1,23 @@
 # Seeds exercises, a routine, assignment and historical workouts for Cliente Demo.
 $ErrorActionPreference = 'Stop'
-$base = 'http://localhost:8080/api/v1'
-$tmp = Join-Path $env:TEMP 'formai-seed'
+$required = @(
+  'FORMAI_SEED_CLIENT_ID', 'FORMAI_SEED_TRAINER_EMAIL', 'FORMAI_SEED_TRAINER_PASSWORD',
+  'FORMAI_SEED_CLIENT_EMAIL', 'FORMAI_SEED_CLIENT_PASSWORD',
+  'FORMAI_SEED_DB_CONTAINER', 'FORMAI_SEED_DB_USER', 'FORMAI_SEED_DB_NAME'
+)
+foreach ($name in $required) {
+  if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+    throw "Missing environment variable: $name"
+  }
+}
+$base = if ($env:FORMAI_SEED_API_URL) { $env:FORMAI_SEED_API_URL.TrimEnd('/') } else { 'http://localhost:8080/api/v1' }
+$clientId = [guid]::Parse($env:FORMAI_SEED_CLIENT_ID).ToString()
+$dbContainer = $env:FORMAI_SEED_DB_CONTAINER
+$dbUser = $env:FORMAI_SEED_DB_USER
+$dbName = $env:FORMAI_SEED_DB_NAME
+$tmp = Join-Path $env:TEMP ('formai-seed-' + [System.IO.Path]::GetRandomFileName())
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+try {
 
 function Write-Json($path, $obj) {
   ($obj | ConvertTo-Json -Depth 10 -Compress) | Set-Content -Path $path -Encoding ascii
@@ -35,8 +50,7 @@ function Get-Token($email, $password, $application) {
   return $Matches[1]
 }
 
-$clientId = '0319bfda-d4c7-4549-ba27-5c51b86e26a4'
-$trainerToken = Get-Token 'entrenador.dev@formai.local' 'TrainerDev1!' 'WEB_PLATFORM'
+$trainerToken = Get-Token $env:FORMAI_SEED_TRAINER_EMAIL $env:FORMAI_SEED_TRAINER_PASSWORD 'WEB_PLATFORM'
 
 # Exercises
 $exDefs = @(
@@ -207,11 +221,11 @@ END `$`$;
 
 $sqlPath = Join-Path $tmp 'seed.sql'
 [System.IO.File]::WriteAllText($sqlPath, $sql)
-Get-Content $sqlPath -Raw | docker exec -i formai-api-postgres-1 psql -U quedena -d formai_db
+Get-Content $sqlPath -Raw | docker exec -i $dbContainer psql -U $dbUser -d $dbName
 "SQL seed done"
 
 # Complete today's session if pending
-$clientToken = Get-Token 'cliente.dev@formai.local' 'ClienteDev1!' 'MOBILE_APP'
+$clientToken = Get-Token $env:FORMAI_SEED_CLIENT_EMAIL $env:FORMAI_SEED_CLIENT_PASSWORD 'MOBILE_APP'
 $today = Invoke-Api GET "$base/workout-sessions?page=0&size=5" $null $clientToken
 $pending = $today.content | Where-Object { $_.status -eq 'PENDING' } | Select-Object -First 1
 if ($pending) {
@@ -241,6 +255,9 @@ if ($pending) {
   }
 }
 
-$count = docker exec formai-api-postgres-1 psql -U quedena -d formai_db -tAc "SELECT count(*) FROM tracking.workout_sessions WHERE client_id = '$clientId';"
+$count = docker exec $dbContainer psql -U $dbUser -d $dbName -tAc "SELECT count(*) FROM tracking.workout_sessions WHERE client_id = '$clientId';"
 "Cliente Demo sessions: $count"
-"Done. Login: cliente.dev@formai.local / ClienteDev1!"
+"Done."
+} finally {
+  Remove-Item -Path $tmp -Recurse -Force -ErrorAction SilentlyContinue
+}

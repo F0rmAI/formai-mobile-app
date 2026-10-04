@@ -70,7 +70,7 @@ export function WorkoutHistoryScreen({
         }}
       />
       <ScrollView
-        contentContainerClassName="grow gap-lg px-xl pb-8 pt-md"
+        contentContainerClassName="grow gap-xl px-xl pb-8 pt-md"
         keyboardShouldPersistTaps="handled"
       >
         {isFiltered && appliedFrom && appliedTo && (

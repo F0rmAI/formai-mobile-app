@@ -29,7 +29,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
  * Top-level navigation switches between authentication and client screens.
  */
 export function RootNavigator() {
-  const { status } = useAuth();
+  const { status, signOutReason } = useAuth();
 
   if (status === 'restoring') {
     return <View className="flex-1 bg-surface-background" />;
@@ -61,8 +61,13 @@ export function RootNavigator() {
         </>
       ) : (
         <>
+          {signOutReason === 'expired' && (
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+          )}
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="SignIn" component={SignInScreen} />
+          {signOutReason !== 'expired' && (
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+          )}
           <Stack.Screen
             name="ActivationCode"
             component={ActivationCodeScreen}

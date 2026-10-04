@@ -7,6 +7,7 @@
 
 import ReactTestRenderer from 'react-test-renderer';
 import App from '@/App';
+import { apiClient } from '@/services/api-client';
 
 type Reply = { status: number; body?: unknown } | 'network-error';
 
@@ -29,6 +30,16 @@ const profile = {
 };
 
 const fetchMock = jest.fn();
+
+/** Builds a JSON response for deferred session confirmation. */
+function mockResponse(body: unknown, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: () => 'application/json' },
+    json: async () => body,
+  };
+}
 
 /** Returns configured endpoint responses with no saved session by default. */
 function mockBackend(replies: Record<string, Reply>) {
@@ -138,7 +149,10 @@ test('describes sign-in using the email chosen for the account', async () => {
 });
 
 test('signs in a client and opens the main tabs', async () => {
-  mockBackend({ [SIGN_IN]: { status: 200, body: client } });
+  mockBackend({
+    [SIGN_IN]: { status: 200, body: client },
+    [PROFILE]: { status: 200, body: profile },
+  });
   await renderApp();
 
   await signInWith(' diego.paredes@correo.com ', 'secreta123');
@@ -151,7 +165,80 @@ test('signs in a client and opens the main tabs', async () => {
     application: 'MOBILE_APP',
   });
   expect(tab('Hoy').props.accessibilityState.selected).toBe(true);
+  expect(requestsTo(PROFILE)).toHaveLength(1);
   expect(hasText('Activar mi cuenta')).toBe(false);
+});
+
+test('keeps SignIn visible until the new session is confirmed', async () => {
+  let resolveProfile!: (response: ReturnType<typeof mockResponse>) => void;
+  const pendingProfile = new Promise<ReturnType<typeof mockResponse>>(resolve => {
+    resolveProfile = resolve;
+  });
+  mockBackend({ [SIGN_IN]: { status: 200, body: client } });
+  const originalImplementation = fetchMock.getMockImplementation();
+  fetchMock.mockImplementation((url: string) =>
+    url.endsWith(PROFILE) ? pendingProfile : originalImplementation!(url),
+  );
+  await renderApp();
+
+  await signInWith('diego.paredes@correo.com', 'secreta123');
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(hasTabs()).toBe(false);
+
+  await ReactTestRenderer.act(async () => {
+    resolveProfile(mockResponse(profile));
+    await pendingProfile;
+  });
+  expect(hasTabs()).toBe(true);
+});
+
+test('shows the cookie failure and stays signed out after a confirmed 403', async () => {
+  mockBackend({
+    [SIGN_IN]: { status: 200, body: client },
+    [PROFILE]: { status: 403 },
+  });
+  await renderApp();
+
+  await signInWith('diego.paredes@correo.com', 'secreta123');
+
+  expect(hasTabs()).toBe(false);
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(
+    hasText(
+      'No pudimos mantener tu sesión. Inténtalo de nuevo. El backend envía cookies Secure sobre HTTP: ejecútalo con JWT_COOKIE_SECURE=false.',
+    ),
+  ).toBe(true);
+  expect(requestsTo(PROFILE)).toHaveLength(1);
+  expect(requestsTo(REFRESH)).toHaveLength(1);
+});
+
+test('shows SignIn with an expiry message after a signed-in refresh fails', async () => {
+  mockBackend({
+    [SIGN_IN]: { status: 200, body: client },
+    [PROFILE]: { status: 200, body: profile },
+  });
+  await renderApp();
+  await signInWith('diego.paredes@correo.com', 'secreta123');
+
+  mockBackend({ [PROFILE]: { status: 403 } });
+  await ReactTestRenderer.act(async () => {
+    await apiClient.get('/client-profiles/me').catch(() => undefined);
+  });
+
+  expect(hasTabs()).toBe(false);
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(hasText('Tu sesión expiró. Inicia sesión de nuevo.')).toBe(true);
+
+  mockBackend({ [SIGN_IN]: { status: 401 } });
+  await type('Correo electrónico', 'diego.paredes@correo.com');
+  await type('Contraseña', 'incorrecta');
+  await press('Iniciar sesión');
+
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(hasText('Tu sesión expiró. Inicia sesión de nuevo.')).toBe(false);
+  expect(hasText('Correo o contraseña incorrectos. Inténtalo de nuevo.')).toBe(
+    true,
+  );
 });
 
 test('shows an error for invalid credentials', async () => {

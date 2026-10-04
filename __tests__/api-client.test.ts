@@ -108,6 +108,20 @@ describe('apiClient', () => {
     setUnauthorizedHandler();
   });
 
+  it('skips refresh and the unauthorized handler for session confirmation', async () => {
+    const handler = jest.fn();
+    setUnauthorizedHandler(handler);
+    fetchMock.mockResolvedValue(jsonResponse(undefined, 403));
+
+    await expect(
+      apiClient.get('/client-profiles/me', { skipRefresh: true }),
+    ).rejects.toMatchObject({ status: 403 });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(handler).not.toHaveBeenCalled();
+    setUnauthorizedHandler();
+  });
+
   it('keeps the session after a retried genuine 403', async () => {
     const handler = jest.fn();
     setUnauthorizedHandler(handler);

@@ -36,12 +36,12 @@ export function ActivationPasswordScreen({
 
   // If automatic sign-in fails after activation, continue to the sign-in screen.
   const onActivated = useCallback(
-    (activatedEmail: string) =>
+    (activatedEmail: string, sessionNotPersisted: boolean) =>
       navigation.reset({
         index: 1,
         routes: [
           { name: 'Welcome' },
-          { name: 'SignIn', params: { activatedEmail } },
+          { name: 'SignIn', params: { activatedEmail, sessionNotPersisted } },
         ],
       }),
     [navigation],

@@ -11,6 +11,7 @@ import {
   accountActivationService,
   activationFailureOf,
 } from '@/services/account-activation.service';
+import { signInFailureOf } from '@/services/auth.service';
 import {
   CONNECTION_ERROR_MESSAGE,
   DATA_CONSENT,
@@ -31,7 +32,7 @@ interface ActivationErrors {
 
 interface ActivationCallbacks {
   /** Opens manual sign-in if authentication after activation is unavailable. */
-  onActivated: (email: string) => void;
+  onActivated: (email: string, sessionNotPersisted: boolean) => void;
   /** The code became invalid between verification and activation. */
   onCodeRejected: () => void;
 }
@@ -114,8 +115,11 @@ export function useAccountActivation(
       });
       try {
         await signIn({ email: trimmedEmail, password });
-      } catch {
-        onActivated(trimmedEmail);
+      } catch (signInError) {
+        onActivated(
+          trimmedEmail,
+          signInFailureOf(signInError).reason === 'sessionNotPersisted',
+        );
       }
     } catch (activationError) {
       switch (activationFailureOf(activationError)) {

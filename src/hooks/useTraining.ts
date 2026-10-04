@@ -43,30 +43,50 @@ export function useTraining() {
   const [routine, setRoutine] = useState<ActiveRoutine | null>();
   const [session, setSession] = useState<WorkoutSession>();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>();
+  const [refreshError, setRefreshError] = useState<string>();
+
+  const fetchTraining = useCallback(async () => {
+    const nextRoutine = await activeRoutineService.getActiveRoutine();
+    const nextSession = nextRoutine?.todayWorkoutSessionId
+      ? await workoutSessionService.getWorkoutSession(
+          nextRoutine.todayWorkoutSessionId,
+        )
+      : undefined;
+    return { nextRoutine, nextSession };
+  }, []);
 
   const load = useCallback(async () => {
     setIsLoading(true);
     setError(undefined);
     try {
-      const activeRoutine = await activeRoutineService.getActiveRoutine();
-      setRoutine(activeRoutine);
-      if (activeRoutine?.todayWorkoutSessionId) {
-        setSession(
-          await workoutSessionService.getWorkoutSession(
-            activeRoutine.todayWorkoutSessionId,
-          ),
-        );
-      } else {
-        setSession(undefined);
-      }
+      const { nextRoutine, nextSession } = await fetchTraining();
+      setRoutine(nextRoutine);
+      setSession(nextSession);
     } catch (loadError) {
       setError(messageOf(loadError));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchTraining]);
+
+  const refresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setRefreshError(undefined);
+    try {
+      const { nextRoutine, nextSession } = await fetchTraining();
+      setRoutine(nextRoutine);
+      setSession(nextSession);
+      setError(undefined);
+    } catch (loadError) {
+      setRefreshError(messageOf(loadError));
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchTraining, refreshing]);
 
   useEffect(() => {
     load();
@@ -177,9 +197,12 @@ export function useTraining() {
     session,
     summary,
     isLoading,
+    refreshing,
     saving,
     error,
+    refreshError,
     retry: load,
+    refresh,
     recordSet,
     correctSet,
     finishSession,

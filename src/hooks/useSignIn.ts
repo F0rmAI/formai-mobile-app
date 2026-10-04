@@ -16,6 +16,12 @@ interface SignInErrors {
   password?: string;
 }
 
+const sessionNotPersistedMessage =
+  'No pudimos mantener tu sesión. Inténtalo de nuevo.' +
+  (__DEV__
+    ? ' El backend envía cookies Secure sobre HTTP: ejecútalo con JWT_COOKIE_SECURE=false.'
+    : '');
+
 /** Maps a backend sign-in failure to safe client-facing copy. */
 function messageOf(error: unknown) {
   const failure = signInFailureOf(error);
@@ -30,6 +36,8 @@ function messageOf(error: unknown) {
             new Date(failure.lockedUntil),
           )}.`
         : 'Tu cuenta está bloqueada por intentos fallidos. Inténtalo más tarde.';
+    case 'sessionNotPersisted':
+      return sessionNotPersistedMessage;
     default:
       return 'No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.';
   }
@@ -39,6 +47,7 @@ function messageOf(error: unknown) {
  * Manages sign-in credentials, validation and submission state.
  *
  * @param initialEmail - Email carried over from activation or recovery.
+ * @param initialSessionNotPersisted - Whether activation could not retain its new session.
  * @returns The credentials, `errors`, `isSubmitting` and form actions.
  *
  * @example
@@ -46,11 +55,15 @@ function messageOf(error: unknown) {
  * const signIn = useSignIn(email);
  * ```
  */
-export function useSignIn(initialEmail = '') {
-  const { signIn } = useAuth();
+export function useSignIn(initialEmail = '', initialSessionNotPersisted = false) {
+  const { signIn, signOutReason } = useAuth();
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<SignInErrors>({});
+  const [errors, setErrors] = useState<SignInErrors>(
+    initialSessionNotPersisted
+      ? { password: sessionNotPersistedMessage }
+      : {},
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const changeEmail = useCallback((value: string) => {
@@ -89,6 +102,10 @@ export function useSignIn(initialEmail = '') {
     email,
     password,
     errors,
+    sessionMessage:
+      signOutReason === 'expired'
+        ? 'Tu sesión expiró. Inicia sesión de nuevo.'
+        : undefined,
     isSubmitting,
     changeEmail,
     changePassword,

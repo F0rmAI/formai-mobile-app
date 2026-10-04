@@ -43,9 +43,12 @@ export function TodayScreen({
     session,
     summary,
     isLoading,
+    refreshing,
     saving,
     error,
+    refreshError,
     retry,
+    refresh,
     recordSet,
     correctSet,
     finishSession,
@@ -96,7 +99,10 @@ export function TodayScreen({
             ? sessionDate[0].toUpperCase() + sessionDate.slice(1)
             : undefined
         }
+        refreshing={refreshing}
+        onRefresh={refresh}
       >
+        {refreshError && <Toast message={refreshError} tone="error" />}
         {isLoading ? (
           <EmptyState icon="hourglass_top" title="Cargando tu entrenamiento" />
         ) : error &&
@@ -115,7 +121,7 @@ export function TodayScreen({
             action={{ label: 'Actualizar', icon: 'refresh', onPress: retry }}
           />
         ) : !session || !summary ? (
-          <View className="gap-lg">
+          <View className="gap-xl">
             <EmptyState
               icon="event"
               title="Hoy es día de descanso"
@@ -125,10 +131,10 @@ export function TodayScreen({
               Tus días de entrenamiento:{' '}
               {routine.trainingDays.map(day => dayNames[day]).join(', ')}.
             </Text>
-            <Button label="Ver mi rutina" onPress={openRoutine} />
+            <Button label="Ver mi rutina" fullWidth onPress={openRoutine} />
           </View>
         ) : (
-          <View className="gap-lg">
+          <View className="gap-xl">
             {error && <Toast message={error} tone="error" />}
             <RoutineOverviewCard
               routine={routine}
@@ -160,6 +166,7 @@ export function TodayScreen({
                   : 'Ver resumen'
               }
               icon="flag"
+              fullWidth
               loading={saving}
               onPress={() =>
                 session.status !== 'PENDING'

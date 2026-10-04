@@ -40,7 +40,12 @@ export function ProgressScreen({
   navigation: BottomTabNavigationProp<MainTabParamList, 'Progress'>;
 }) {
   const { headerUser } = useClientProfile();
-  const { routine } = useActiveRoutine();
+  const {
+    routine,
+    refreshing: routineRefreshing,
+    error: routineError,
+    refresh: refreshRoutine,
+  } = useActiveRoutine();
   const [filterOpen, setFilterOpen] = useState(false);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -62,9 +67,11 @@ export function ProgressScreen({
     weeklyVolumeKg,
     weeklyVolumeDeltaPercent,
     isLoading,
+    refreshing: dashboardRefreshing,
     isChartLoading,
     error,
     retry,
+    refresh: refreshDashboard,
   } = useProgressDashboard();
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
@@ -91,6 +98,10 @@ export function ProgressScreen({
       user={headerUser}
       title="Tu progreso"
       subtitle={routine ? `Rutina ${routine.routineName}` : undefined}
+      refreshing={routineRefreshing || dashboardRefreshing}
+      onRefresh={() => {
+        Promise.all([refreshDashboard(), refreshRoutine()]);
+      }}
     >
       <View className="gap-xl">
         <SegmentedControl
@@ -102,6 +113,7 @@ export function ProgressScreen({
         />
 
         {error && <Toast message={error} tone="error" />}
+        {routineError && <Toast message={routineError} tone="error" />}
 
         {isLoading ? (
           <EmptyState title="Cargando progreso" icon="hourglass_top" />
@@ -190,7 +202,7 @@ export function ProgressScreen({
               )}
             </Card>
 
-            <View className="gap-md">
+            <View className="gap-xl">
               <SectionHeader
                 title="Historial"
                 actionLabel="Filtrar por fechas"

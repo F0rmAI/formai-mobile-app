@@ -5,9 +5,11 @@
  * @packageDocumentation
  */
 
+import { useState } from 'react';
 import { TextInput, View } from 'react-native';
-import { IconButton, Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
+import { IconButton } from './IconButton';
+import { Text } from './Text';
 
 /** Props accepted by the numeric stepper field. */
 export interface StepperFieldProps {
@@ -37,6 +39,7 @@ export function StepperField({
   hint,
   onChange,
 }: StepperFieldProps) {
+  const [valueWidth, setValueWidth] = useState(24);
   const changeBy = (delta: number) => {
     const numericValue = Number(value.replace(',', '.')) || 0;
     onChange(String(Math.max(0, Math.round((numericValue + delta) * 10) / 10)));
@@ -45,20 +48,32 @@ export function StepperField({
   return (
     <View
       className={cn(
-        'min-w-0 flex-1 gap-sm rounded-md bg-surface-card px-md py-xl',
+        'min-w-0 flex-1 gap-sm rounded-md bg-surface-card px-xs py-xl',
         error && 'border border-error',
       )}
     >
       <Text variant="overline" tone="secondary" className="text-center">
         {label}
       </Text>
-      <View className="flex-row items-center gap-xs">
+      <View className="flex-row items-center gap-2xs">
         <IconButton
           icon="remove"
           label={`Disminuir ${label.toLowerCase()}`}
+          className="size-6"
+          hitSlop={10}
           onPress={() => changeBy(-step)}
         />
-        <View className="min-w-0 flex-1 flex-row items-baseline justify-center gap-2xs">
+        <View className="min-w-0 flex-1 flex-row items-center justify-center gap-2xs">
+          <Text
+            variant="title-strong"
+            className="absolute opacity-0"
+            accessible={false}
+            onLayout={event =>
+              setValueWidth(Math.ceil(event.nativeEvent.layout.width) + 10)
+            }
+          >
+            {value || '—'}
+          </Text>
           <TextInput
             accessibilityLabel={label}
             keyboardType={step === 1 ? 'number-pad' : 'decimal-pad'}
@@ -68,7 +83,8 @@ export function StepperField({
             maxLength={5}
             onChangeText={onChange}
             selectTextOnFocus
-            className="w-10 p-0 text-right font-sans-extrabold text-headline text-content-primary"
+            className="p-0 text-center font-sans-extrabold text-title-strong text-content-primary"
+            style={{ width: Math.max(24, valueWidth) }}
           />
           <Text variant="caption" tone="secondary" numberOfLines={1}>
             {suffix}
@@ -77,6 +93,8 @@ export function StepperField({
         <IconButton
           icon="add"
           label={`Aumentar ${label.toLowerCase()}`}
+          className="size-6"
+          hitSlop={10}
           onPress={() => changeBy(step)}
         />
       </View>

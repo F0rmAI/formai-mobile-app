@@ -104,6 +104,48 @@ test('handles a 404 routine result as no assigned routine', async () => {
   expect(training.routine).toBeNull();
 });
 
+test('refreshes a reassigned routine without blanking the current workout', async () => {
+  service.getActiveRoutine.mockResolvedValueOnce(routine);
+  service.getWorkoutSession.mockResolvedValueOnce(session);
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<TrainingHarness />);
+  });
+  const reassigned = { ...routine, routineId: 'r2', todayWorkoutSessionId: 's2' };
+  const newSession = { ...session, id: 's2' };
+  let resolveRoutine!: (value: ActiveRoutine | null) => void;
+  service.getActiveRoutine.mockReturnValueOnce(
+    new Promise(resolve => {
+      resolveRoutine = resolve;
+    }),
+  );
+  service.getWorkoutSession.mockResolvedValueOnce(newSession);
+  ReactTestRenderer.act(() => {
+    training.refresh();
+  });
+  expect(training.refreshing).toBe(true);
+  expect(training.isLoading).toBe(false);
+  expect(training.session?.id).toBe('s1');
+  await ReactTestRenderer.act(async () => {
+    resolveRoutine(reassigned);
+  });
+  expect(training.refreshing).toBe(false);
+  expect(training.routine?.routineId).toBe('r2');
+  expect(training.session?.id).toBe('s2');
+});
+
+test('keeps the current workout and exposes a toast error when refresh fails', async () => {
+  service.getActiveRoutine.mockResolvedValueOnce(routine);
+  service.getWorkoutSession.mockResolvedValueOnce(session);
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<TrainingHarness />);
+  });
+  service.getActiveRoutine.mockRejectedValueOnce(new Error('offline'));
+  await ReactTestRenderer.act(async () => training.refresh());
+  expect(training.isLoading).toBe(false);
+  expect(training.session?.id).toBe('s1');
+  expect(training.refreshError).toMatch(/conexión/);
+});
+
 test('records and corrects sets, validates input, then finishes partial', async () => {
   service.getActiveRoutine.mockResolvedValue(routine);
   service.getWorkoutSession.mockResolvedValue(session);

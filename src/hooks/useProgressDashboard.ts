@@ -59,6 +59,7 @@ export function useProgressDashboard() {
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>();
   const [chart, setChart] = useState<ProgressChart>();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [isChartLoading, setIsChartLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -91,6 +92,38 @@ export function useProgressDashboard() {
   useEffect(() => {
     loadSessions(weeks);
   }, [weeks, loadSessions]);
+
+  const refresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setError(undefined);
+    try {
+      const { from, to } = progressWindowRange(weeks);
+      const loaded = await loadAllSessions(from, to);
+      const options = exercisesWithRecords(loaded);
+      const nextExerciseId =
+        selectedExerciseId &&
+        options.some(option => option.exerciseId === selectedExerciseId)
+          ? selectedExerciseId
+          : options[0]?.exerciseId;
+      setSessions(loaded);
+      setExercises(options);
+      setSelectedExerciseId(nextExerciseId);
+      if (!nextExerciseId) {
+        setChart(undefined);
+      } else if (nextExerciseId === selectedExerciseId) {
+        try {
+          setChart(await progressChartService.getMine(nextExerciseId, weeks));
+        } catch {
+          setError('No pudimos cargar la evolución del ejercicio.');
+        }
+      }
+    } catch {
+      setError('No pudimos cargar tu progreso. Inténtalo de nuevo.');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, selectedExerciseId, weeks]);
 
   useEffect(() => {
     if (!selectedExerciseId) {
@@ -199,8 +232,10 @@ export function useProgressDashboard() {
     weeklyVolumeKg,
     weeklyVolumeDeltaPercent,
     isLoading,
+    refreshing,
     isChartLoading,
     error,
     retry: () => loadSessions(weeks),
+    refresh,
   };
 }

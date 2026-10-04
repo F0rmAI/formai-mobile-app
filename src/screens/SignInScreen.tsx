@@ -9,7 +9,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { InsetToast, ScreenContainer, TopBar } from '@/components/layout';
-import { Button, Text, TextField } from '@/components/ui';
+import { Button, Text, TextField, Toast } from '@/components/ui';
 import { useSignIn } from '@/hooks/useSignIn';
 import type { RootStackParamList } from '@/types/navigation';
 
@@ -17,7 +17,8 @@ type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
 /** Shows client credentials using useSignIn for validation and submission. */
 export function SignInScreen({ navigation, route }: SignInScreenProps) {
-  const { activatedEmail, passwordUpdated } = route.params ?? {};
+  const { activatedEmail, passwordUpdated, sessionNotPersisted } =
+    route.params ?? {};
   const toast = activatedEmail
     ? 'Cuenta activada'
     : passwordUpdated
@@ -28,11 +29,12 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
     email,
     password,
     errors,
+    sessionMessage,
     isSubmitting,
     changeEmail,
     changePassword,
     submit,
-  } = useSignIn(activatedEmail ?? route.params?.email);
+  } = useSignIn(activatedEmail ?? route.params?.email, sessionNotPersisted);
 
   return (
     <ScreenContainer>
@@ -51,6 +53,8 @@ export function SignInScreen({ navigation, route }: SignInScreenProps) {
               : 'Ingresa con el correo que registró tu entrenador.'}
           </Text>
         </View>
+
+        {sessionMessage && <Toast message={sessionMessage} tone="error" />}
 
         <TextField
           label="Correo electrónico"

@@ -18,7 +18,7 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   return (
     <ScreenContainer bottomInset>
       <ScrollView
-        contentContainerClassName="grow justify-between gap-2xl px-xl pb-2xl pt-2xl"
+        contentContainerClassName="grow justify-between gap-xl px-xl pb-2xl pt-2xl"
         alwaysBounceVertical={false}
       >
         <View className="items-center gap-xl">
@@ -31,7 +31,7 @@ export function WelcomeScreen({ navigation }: WelcomeScreenProps) {
           </Text>
         </View>
 
-        <View className="gap-md">
+        <View className="gap-xl">
           <Button
             label="Iniciar sesión"
             fullWidth

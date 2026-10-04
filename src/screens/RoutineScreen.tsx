@@ -32,7 +32,7 @@ export function RoutineScreen({
   return (
     <ScreenContainer>
       <TopBar title="Mi rutina" onBack={navigation.goBack} />
-      <ScrollView contentContainerClassName="gap-lg p-xl">
+      <ScrollView contentContainerClassName="gap-xl p-xl">
         {isLoading ? (
           <EmptyState title="Cargando tu rutina" icon="hourglass_top" />
         ) : error ? (

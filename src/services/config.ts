@@ -5,21 +5,26 @@
  * @packageDocumentation
  */
 
+import { API_URL as envApiUrl } from '@env';
 import { Platform } from 'react-native';
 
-// React Native does not read `.env` files without an extra library, so the values live here.
 // On the Android emulator, `10.0.2.2` points to the localhost of the host machine.
 const DEV_API_URL = Platform.select({
   android: 'http://10.0.2.2:8080/api/v1',
   default: 'http://localhost:8080/api/v1',
 });
 
-const PROD_API_URL = 'https://formai.app/api/v1';
+const configuredApiUrl = envApiUrl?.trim().replace(/\/+$/, '');
+
+if (!__DEV__ && !configuredApiUrl) {
+  throw new Error('API_URL is required for release builds.');
+}
 
 /**
  * Base URL of the backend, without a trailing slash.
  */
-export const API_URL = __DEV__ ? DEV_API_URL : PROD_API_URL;
+export const API_URL =
+  configuredApiUrl || DEV_API_URL;
 
 /**
  * URL prefixes accepted for app deep links.

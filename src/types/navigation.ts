@@ -11,11 +11,16 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 export type RootStackParamList = {
   Welcome: undefined;
   /**
-   * `activatedEmail`: prefilled after activation.
+   * `activatedEmail`: prefilled after activation; `sessionNotPersisted`: its automatic sign-in lost the cookie.
    * `passwordUpdated`: set after password reset; `email` optionally prefills the address.
    */
   SignIn:
-    | { activatedEmail?: string; passwordUpdated?: boolean; email?: string }
+    | {
+        activatedEmail?: string;
+        sessionNotPersisted?: boolean;
+        passwordUpdated?: boolean;
+        email?: string;
+      }
     | undefined;
   /** `codeRejected`: the code expired during password entry. */
   ActivationCode: { codeRejected?: boolean } | undefined;

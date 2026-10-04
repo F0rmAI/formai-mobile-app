@@ -17,6 +17,7 @@ type Reply = { status: number; body?: unknown } | 'network-error';
 const VERIFY = '/activation-code-verifications';
 const ACTIVATE = '/account-activations';
 const SIGN_IN = '/authentication/sign-in';
+const PROFILE = '/client-profiles/me';
 const INVALID_CODE =
   'Este código no es válido o ya venció. Pídele uno nuevo a tu entrenador.';
 
@@ -237,18 +238,59 @@ test('opens Today after activation when automatic sign-in succeeds', async () =>
         status: 'ACTIVE',
       },
     },
+    [PROFILE]: {
+      status: 200,
+      body: {
+        id: 'u1',
+        fullName: 'Diego Paredes',
+        email: 'diego.paredes@correo.com',
+      },
+    },
   });
   await reachPasswordStep();
   await fillPasswordStep();
   await press('Activar cuenta');
 
   expect(requestsTo(SIGN_IN)).toHaveLength(1);
+  expect(requestsTo(PROFILE)).toHaveLength(1);
   expect(
     renderer.root.findAllByProps({
       accessibilityRole: 'tab',
       accessibilityLabel: 'Hoy',
     }).length,
   ).toBeGreaterThan(0);
+});
+
+test('shows the cookie failure and prefilled email after activation', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 201, body: { userId: 'u1', status: 'ACTIVE' } },
+    [SIGN_IN]: {
+      status: 200,
+      body: {
+        id: 'u1',
+        email: 'diego.paredes@correo.com',
+        roles: ['CLIENT'],
+        status: 'ACTIVE',
+      },
+    },
+    [PROFILE]: { status: 403 },
+  });
+  await reachPasswordStep();
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(input('Correo electrónico').props.value).toBe(
+    'diego.paredes@correo.com',
+  );
+  expect(
+    hasText(
+      'No pudimos mantener tu sesión. Inténtalo de nuevo. El backend envía cookies Secure sobre HTTP: ejecútalo con JWT_COOKIE_SECURE=false.',
+    ),
+  ).toBe(true);
+  expect(requestsTo(PROFILE)).toHaveLength(1);
+  expect(requestsTo('/authentication/refresh')).toHaveLength(1);
 });
 
 test('returns to code entry when a verified code is later rejected', async () => {

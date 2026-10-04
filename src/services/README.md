@@ -7,7 +7,7 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 
 | Archivo | Uso |
 |---|---|
-| `config.ts` | URL base del backend y prefijos de los enlaces que abren la app. La URL base vive en `services/config.ts` (RN no lee `.env` sin una librería adicional). |
+| `config.ts` | Único lector de `API_URL` desde `@env` (incorporada por Babel al compilar); recorta espacios y barras finales. Si falta, usa las URL de simulador/emulador en debug o HTTPS de producción en release. También define los prefijos de los enlaces que abren la app. |
 | `auth.service.ts` | Inicio, renovación y cierre de sesión (`/authentication/*`); la sesión viaja en cookies httpOnly. |
 | `password-reset.service.ts` | Solicitud del enlace (`/password-reset-requests`) y canje de su token (`/password-resets`). |
 | `client-profile.service.ts` | Nombre y correo del cliente con sesión (`/client-profiles/me`). |
@@ -20,7 +20,7 @@ llamadas HTTP a funciones tipadas que consumen los hooks.
 | `reminder-notifications.service.ts` | Canal y programación local con Notifee (no HTTP). |
 | `reminder-session.service.ts` | Limpia prefs y avisos al cerrar sesión. |
 
-En desarrollo, la API local debe ejecutarse con `JWT_COOKIE_SECURE=false`: las cookies `Secure` no viajan por HTTP desde los simuladores. `config.ts` usa `localhost:8080` en iOS y `10.0.2.2:8080` en Android.
+En desarrollo, ejecuta formai-api local con `JWT_COOKIE_SECURE=false` (su valor predeterminado es `true`). Los almacenes de cookies nativos de iOS y Android descartan las cookies `Secure` sobre HTTP: el inicio de sesión puede responder 200, pero la siguiente llamada protegida dará 401/403. Navegadores y `curl` tratan `localhost` como seguro, por eso la web puede funcionar. Sin `API_URL` en `.env`, `config.ts` usa `localhost:8080` en iOS y `10.0.2.2:8080` en Android; para un teléfono físico, define la IP LAN de la Mac en `.env` y recompila. `authService.confirmSession` comprueba la cookie una vez antes de marcar al usuario como autenticado; esa llamada usa `skipRefresh` para no invocar el cierre de sesión global si falla.
 
 ## Reglas
 

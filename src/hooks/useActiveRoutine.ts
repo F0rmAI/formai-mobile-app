@@ -23,6 +23,7 @@ import type { ActiveRoutine } from '@/types/training';
 export function useActiveRoutine(errorMessage = 'No pudimos cargar tu rutina') {
   const [routine, setRoutine] = useState<ActiveRoutine | null>();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string>();
   const retry = useCallback(async () => {
     setIsLoading(true);
@@ -35,8 +36,20 @@ export function useActiveRoutine(errorMessage = 'No pudimos cargar tu rutina') {
       setIsLoading(false);
     }
   }, [errorMessage]);
+  const refresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setError(undefined);
+    try {
+      setRoutine(await activeRoutineService.getActiveRoutine());
+    } catch {
+      setError(errorMessage);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [errorMessage, refreshing]);
   useEffect(() => {
     retry();
   }, [retry]);
-  return { routine, isLoading, error, retry };
+  return { routine, isLoading, refreshing, error, retry, refresh };
 }

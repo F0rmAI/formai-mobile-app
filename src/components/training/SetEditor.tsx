@@ -7,9 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Badge, Button, Icon, Text } from '@/components/ui';
+import { Badge, Button, Icon, StepperField, Text } from '@/components/ui';
 import type { RecordSetInput, WorkoutExercise } from '@/types/training';
-import { StepperField } from './StepperField';
 
 /** Props accepted by the set editor. */
 interface SetEditorProps {

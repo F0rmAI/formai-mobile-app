@@ -6,6 +6,7 @@
  */
 
 import ReactTestRenderer from 'react-test-renderer';
+import { ScrollView } from 'react-native';
 import { Dialog } from '@/components/ui/Dialog';
 import { SetEditor } from '@/components/training/SetEditor';
 import { useClientProfile } from '@/hooks/useClientProfile';
@@ -112,9 +113,11 @@ const dashboardState = {
   weeklyVolumeKg: 0,
   weeklyVolumeDeltaPercent: undefined,
   isLoading: false,
+  refreshing: false,
   isChartLoading: false,
   error: undefined,
   retry: jest.fn(),
+  refresh: jest.fn(),
 };
 
 let renderer: ReactTestRenderer.ReactTestRenderer;
@@ -129,8 +132,10 @@ beforeEach(() => {
   mockedRoutine.mockReturnValue({
     routine: null,
     isLoading: false,
+    refreshing: false,
     error: undefined,
     retry: jest.fn(),
+    refresh: jest.fn(),
   });
   mockedDashboard.mockReturnValue(
     dashboardState as ReturnType<typeof useProgressDashboard>,
@@ -201,6 +206,21 @@ test('progress dashboard shows the empty history preview', async () => {
   expect(hasText('Tu progreso')).toBe(true);
   expect(hasText('Aún no hay entrenamientos')).toBe(true);
   expect(hasText('Aún no hay datos suficientes')).toBe(true);
+});
+
+test('pulling down on Progress refreshes the dashboard and routine', async () => {
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(
+      <ProgressScreen navigation={{ getParent: () => undefined } as never} />,
+    );
+  });
+  const control = renderer.root.findAllByType(ScrollView).find(
+    node => node.props.refreshControl,
+  )?.props.refreshControl;
+  expect(control).toBeDefined();
+  control.props.onRefresh();
+  expect(dashboardState.refresh).toHaveBeenCalledTimes(1);
+  expect(mockedRoutine.mock.results[0].value.refresh).toHaveBeenCalledTimes(1);
 });
 
 test('progress dashboard shows insufficient chart data for one point', async () => {

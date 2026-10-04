@@ -38,7 +38,7 @@ export function WorkoutDetailScreen({
   return (
     <ScreenContainer>
       <TopBar title="Detalle" onBack={navigation.goBack} />
-      <ScrollView contentContainerClassName="gap-lg p-xl">
+      <ScrollView contentContainerClassName="gap-xl p-xl">
         {isLoading ? (
           <EmptyState title="Cargando sesión" icon="hourglass_top" />
         ) : error ? (

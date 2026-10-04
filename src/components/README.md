@@ -8,7 +8,7 @@ de FormAI (Figma › `formai_design_system`).
 
 | Carpeta | Contenido |
 |---|---|
-| `ui/` | Primitivos del design system: `Text`, `Icon`, `Button`, `IconButton`, `Badge`, `Chip`, `SectionLabel`, `Card`, `TextField`, `Checkbox`, `Toggle`, `ProgressBar`, `SegmentedControl`, `Toast`, `Dialog`, `Avatar`, `BrandLogo`, `EmptyState`, `ListItem`, `Callout`, `SectionHeader`, `TabItem`. **Misma API en web y mobile.** |
+| `ui/` | Primitivos del design system: `Text`, `Icon`, `Button`, `IconButton`, `Badge`, `Chip`, `SectionLabel`, `Card`, `TextField`, `StepperField`, `Checkbox`, `Toggle`, `ProgressBar`, `SegmentedControl`, `Toast`, `Dialog`, `Avatar`, `BrandLogo`, `EmptyState`, `ListItem`, `Callout`, `SectionHeader`, `TabItem`. **Misma API en web y mobile.** |
 | `layout/` | Navegación y estructura propias de esta plataforma. |
 | `progress/` | Componentes del flujo Progreso: `StatCard`, `AdherenceCard`, `ProgressLineChart`, `WorkoutHistoryItem`, `HistoryFilterDialog`, `SetSummaryTile`. |
 | `history/` | Chip del rango de fechas aplicado en el historial. |

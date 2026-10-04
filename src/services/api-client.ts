@@ -39,6 +39,8 @@ interface RequestOptions {
   headers?: Record<string, string>;
   /** Signal used to cancel the request. */
   signal?: AbortSignal;
+  /** Skips session renewal and the global unauthorized handler on failure. */
+  skipRefresh?: boolean;
 }
 
 let refreshInFlight: Promise<unknown> | undefined;
@@ -119,6 +121,7 @@ async function request<T>(
     return await send<T>(method, path, options);
   } catch (error) {
     if (
+      options.skipRefresh ||
       publicPaths.includes(path) ||
       !(error instanceof ApiError) ||
       (error.status !== 401 && error.status !== 403)

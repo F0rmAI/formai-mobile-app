@@ -122,6 +122,59 @@ test('reloads the chart when the period changes', async () => {
   expect(dashboard.chart?.enoughData).toBe(true);
 });
 
+test('refreshes sessions and the selected chart without blanking progress', async () => {
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<Harness />);
+  });
+  const updated = { ...session, id: 's2', totalVolumeKg: 250 };
+  let resolveSessions!: (value: Awaited<ReturnType<typeof sessions>>) => void;
+  sessions.mockReturnValueOnce(
+    new Promise(resolve => {
+      resolveSessions = resolve;
+    }),
+  );
+  charts.mockResolvedValueOnce({
+    exerciseId: 'e1',
+    weeks: 4,
+    enoughData: true,
+    points: [
+      { date: '2026-09-20', maxLoadKg: 18, volumeKg: 180 },
+      { date: '2026-10-02', maxLoadKg: 22.5, volumeKg: 250 },
+    ],
+  });
+  ReactTestRenderer.act(() => {
+    dashboard.refresh();
+  });
+  expect(dashboard.refreshing).toBe(true);
+  expect(dashboard.isLoading).toBe(false);
+  expect(dashboard.sessions[0].id).toBe('s1');
+  await ReactTestRenderer.act(async () => {
+    resolveSessions({
+      content: [updated],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    });
+  });
+  expect(dashboard.refreshing).toBe(false);
+  expect(dashboard.sessions[0].id).toBe('s2');
+  expect(dashboard.chart?.points[1].maxLoadKg).toBe(22.5);
+  expect(charts).toHaveBeenCalledTimes(2);
+});
+
+test('keeps prior progress when refresh fails', async () => {
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<Harness />);
+  });
+  sessions.mockRejectedValueOnce(new Error('offline'));
+  await ReactTestRenderer.act(async () => dashboard.refresh());
+  expect(dashboard.isLoading).toBe(false);
+  expect(dashboard.sessions).toHaveLength(1);
+  expect(dashboard.chart?.exerciseId).toBe('e1');
+  expect(dashboard.error).toMatch(/progreso/);
+});
+
 test('derives maximum load and calendar-week volume from backend data', async () => {
   jest.useFakeTimers().setSystemTime(new Date(2026, 9, 3, 12));
   sessions.mockResolvedValue({

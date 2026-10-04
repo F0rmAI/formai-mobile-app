@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
@@ -26,6 +26,10 @@ export interface TabScreenLayoutProps {
   subtitle?: string;
   /** Scrollable screen content. */
   children?: ReactNode;
+  /** Whether the screen is fetching fresh content. */
+  refreshing?: boolean;
+  /** Starts a pull-to-refresh request when provided. */
+  onRefresh?: () => void;
   /** Extra classes for the outer container. */
   className?: string;
 }
@@ -44,6 +48,8 @@ export function TabScreenLayout({
   title,
   subtitle,
   children,
+  refreshing = false,
+  onRefresh,
   className,
 }: TabScreenLayoutProps) {
   const insets = useSafeAreaInsets();
@@ -54,7 +60,19 @@ export function TabScreenLayout({
       style={{ paddingTop: insets.top }}
     >
       <AppHeader subtitle={headerSubtitle} user={user} />
-      <ScrollView contentContainerClassName="gap-xl px-xl pt-xl pb-page-bottom">
+      <ScrollView
+        contentContainerClassName="gap-xl px-xl pt-xl pb-page-bottom"
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColorClassName="accent-primary"
+              colorsClassName="accent-primary"
+            />
+          ) : undefined
+        }
+      >
         <View className="gap-xs">
           <Text variant="display" accessibilityRole="header">
             {title}
