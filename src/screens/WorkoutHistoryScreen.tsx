@@ -101,7 +101,7 @@ export function WorkoutHistoryScreen({
             description={
               isFiltered
                 ? undefined
-                : 'Tus sesiones aparecerán aquí cuando tengas una rutina.'
+                : 'Tus sesiones aparecerán aquí cuando completes un entrenamiento.'
             }
             icon="event_busy"
             action={

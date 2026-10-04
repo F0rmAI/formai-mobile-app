@@ -7,7 +7,7 @@
 
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import {
   AdherenceCard,
@@ -75,6 +75,14 @@ export function ProgressScreen({
   } = useProgressDashboard();
   const root =
     navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
+
+  useEffect(
+    () =>
+      navigation.addListener?.('focus', () => {
+        Promise.all([refreshDashboard(), refreshRoutine()]);
+      }),
+    [navigation, refreshDashboard, refreshRoutine],
+  );
 
   const applyFilter = () => {
     const parsedFrom = parseFilterDate(from);
@@ -211,7 +219,7 @@ export function ProgressScreen({
               {previewSessions.length === 0 ? (
                 <EmptyState
                   title="Aún no hay entrenamientos"
-                  description="Tus sesiones aparecerán aquí cuando tengas una rutina."
+                  description="Tus sesiones aparecerán aquí cuando completes un entrenamiento."
                   icon="event_busy"
                   action={
                     error ? { label: 'Reintentar', onPress: retry } : undefined

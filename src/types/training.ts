@@ -30,6 +30,10 @@ export interface RoutineDay {
   /** One-based order. */ order: number;
   /** Day label. */ label: string;
   /** Prescribed exercises. */ exercises: ExercisePrescription[];
+  /** Date of the latest session for this routine day and version. */ lastSessionDate?:
+    | string
+    | null;
+  /** Outcome of the latest session for this routine day and version. */ lastSessionStatus?: WorkoutStatus | null;
 }
 /** Currently assigned routine. */
 export interface ActiveRoutine {

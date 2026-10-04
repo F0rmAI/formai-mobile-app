@@ -13,7 +13,8 @@ import { EmptyState, Icon, Text } from '@/components/ui';
 import { useActiveRoutine } from '@/hooks/useActiveRoutine';
 import type { RootStackParamList } from '@/types/navigation';
 import { nextRoutineSessionDate } from '@/utils/reminders';
-import { formatLongDate } from '@/utils/dates';
+import { formatLongDate, formatWorkoutHistoryDate } from '@/utils/dates';
+import { statusLabel } from '@/utils/progress';
 
 /** Shows prescribed exercises using useActiveRoutine for the assigned day. */
 export function RoutineDayScreen({
@@ -26,6 +27,13 @@ export function RoutineDayScreen({
   const day = routine?.sessions.find(item => item.order === route.params.order);
   const scheduledDate =
     routine && day && nextRoutineSessionDate(routine, day.order);
+  const resultLabel =
+    day?.lastSessionDate && day.lastSessionStatus
+      ? `${statusLabel(day.lastSessionStatus)} · ${formatWorkoutHistoryDate(
+          day.lastSessionDate,
+          'detail',
+        ).toLowerCase()}`
+      : undefined;
   return (
     <ScreenContainer>
       <TopBar
@@ -64,6 +72,7 @@ export function RoutineDayScreen({
               <RoutineExerciseCard
                 key={exercise.exerciseId}
                 exercise={exercise}
+                lastResult={resultLabel}
               />
             ))}
           </>
