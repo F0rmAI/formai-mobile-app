@@ -31,6 +31,7 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+**/.xcode.env
 **/.xcode.env.local
 
 # ── Android / Gradle ─────────────────────────────────────────────────
@@ -44,7 +45,6 @@ local.properties
 
 # ── Firma y credenciales (nunca se versionan) ────────────────────────
 *.keystore
-!debug.keystore
 *.jks
 *.p8
 *.p12
@@ -67,7 +67,6 @@ node_modules/
 # ── Variables de entorno ─────────────────────────────────────────────
 .env
 .env.*
-!.env.example
 
 # ── Logs ─────────────────────────────────────────────────────────────
 *.log

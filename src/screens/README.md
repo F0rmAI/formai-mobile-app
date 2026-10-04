@@ -7,6 +7,9 @@ Cada archivo es una **pantalla completa** de la app: compone componentes de
 App
  │
  ▼
+Navigation
+ │
+ ▼
 Screens
  │
  ├──────────► Components
@@ -26,8 +29,13 @@ Backend/API
 - Nombre `<Nombre>Screen.tsx` (p. ej. `TodayScreen.tsx`), exportado por nombre.
 - **No llama a `services/` directamente**: usa un hook (`useClients`, `useTodayWorkout`…).
 - Mantiene el markup de alto nivel; si un bloque se repite o crece, se extrae a `components/`.
-- Cuando se agregue la navegación (stack/tabs), cada ruta apunta a una pantalla de esta carpeta.
-- `HomeScreen`/`HomePage` es la pantalla de verificación de la base (título + contador) y se reemplaza al empezar las features.
+- Cada ruta de `navigation/` apunta a una pantalla de esta carpeta.
+- `WelcomeScreen` y `SignInScreen` son el acceso a la app.
+- `ActivationCodeScreen` y `ActivationPasswordScreen` son los dos pasos de la activación de cuenta.
+- `ForgotPasswordScreen`, `PasswordResetSentScreen` y `ResetPasswordScreen` son la recuperación de contraseña: pedir el enlace, la confirmación del envío y la nueva contraseña (o el aviso de enlace vencido) al abrir el enlace del correo.
+- `TodayScreen`, `ProgressScreen` y `ProfileScreen` son las pestañas principales; `ProgressScreen` es el dashboard de progreso.
+- `WorkoutHistoryScreen` es el historial filtrable; `RoutineScreen`, `RoutineDayScreen`, `WorkoutSummaryScreen` y `WorkoutDetailScreen` completan el stack autenticado.
+- `RemindersScreen` configura recordatorios locales (toggle, hora y ejemplo de aviso).
 
 ## Ejemplo
 

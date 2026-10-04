@@ -1,0 +1,365 @@
+/**
+ * Integration tests for useActivationCode and useAccountActivation through the app.
+ *
+ * @author Carlos
+ * @packageDocumentation
+ */
+
+import ReactTestRenderer from 'react-test-renderer';
+import App from '@/App';
+import {
+  isValidPassword,
+  normalizeActivationCode,
+} from '@/utils/account-activation';
+
+type Reply = { status: number; body?: unknown } | 'network-error';
+
+const VERIFY = '/activation-code-verifications';
+const ACTIVATE = '/account-activations';
+const SIGN_IN = '/authentication/sign-in';
+const PROFILE = '/client-profiles/me';
+const INVALID_CODE =
+  'Este código no es válido o ya venció. Pídele uno nuevo a tu entrenador.';
+
+const fetchMock = jest.fn();
+
+/** Returns the configured response for each activation endpoint. */
+function mockBackend(replies: Record<string, Reply>) {
+  fetchMock.mockImplementation(async (url: string) => {
+    const path = Object.keys(replies).find(key => url.endsWith(key));
+    const reply = path ? replies[path] : { status: 404 };
+    if (reply === 'network-error') {
+      throw new TypeError('Network request failed');
+    }
+    return {
+      ok: reply.status >= 200 && reply.status < 300,
+      status: reply.status,
+      headers: {
+        get: () => (reply.body === undefined ? null : 'application/json'),
+      },
+      json: async () => reply.body,
+    };
+  });
+}
+
+const requestsTo = (path: string) =>
+  fetchMock.mock.calls.filter(([url]) => (url as string).endsWith(path));
+
+const bodyOf = (path: string) => JSON.parse(requestsTo(path)[0][1].body);
+
+let renderer: ReactTestRenderer.ReactTestRenderer;
+
+const hasText = (text: string) =>
+  renderer.root.findAll(node => node.props.children === text).length > 0;
+
+/** Presses the last visible button bearing the given label. */
+async function press(label: string) {
+  const buttons = renderer.root.findAll(
+    node =>
+      node.props.accessibilityRole === 'button' &&
+      typeof node.props.onPress === 'function' &&
+      node.findAll(child => child.props.children === label).length > 0,
+  );
+  await ReactTestRenderer.act(async () => {
+    buttons[buttons.length - 1].props.onPress();
+  });
+}
+
+const input = (label: string) =>
+  renderer.root.findAll(
+    node =>
+      node.props.accessibilityLabel === label &&
+      typeof node.props.onChangeText === 'function',
+  )[0];
+
+async function type(label: string, value: string) {
+  await ReactTestRenderer.act(async () => {
+    input(label).props.onChangeText(value);
+  });
+}
+
+async function acceptConsent() {
+  const checkbox = renderer.root.findAll(
+    node =>
+      node.props.accessibilityRole === 'checkbox' &&
+      typeof node.props.onPress === 'function',
+  )[0];
+  await ReactTestRenderer.act(async () => {
+    checkbox.props.onPress();
+  });
+}
+
+/** Opens credential setup with a code accepted by the backend. */
+async function reachPasswordStep() {
+  await press('Activar mi cuenta');
+  await type('Código de activación', 'ABCD2345');
+  await press('Continuar');
+}
+
+async function fillPasswordStep({ consent = true } = {}) {
+  await type('Correo de tu cuenta', ' diego.paredes@correo.com ');
+  await type('Contraseña', 'secreta123');
+  await type('Confirmar contraseña', 'secreta123');
+  if (consent) {
+    await acceptConsent();
+  }
+}
+
+beforeEach(async () => {
+  fetchMock.mockReset();
+  globalThis.fetch = fetchMock as unknown as typeof fetch;
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<App />);
+  });
+});
+
+// El navegador deja actualizaciones pendientes: se desmonta antes de terminar.
+afterEach(async () => {
+  await ReactTestRenderer.act(async () => {
+    renderer.unmount();
+  });
+});
+
+test('verifies the code before requesting account credentials', async () => {
+  mockBackend({ [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } } });
+
+  await press('Activar mi cuenta');
+  expect(hasText('Ingresa tu código')).toBe(true);
+
+  await type('Código de activación', ' abcd 2345 ');
+  await press('Continuar');
+
+  expect(bodyOf(VERIFY)).toEqual({ activationCode: 'ABCD2345' });
+  expect(hasText('Crea tu contraseña')).toBe(true);
+});
+
+test('shows an error for an invalid or expired code', async () => {
+  mockBackend({ [VERIFY]: { status: 422, body: { status: 422 } } });
+
+  await press('Activar mi cuenta');
+  await type('Código de activación', 'ZZZZ9999');
+  await press('Continuar');
+
+  expect(hasText(INVALID_CODE)).toBe(true);
+  expect(hasText('Crea tu contraseña')).toBe(false);
+});
+
+test('does not call the backend for an empty code', async () => {
+  await press('Activar mi cuenta');
+  await press('Continuar');
+
+  expect(hasText('Ingresa el código que te dio tu entrenador.')).toBe(true);
+  expect(requestsTo(VERIFY)).toHaveLength(0);
+});
+
+test('shows a connection error while verifying a code', async () => {
+  mockBackend({ [VERIFY]: 'network-error' });
+
+  await press('Activar mi cuenta');
+  await type('Código de activación', 'ABCD2345');
+  await press('Continuar');
+
+  expect(
+    hasText('No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.'),
+  ).toBe(true);
+});
+
+test('requires consent before account activation', async () => {
+  mockBackend({ [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } } });
+  await reachPasswordStep();
+
+  await fillPasswordStep({ consent: false });
+  await press('Activar cuenta');
+
+  expect(
+    hasText(
+      'Debes aceptar el tratamiento de tus datos para activar tu cuenta.',
+    ),
+  ).toBe(true);
+  expect(requestsTo(ACTIVATE)).toHaveLength(0);
+});
+
+test('validates email, password and confirmation before activation', async () => {
+  mockBackend({ [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } } });
+  await reachPasswordStep();
+
+  await type('Correo de tu cuenta', 'diego');
+  await type('Contraseña', 'corta1');
+  await acceptConsent();
+  await press('Activar cuenta');
+
+  expect(hasText('Ingresa un correo válido.')).toBe(true);
+  expect(hasText('La contraseña debe tener entre 8 y 128 caracteres.')).toBe(
+    true,
+  );
+
+  await type('Contraseña', 'secreta123');
+  await type('Confirmar contraseña', 'secreta124');
+  await press('Activar cuenta');
+
+  expect(hasText('Las contraseñas no coinciden.')).toBe(true);
+  expect(requestsTo(ACTIVATE)).toHaveLength(0);
+});
+
+test('activates the account and preloads the sign-in email', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 201, body: { userId: 'u1', status: 'ACTIVE' } },
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(bodyOf(ACTIVATE)).toEqual({
+    activationCode: 'ABCD2345',
+    email: 'diego.paredes@correo.com',
+    password: 'secreta123',
+    consentAccepted: true,
+    consentVersion: '1.0',
+  });
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(hasText('Cuenta activada')).toBe(true);
+  expect(input('Correo electrónico').props.value).toBe(
+    'diego.paredes@correo.com',
+  );
+});
+
+test('opens Today after activation when automatic sign-in succeeds', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 201, body: { userId: 'u1', status: 'ACTIVE' } },
+    [SIGN_IN]: {
+      status: 200,
+      body: {
+        id: 'u1',
+        email: 'diego.paredes@correo.com',
+        roles: ['CLIENT'],
+        status: 'ACTIVE',
+      },
+    },
+    [PROFILE]: {
+      status: 200,
+      body: {
+        id: 'u1',
+        fullName: 'Diego Paredes',
+        email: 'diego.paredes@correo.com',
+      },
+    },
+  });
+  await reachPasswordStep();
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(requestsTo(SIGN_IN)).toHaveLength(1);
+  expect(requestsTo(PROFILE)).toHaveLength(1);
+  expect(
+    renderer.root.findAllByProps({
+      accessibilityRole: 'tab',
+      accessibilityLabel: 'Hoy',
+    }).length,
+  ).toBeGreaterThan(0);
+});
+
+test('shows the cookie failure and prefilled email after activation', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 201, body: { userId: 'u1', status: 'ACTIVE' } },
+    [SIGN_IN]: {
+      status: 200,
+      body: {
+        id: 'u1',
+        email: 'diego.paredes@correo.com',
+        roles: ['CLIENT'],
+        status: 'ACTIVE',
+      },
+    },
+    [PROFILE]: { status: 403 },
+  });
+  await reachPasswordStep();
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Hola de nuevo')).toBe(true);
+  expect(input('Correo electrónico').props.value).toBe(
+    'diego.paredes@correo.com',
+  );
+  expect(
+    hasText(
+      'No pudimos mantener tu sesión. Inténtalo de nuevo. El backend envía cookies Secure sobre HTTP: ejecútalo con JWT_COOKIE_SECURE=false.',
+    ),
+  ).toBe(true);
+  expect(requestsTo(PROFILE)).toHaveLength(1);
+  expect(requestsTo('/authentication/refresh')).toHaveLength(1);
+});
+
+test('returns to code entry when a verified code is later rejected', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 422, body: { status: 422 } },
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Ingresa tu código')).toBe(true);
+  expect(hasText(INVALID_CODE)).toBe(true);
+});
+
+test('shows a neutral message when the email belongs to another account', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 409, body: { status: 409 } },
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(
+    hasText(
+      'No pudimos activar la cuenta con esos datos. Si ya tienes una cuenta, usa tu correo y tu contraseña actual; de lo contrario, revisa el correo o usa uno distinto.',
+    ),
+  ).toBe(true);
+});
+
+test('shows an error when the backend rejects the email format', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: { status: 400, body: { status: 400 } },
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(hasText('Ingresa un correo válido.')).toBe(true);
+});
+
+test('shows a connection error during activation', async () => {
+  mockBackend({
+    [VERIFY]: { status: 201, body: { expiresAt: '2026-10-04' } },
+    [ACTIVATE]: 'network-error',
+  });
+  await reachPasswordStep();
+
+  await fillPasswordStep();
+  await press('Activar cuenta');
+
+  expect(hasText('Crea tu contraseña')).toBe(true);
+  expect(
+    hasText('No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.'),
+  ).toBe(true);
+});
+
+test('normalizes the code and applies the password policy', () => {
+  expect(normalizeActivationCode(' abcd 2345 ')).toBe('ABCD2345');
+  expect(isValidPassword('secreta123')).toBe(true);
+  expect(isValidPassword('corta1')).toBe(false);
+  expect(isValidPassword('sololetras')).toBe(true);
+  expect(isValidPassword('12345678')).toBe(true);
+  expect(isValidPassword(`a1${'x'.repeat(127)}`)).toBe(false);
+});

@@ -1,18 +1,34 @@
+/**
+ * Icon button primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Pressable, type PressableProps } from 'react-native';
 import type { IconButtonVariant, IconName } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { Icon } from './Icon';
 
+/**
+ * Props accepted by {@link IconButton}.
+ */
 export interface IconButtonProps
   extends Omit<PressableProps, 'children' | 'style'> {
   icon: IconName;
-  /** Texto accesible (obligatorio: el botón no tiene texto visible). */
   label: string;
   variant?: IconButtonVariant;
   className?: string;
 }
 
-/** Botón circular de 40 px. */
+/**
+ * Renders a circular 40 px button that shows only an icon.
+ *
+ * @example
+ * ```tsx
+ * <IconButton icon="tune" label="Filters" onPress={openFilters} />
+ * ```
+ */
 export function IconButton({
   icon,
   label,

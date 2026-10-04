@@ -72,6 +72,12 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+def releaseStoreFile = System.getenv("FORMAI_RELEASE_STORE_FILE")
+def releaseStorePassword = System.getenv("FORMAI_RELEASE_STORE_PASSWORD")
+def releaseKeyAlias = System.getenv("FORMAI_RELEASE_KEY_ALIAS")
+def releaseKeyPassword = System.getenv("FORMAI_RELEASE_KEY_PASSWORD")
+def useDebugReleaseSigning = providers.gradleProperty("formaiUseDebugSigning").getOrElse("false").toBoolean()
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -82,28 +88,33 @@ android {
         applicationId "app.formai.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "0.1.1"
     }
     signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+        release {
+            if (releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword) {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
     buildTypes {
-        debug {
-            signingConfig signingConfigs.debug
-        }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig useDebugReleaseSigning ? signingConfigs.debug : signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
+    }
+}
+
+// React Native sets this placeholder in finalizeDsl; register afterward to override release only.
+androidComponents {
+    finalizeDsl { extension ->
+        def allowCleartext = providers.gradleProperty("formaiAllowCleartext").getOrElse("false").toBoolean()
+        extension.buildTypes.getByName("release").manifestPlaceholders["usesCleartextTraffic"] = allowCleartext.toString()
     }
 }
 

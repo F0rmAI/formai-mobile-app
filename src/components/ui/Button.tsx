@@ -1,3 +1,10 @@
+/**
+ * Button primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import {
   ActivityIndicator,
   Pressable,
@@ -38,7 +45,6 @@ const iconColor: Record<ButtonVariant, string> = {
   danger: 'text-content-on-primary',
 };
 
-/** Color del ActivityIndicator (Uniwind usa el prefijo accent- para props de color). */
 const spinnerColor: Record<ButtonVariant, string> = {
   primary: 'accent-content-on-primary',
   accent: 'accent-content-on-primary',
@@ -47,19 +53,31 @@ const spinnerColor: Record<ButtonVariant, string> = {
   danger: 'accent-content-on-primary',
 };
 
+/**
+ * Props accepted by {@link Button}.
+ */
 export interface ButtonProps
   extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
-  /** Por defecto `primary` (color principal del design system). */
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** Ícono a la izquierda del texto. */
   icon?: IconName;
   fullWidth?: boolean;
   loading?: boolean;
   className?: string;
 }
 
+/**
+ * Renders the main action control of the design system.
+ *
+ * @remarks
+ * Use one `primary` button per view; other actions use the `secondary` or `ghost` variants.
+ *
+ * @example
+ * ```tsx
+ * <Button label="Save" icon="check" onPress={handleSave} />
+ * ```
+ */
 export function Button({
   label,
   variant = 'primary',
@@ -76,6 +94,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       className={cn(

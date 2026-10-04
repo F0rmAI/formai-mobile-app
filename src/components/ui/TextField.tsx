@@ -1,3 +1,10 @@
+/**
+ * Text field primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { useState } from 'react';
 import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
 import type { IconName } from '@/types/ui';
@@ -5,21 +12,36 @@ import { cn } from '@/utils/cn';
 import { Icon } from './Icon';
 import { Text } from './Text';
 
+/**
+ * Props accepted by {@link TextField}.
+ */
 export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
+  /** Label shown above the field. */
   label: string;
-  /** Texto de ayuda bajo el campo. */
+  /** Help text shown below the field. */
   helper?: string;
-  /** Mensaje de error: activa el estado Error y reemplaza al texto de ayuda. */
+  /** Error message; switches the field to the error state and replaces the help text. */
   error?: string;
+  /** Icon shown at the start of the field. */
   leadingIcon?: IconName;
+  /** Icon shown at the end of the field. */
   trailingIcon?: IconName;
-  /** Acción del ícono final (p. ej. mostrar/ocultar contraseña). */
+  /** Called when the trailing icon is activated, for example to toggle password visibility. */
   onTrailingIconPress?: () => void;
+  /** Accessible label of the trailing icon action. */
   trailingIconLabel?: string;
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
-/** Campo de formulario. Ocupa todo el ancho disponible. */
+/**
+ * Renders a labeled text input that fills the available width.
+ *
+ * @example
+ * ```tsx
+ * <TextField label="Email" leadingIcon="mail" error={errors.email} />
+ * ```
+ */
 export function TextField({
   label,
   helper,

@@ -1,3 +1,10 @@
+/**
+ * Public entry point of the design system primitives.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 export { Avatar, type AvatarProps } from './Avatar';
 export { Badge, type BadgeProps } from './Badge';
 export { BrandLogo, type BrandLogoProps } from './BrandLogo';
@@ -18,8 +25,10 @@ export {
   SegmentedControl,
   type SegmentedControlProps,
 } from './SegmentedControl';
+export { StepperField, type StepperFieldProps } from './StepperField';
 export { TabItem, type TabItemProps } from './TabItem';
 export { Text, type TextProps } from './Text';
 export { TextField, type TextFieldProps } from './TextField';
 export { Toast, type ToastProps } from './Toast';
 export { Toggle, type ToggleProps } from './Toggle';
+export { WelcomeHero } from './WelcomeHero';

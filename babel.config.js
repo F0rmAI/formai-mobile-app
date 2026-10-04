@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = api => ({
   presets: ['module:@react-native/babel-preset'],
   plugins: [
     [
@@ -9,5 +9,18 @@ module.exports = {
         alias: { '@': './src' },
       },
     ],
+    ...(!api.env('test')
+      ? [
+          [
+            'module:react-native-dotenv',
+            {
+              moduleName: '@env',
+              path: '.env',
+              safe: false,
+              allowUndefined: true,
+            },
+          ],
+        ]
+      : []),
   ],
-};
+});

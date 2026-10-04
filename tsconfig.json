@@ -5,6 +5,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/node_modules", "**/Pods"]
+  "include": ["src", "__tests__", "jest", "index.js", "*.config.js"],
+  "exclude": ["ios", "android", "**/build", "**/node_modules", "**/Pods"]
 }

@@ -1,3 +1,10 @@
+/**
+ * Toast primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { View, type ViewProps } from 'react-native';
 import type { IconName, ToastTone } from '@/types/ui';
 import { cn } from '@/utils/cn';
@@ -10,13 +17,30 @@ const toneStyles: Record<ToastTone, { icon: IconName; color: string }> = {
   error: { icon: 'error', color: 'text-error-container' },
 };
 
+/**
+ * Props accepted by {@link Toast}.
+ */
 export interface ToastProps extends Omit<ViewProps, 'children'> {
+  /** Text of the message. */
   message: string;
+  /**
+   * Kind of message.
+   *
+   * @defaultValue `'info'`
+   */
   tone?: ToastTone;
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
-/** Mensaje breve sobre superficie inversa. */
+/**
+ * Renders a short message over an inverse surface.
+ *
+ * @example
+ * ```tsx
+ * <Toast message="Changes saved" tone="success" />
+ * ```
+ */
 export function Toast({
   message,
   tone = 'info',

@@ -1,15 +1,38 @@
-import { View } from 'react-native';
+/**
+ * App header layout component.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
+import { View, type ImageSourcePropType } from 'react-native';
 import { Avatar, BrandLogo, Text } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
+/**
+ * Props accepted by {@link AppHeader}.
+ */
 export interface AppHeaderProps {
-  /** Texto bajo la marca (p. ej. "Entrenamiento de hoy"). */
+  /** Text shown below the brand name. */
   subtitle?: string;
-  user?: { name: string; avatarUrl?: string };
+  /** Signed-in user whose avatar is shown; `avatarSource` is a bundled image used instead of the URL. */
+  user?: {
+    name: string;
+    avatarUrl?: string;
+    avatarSource?: ImageSourcePropType;
+  };
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
-/** Header principal con marca y avatar (64 px). */
+/**
+ * Renders the main header with the brand and the user avatar.
+ *
+ * @example
+ * ```tsx
+ * <AppHeader subtitle="Today" user={user} />
+ * ```
+ */
 export function AppHeader({ subtitle, user, className }: AppHeaderProps) {
   return (
     <View
@@ -29,7 +52,9 @@ export function AppHeader({ subtitle, user, className }: AppHeaderProps) {
           )}
         </View>
       </View>
-      {user && <Avatar name={user.name} src={user.avatarUrl} />}
+      {user && (
+        <Avatar name={user.name} src={user.avatarSource ?? user.avatarUrl} />
+      )}
     </View>
   );
 }

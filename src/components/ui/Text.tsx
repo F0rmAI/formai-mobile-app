@@ -1,11 +1,14 @@
+/**
+ * Text primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import type { TextTone, TextVariant } from '@/types/ui';
 import { cn } from '@/utils/cn';
 
-/**
- * Tamaño/interlineado/tracking salen de tokens.css. En React Native cada peso es
- * una familia distinta (font-sans-*), por eso el peso se fija aquí.
- */
 const textVariantClass: Record<TextVariant, string> = {
   'display-xl': 'text-display-xl font-sans-extrabold',
   display: 'text-display font-sans-extrabold',
@@ -36,12 +39,39 @@ const textToneClass: Record<TextTone, string> = {
   error: 'text-error',
 };
 
+/**
+ * Props accepted by {@link Text}.
+ */
 export interface TextProps extends RNTextProps {
+  /**
+   * Typography style.
+   *
+   * @defaultValue `'body-l'`
+   */
   variant?: TextVariant;
+  /**
+   * Text color.
+   *
+   * @defaultValue `'default'`
+   */
   tone?: TextTone;
+  /** Extra classes for layout adjustments from the parent. */
   className?: string;
 }
 
+/**
+ * Renders text with a typography style and a color of the design system.
+ *
+ * @remarks
+ * Use it instead of a raw text element so font family, weight and color stay consistent.
+ *
+ * @example
+ * ```tsx
+ * <Text variant="title" tone="secondary">
+ *   Weekly summary
+ * </Text>
+ * ```
+ */
 export function Text({
   variant = 'body-l',
   tone = 'default',

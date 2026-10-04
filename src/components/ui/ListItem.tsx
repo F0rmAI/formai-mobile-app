@@ -1,27 +1,45 @@
+/**
+ * List item primitive of the design system.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+
 import { Pressable, View, type PressableProps } from 'react-native';
-import type { IconName } from '@/types/ui';
+import type { BadgeTone, IconName } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { Badge } from './Badge';
 import { Icon } from './Icon';
 import { Text } from './Text';
 
+/**
+ * Props accepted by {@link ListItem}.
+ */
 export interface ListItemProps
   extends Omit<PressableProps, 'children' | 'style'> {
   title: string;
   subtitle?: string;
   icon?: IconName;
-  /** Texto de un Badge primary a la derecha. */
   badge?: string;
+  badgeTone?: BadgeTone;
   showChevron?: boolean;
   className?: string;
 }
 
-/** Fila de lista navegable. */
+/**
+ * Renders a list row that the user can activate.
+ *
+ * @example
+ * ```tsx
+ * <ListItem icon="fitness_center" title="Day A" subtitle="4 exercises" badge="Today" onPress={open} />
+ * ```
+ */
 export function ListItem({
   title,
   subtitle,
   icon,
   badge,
+  badgeTone = 'primary',
   showChevron = true,
   className,
   ...props
@@ -50,7 +68,9 @@ export function ListItem({
           </Text>
         )}
       </View>
-      {badge && <Badge label={badge} className="self-center" />}
+      {badge && (
+        <Badge label={badge} tone={badgeTone} className="self-center" />
+      )}
       {showChevron && (
         <Icon name="chevron_right" size={20} className="text-content-subtle" />
       )}

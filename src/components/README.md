@@ -8,8 +8,12 @@ de FormAI (Figma › `formai_design_system`).
 
 | Carpeta | Contenido |
 |---|---|
-| `ui/` | Primitivos del design system: `Text`, `Icon`, `Button`, `IconButton`, `Badge`, `Chip`, `SectionLabel`, `Card`, `TextField`, `Checkbox`, `Toggle`, `ProgressBar`, `SegmentedControl`, `Toast`, `Dialog`, `Avatar`, `BrandLogo`, `EmptyState`, `ListItem`, `Callout`, `SectionHeader`, `TabItem`. **Misma API en web y mobile.** |
+| `ui/` | Primitivos del design system: `Text`, `Icon`, `Button`, `IconButton`, `Badge`, `Chip`, `SectionLabel`, `Card`, `TextField`, `StepperField`, `Checkbox`, `Toggle`, `ProgressBar`, `SegmentedControl`, `Toast`, `Dialog`, `Avatar`, `BrandLogo`, `EmptyState`, `ListItem`, `Callout`, `SectionHeader`, `TabItem`. **Misma API en web y mobile.** |
 | `layout/` | Navegación y estructura propias de esta plataforma. |
+| `progress/` | Componentes del flujo Progreso: `StatCard`, `AdherenceCard`, `ProgressLineChart`, `WorkoutHistoryItem`, `HistoryFilterDialog`, `SetSummaryTile`. |
+| `history/` | Chip del rango de fechas aplicado en el historial. |
+| `reminders/` | Ajustes y preview de recordatorios locales: `ReminderSettingsCard`, `ReminderPreviewModal`. |
+| `training/` | Componentes de la sesión de hoy y rutina, incluido el panel de corrección de series. |
 
 ### `layout/` en esta app
 
@@ -18,6 +22,8 @@ de FormAI (Figma › `formai_design_system`).
 | `AppHeader` | Header principal con marca y avatar. |
 | `TopBar` | Barra superior con botón volver y acción opcional. |
 | `BottomNav` / `NavItem` | Navegación inferior (MVP: Hoy, Progreso, Perfil; TB2 agrega Escanear). |
+| `TabScreenLayout` | Estructura de las pantallas con navegación inferior: header, título y contenido desplazable. |
+| `ScreenContainer` / `InsetToast` | Insets del sistema para rutas completas y avisos sobre la zona de gestos. |
 
 ## Reglas
 
