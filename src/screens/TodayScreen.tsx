@@ -20,6 +20,7 @@ import { useTraining } from '@/hooks/useTraining';
 import type { MainTabParamList, RootStackParamList } from '@/types/navigation';
 import type { RecordSetInput } from '@/types/training';
 import { formatTrainingDate } from '@/utils/training-formatters';
+import { trainingDayToJsWeekday } from '@/utils/reminders';
 
 const dayNames: Record<string, string> = {
   MONDAY: 'lunes',
@@ -88,6 +89,9 @@ export function TodayScreen({
     day => day.order === routine.todaySessionOrder,
   );
   const sessionDate = session && formatTrainingDate(session.scheduledFor);
+  const isTrainingDay = routine?.trainingDays.some(
+    day => trainingDayToJsWeekday(day) === new Date().getDay(),
+  );
   return (
     <>
       <TabScreenLayout
@@ -123,9 +127,17 @@ export function TodayScreen({
         ) : !session || !summary ? (
           <View className="gap-xl">
             <EmptyState
-              icon="event"
-              title="Hoy es día de descanso"
-              description="No tienes una sesión programada para hoy."
+              icon={isTrainingDay ? 'schedule' : 'event'}
+              title={
+                isTrainingDay
+                  ? 'Tu sesión aún no está disponible'
+                  : 'Hoy es día de descanso'
+              }
+              description={
+                isTrainingDay
+                  ? 'Hoy te toca entrenar. Actualiza la pantalla en unos minutos.'
+                  : 'No tienes una sesión programada para hoy.'
+              }
             />
             <Text variant="body-m" tone="secondary">
               Tus días de entrenamiento:{' '}
