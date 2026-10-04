@@ -90,11 +90,13 @@ const finishSession = jest.fn().mockResolvedValue(undefined);
 let tree: ReactTestRenderer.ReactTestRenderer;
 
 function hasText(value: string) {
-  return tree.root.findAll(node =>
-    typeof node.props.children === 'string'
-      ? node.props.children.includes(value)
-      : false,
-  ).length > 0;
+  return (
+    tree.root.findAll(node =>
+      typeof node.props.children === 'string'
+        ? node.props.children.includes(value)
+        : false,
+    ).length > 0
+  );
 }
 
 async function press(label: string) {
@@ -184,5 +186,47 @@ test('pulling down on Today invokes the training refresh', async () => {
   });
   const control = tree.root.findByType(ScrollView).props.refreshControl;
   control.props.onRefresh();
-  expect(jest.mocked(useTraining).mock.results[0].value.refresh).toHaveBeenCalledTimes(1);
+  expect(
+    jest.mocked(useTraining).mock.results[0].value.refresh,
+  ).toHaveBeenCalledTimes(1);
+});
+
+test('distinguishes an unscheduled training day from a rest day', async () => {
+  jest.useFakeTimers().setSystemTime(new Date(2026, 9, 2, 12));
+  const base = jest.mocked(useTraining)();
+  jest.mocked(useTraining).mockReturnValue({
+    ...base,
+    routine: {
+      ...routine,
+      todaySessionOrder: null,
+      todayWorkoutSessionId: null,
+    },
+    session: undefined,
+    summary: undefined,
+  });
+  await ReactTestRenderer.act(async () => {
+    tree = ReactTestRenderer.create(
+      <TodayScreen navigation={{ getParent: () => undefined } as never} />,
+    );
+  });
+  expect(hasText('Tu sesión aún no está disponible')).toBe(true);
+  await ReactTestRenderer.act(async () => tree.unmount());
+  jest.mocked(useTraining).mockReturnValue({
+    ...base,
+    routine: {
+      ...routine,
+      trainingDays: ['SATURDAY'],
+      todaySessionOrder: null,
+      todayWorkoutSessionId: null,
+    },
+    session: undefined,
+    summary: undefined,
+  });
+  await ReactTestRenderer.act(async () => {
+    tree = ReactTestRenderer.create(
+      <TodayScreen navigation={{ getParent: () => undefined } as never} />,
+    );
+  });
+  expect(hasText('Hoy es día de descanso')).toBe(true);
+  jest.useRealTimers();
 });
